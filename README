@@ -1,0 +1,49 @@
+MichalOS Readme
+***************
+
+A 16-bit operating system based on MikeOS 4.5, aimed to be more advanced and lightweight on the inside, but simple and easy to use on the outside.
+
+System requirements:
+	- Intel 80386 or higher, Pentium recommended
+	- At least 80 kB RAM, 256 kB recommended
+	- An EGA card
+	- A keyboard
+	
+Building the OS
+***************
+
+Note: These instructions work only on Linux (and possibly Mac?) systems.
+
+If you use Windows, please install WSL (Windows Subsystem for Linux).
+To properly compile under WSL, you will have to have DOSBox installed on Windows
+and create a Bash script under WSL in /bin/dosbox (and don't forget to "chmod +x" it!):
+
+	#!/bin/bash
+	"/mnt/c/Program Files (x86)/DOSBox-0.74-3/DOSBox.exe" $@
+
+Required packages: make nasm dosfstools dosbox mtools mkisofs
+
+For Ubuntu/Debian systems, run: 
+
+	sudo apt-get install make nasm dosfstools dosbox mtools mkisofs
+
+For WSL, run the same command, just omit dosbox:
+
+	sudo apt-get install make nasm dosfstools mtools mkisofs
+
+It is also necessary to install the zx7 compressor utility:
+
+	cd misc/zx7
+	sudo ./build.sh
+
+To build: open the terminal, navigate to the directory that contains MichalOS and run:
+	make
+
+If you want to force-rebuild everything, run:
+	make force
+	
+If you want to get rid of all of the built pieces, run:
+	make clean
+
+If you just want to boot the image without rebuilding, run:
+	make boot

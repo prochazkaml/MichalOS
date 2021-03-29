@@ -1,0 +1,15 @@
+Error 00: unexpected char in number
+Error 01: unknown command
+Error 02: attempt to divide by zero
+Error 03: DO/LOOP nesting limit exceeded
+Error 04: file not found
+Error 05: GOTO or GOSUB not followed by label
+Error 06: label not found
+Error 07: FOR or GOSUB nest limit exceeded
+Error 08: NEXT without FOR
+Error 09: LOOP without DO
+Error 10: PRINT not followed by quoted text or variable
+Error 11: quoted string or char not terminated correctly
+Error 12: RETURN without GOSUB
+Error 13: string location out of range
+Error 14: syntax error

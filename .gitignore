@@ -1,0 +1,4 @@
+build
+programs/*.app
+source/michalos.sys
+source/bootload/bootload.bin

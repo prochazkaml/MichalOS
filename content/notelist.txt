@@ -1,0 +1,51 @@
+; ------------------------------------------------------------------
+; Include file for MichalOS sound generation
+; ------------------------------------------------------------------
+
+A2		equ 110
+AS2		equ 117
+B2		equ 124
+C3		equ 131
+CS3		equ 139
+D3		equ 147
+DS3		equ 156
+E3		equ 165
+F3		equ 175
+FS3		equ 185
+G3		equ 196
+GS3		equ 208
+A3		equ 220
+AS3		equ 233
+B3		equ 247
+C4		equ 262
+CS4		equ 277
+D4		equ 294
+DS4		equ 311
+E4		equ 330
+F4		equ 349
+FS4		equ 370
+G4		equ 392
+GS4		equ 415
+A4		equ 440
+AS4		equ 466
+B4		equ 494
+C5		equ 523
+CS5		equ 554
+D5		equ 587
+DS5		equ 622
+E5		equ 659
+F5		equ 698
+FS5		equ 740
+G5		equ 784
+GS5		equ 831
+A5		equ 880
+AS5		equ 932
+B5		equ 988
+C6		equ 1046
+CS6		equ 1109
+D6		equ 1175
+DS6		equ 1245
+E6		equ 1319
+F6		equ 1397
+FS6		equ 1480
+G6		equ 1568

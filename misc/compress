@@ -1,0 +1,29 @@
+#!/bin/bash
+
+function chr() { printf "\\$(printf '%03o' "$1")" ; return 0 ; }
+function word() { chr $(($1 % 256)) ; chr $(($1 / 256)) ; return 0 ; }
+
+# Split the file into 64 kB chunks
+split -b 65536 -d "$1" "$1."
+splitarr=($1.*)
+
+# Store the number of chunks
+chr "${#splitarr[@]}" > "$2"
+
+# Compress the chunks first, store their pointers
+ptr=`expr ${#splitarr[@]} \* 2 + 1`
+
+for i in $(seq 1 ${#splitarr[@]}); do
+	num=`printf "%02d" $(expr $i - 1)`
+	zx7 -f "$1.$num" "$2.$num" || exit 1
+	rm "$1.$num"
+	word "$ptr" >> "$2"
+	ptr=`expr $ptr + $(stat --printf="%s" $2.$num)`
+done
+
+# Next, store the chunks
+for i in $(seq 1 ${#splitarr[@]}); do
+	num=`printf "%02d" $(expr $i - 1)`
+	cat "$2.$num" >> "$2"
+	rm "$2.$num"
+done

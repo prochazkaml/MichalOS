@@ -1,0 +1,30 @@
+; MichalOS Music Format File
+
+	%INCLUDE "notelist.txt"
+
+start:
+	.pit_data	dw 0
+	.song_delay	db 1
+
+	;				0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	10	11	12	13	14	15	16	17	18	19	1A	1B	1C	1D	1E	1F
+	.track00	dw	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	0,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	0
+	.track01	dw	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	0,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	0
+	.track02	dw	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	0,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	0
+	.track03	dw	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	0,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	0
+
+	.track04	dw	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	0,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	0
+	.track05	dw	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	0,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	0
+	.track06	dw	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	C4,	G3,	0,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	0
+	.track07	dw	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	D4,	A3,	0,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	D4,	B3,	0
+
+	.track08	dw	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3,	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3
+	.track09	dw	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3,	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3
+	.track0A	dw	G3,	G3,	G3,	G3,	C4,	C4,	C4,	C4,	E3,	E3,	E3,	E3,	C4,	C4,	C4,	C4,	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3
+	.track0B	dw	E3,	E3,	E3,	E3,	A3,	A3,	A3,	A3,	CS3,CS3,CS3,CS3,A3,	A3,	A3,	A3,	FS3,FS3,FS3,FS3,B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3
+	
+	.track0C	dw	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3,	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3
+	.track0D	dw	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3,	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3
+	.track0E	dw	G3,	G3,	G3,	G3,	C4,	C4,	C4,	C4,	E3,	E3,	E3,	E3,	C4,	C4,	C4,	C4,	G3,	G3,	G3,	G3,	B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3
+	.track0F	dw	FS3,FS3,FS3,FS3,B3,	B3,	B3,	B3,	D3,	D3,	D3,	D3,	B3,	B3,	B3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	B3,	G3,	0
+
+	.end		dw	1
