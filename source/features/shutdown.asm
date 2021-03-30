@@ -2,164 +2,10 @@
 ; MichalOS Shutdown handler
 ; ------------------------------------------------------------------
 
-os_shutdown:
-	mov byte [0082h], 1
-	call os_hide_cursor
-	call .drawbackground
-	call .drawwindow
-	call .selector
-	
-	cmp al, 1
-	je near .shutdown
-	
-	cmp al, 2
-	je near .reset
-	
-	cmp al, 3
-	je near checkformenu
-	
-.selector:
-	mov dx, 11 * 256 + 28
-	call os_move_cursor
-
-.selectorloop:
-	call .drawcontents
-	call .invert
-	
-	call os_wait_for_key
-	
-	cmp ah, 80
-	je .selectdown
-	
-	cmp ah, 72
-	je .selectup
-	
-	cmp al, 13
-	je .select
-	
-	cmp al, 27
-	je .return
-	
-	jmp .selectorloop
-
-.return:
-	mov al, 3
-	mov byte [0082h], 1
-	ret
-
-.selectdown:
-	cmp dh, 13
-	je near .selectorloop
-	inc dh
-	jmp .selectorloop
-
-.selectup:
-	cmp dh, 11
-	je near .selectorloop
-	dec dh
-	jmp .selectorloop
-
-.select:
-	mov al, dh
-	sub al, 10
-	ret
-	
-.invert:
-	mov dl, 28
-
-.invertloop:
-	call os_move_cursor
-	mov ah, 08h
-	mov bh, 0
-	int 10h
-
-	mov bx, 240			; Black on white
-	mov ah, 09h
-	mov cx, 1
-	int 10h
-
-	inc dl
-	cmp dl, 60
-	je near .invertend
-	jmp .invertloop
-	
-.invertend:
-	mov dl, 28
-	ret
-	
-.drawwindow:
-	mov dx, 9 * 256 + 19			; First, draw white background box
-	mov bl, [57001]
-	mov si, 42
-	mov di, 15
-	call os_draw_block
-
-.drawcontents:
-	pusha
-	mov bl, [57001]
-	mov dx, 10 * 256 + 20
-	call os_move_cursor
-
-	mov si, .dialogmsg1
-	call os_format_string
-	mov si, 57036
-	call os_format_string
-	mov si, .dialogmsg2
-	call os_format_string
-
-	mov dx, 11 * 256 + 20
-	call os_move_cursor
-	mov si, .logo0
-	call os_format_string
-
-	mov dx, 12 * 256 + 20
-	call os_move_cursor
-	mov si, .logo1
-	call os_format_string
-
-	mov dx, 13 * 256 + 20
-	call os_move_cursor
-	mov si, .logo2
-	call os_format_string
-
-	mov dx, 14 * 256 + 20
-	call os_move_cursor
-	mov si, .logo3
-	call os_format_string
-	popa
-	ret
-
-.drawbackground:
-	call os_clear_screen
-	mov dx, 0
-	call os_move_cursor
-	
-	mov ax, 0920h
-	mov bx, 112			; Black on gray
-	mov cx, 80
-	int 10h
-	
-	mov dx, 1 * 256
-	call os_move_cursor
-	
-	mov bl, [57000]		; Color from RAM
-	and bl, 11110000b
-	mov cx, 1840
-	mov al, 177
-	int 10h
-	
-	mov dx, 24 * 256
-	call os_move_cursor
-	mov bl, 112			; Black on gray
-	mov cx, 80
-	mov al, 32
-	int 10h
-	ret
-	
-.reset:
+os_reboot:
 	jmp 0FFFFh:0
 
-.shutdown:
+os_shutdown:
 	call os_clear_screen
 	call os_show_cursor
 
@@ -213,7 +59,7 @@ os_shutdown:
 	xor dx, dx
 	call os_dialog_box
 	
-	jmp .reset
+	jmp os_reboot
 	
 .APM_missing:
 	mov ax, .errormsg2
@@ -222,7 +68,7 @@ os_shutdown:
 	xor dx, dx
 	call os_dialog_box
 	
-	jmp .reset
+	jmp os_reboot
 	
 .APM_interface:
 	mov ax, .errormsg3
@@ -231,7 +77,7 @@ os_shutdown:
 	xor dx, dx
 	call os_dialog_box
 	
-	jmp .reset
+	jmp os_reboot
 	
 .APM_pwrmgmt:
 	mov ax, .errormsg5
@@ -240,7 +86,7 @@ os_shutdown:
 	xor dx, dx
 	call os_dialog_box
 	
-	jmp .reset
+	jmp os_reboot
 
 	
 	.dialogmsg1	db 'Goodbye, ', 0
