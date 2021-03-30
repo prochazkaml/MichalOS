@@ -1,8 +1,9 @@
 # MichalOS
 
-![Desktop screenshot](https://user-images.githubusercontent.com/41787099/112810298-291bd880-907b-11eb-8d70-37cf3e56b18a.png)
+A 16-bit keyboard controlled operating system based on MikeOS 4.5, aimed to be more advanced and lightweight on the inside, but simple and easy to use on the outside.
 
-This project is essentially a beefed-up version of MikeOS 4.5. It includes high-end OS features, such as:
+## New features
+
 - Screensaver with customizable timeout
 - Customizable user interface (custom background, window colors etc.)
 - Custom font
@@ -10,26 +11,26 @@ This project is essentially a beefed-up version of MikeOS 4.5. It includes high-
 - AdLib synthesizer support
 - Build-in graphics drawing functions
 
-Even though all of these mind-blowing features are included, the system requirements are kept to a minimum:
+## System requirements
+
 - Intel 80386 or higher, Pentium recommended
 - At least 80 kB RAM, 256 kB recommended
 - An EGA video card, VGA recommended
 - A keyboard
 
+## Screenshots
+
+![Login screen](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202019-07-11%2020-50-20.png/max/max/1)
+![Desktop](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202019-07-11%2020-50-27.png/max/max/1)
+
+More screenshots are available in the [gallery](https://github.com/prochazkaml/MichalOS/blob/master/misc/gallery.md).
+
 ## Building instructions
 
-### First-time setup
+For building the OS, a Unix-based system is required (Linux, BSD, WSL, macOS) with **NASM** and **make** installed. **DOSBox** is required for testing MichalOS builds (QEMU, VirtualBox, VMware etc. could also be used, but you will be met with limited functionality).
 
-```
-sudo ./misc/zx7/build.sh
-```
+On Debian GNU/Linux (and its derivates, such as Linux Mint or Ubuntu), these requirements can be met by running ```sudo apt-get install nasm make dosbox```.
 
-This command compiles and installs a program for compressing files using the ZX7 standard.
+It is also necessary to install a ZX7 data compressor with ```sudo ./misc/zx7/build.sh```. It will install in the ```/usr/bin/``` directory.
 
-### Building the image
-
-```
-make
-```
-
-Couldn't get any simpler than that. [nasm](https://www.nasm.us/) is required for assembling the OS.
+Then, you can simply build the image by running ```make```.
