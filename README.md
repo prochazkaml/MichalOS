@@ -11,7 +11,7 @@ This project is essentially a beefed-up version of MikeOS 4.5. It includes high-
 - Build-in graphics drawing functions
 
 Even though all of these mind-blowing features are included, the system requirements are kept to a minimum:
-	- Intel 80386 or higher, Pentium recommended
-	- At least 80 kB RAM, 256 kB recommended
-	- An EGA video card, VGA recommended
-	- A keyboard
+- Intel 80386 or higher, Pentium recommended
+- At least 80 kB RAM, 256 kB recommended
+- An EGA video card, VGA recommended
+- A keyboard
