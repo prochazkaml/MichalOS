@@ -1,4 +1,7 @@
 build
+content/*.mmf
 programs/*.app
+programs/*.lst
 source/michalos.sys
+source/system.lst
 source/bootload/bootload.bin
