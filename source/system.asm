@@ -791,7 +791,7 @@ systemfilemissing:
 
 	empty_string			db 0
 	
-	menuoptions				db 'Programs,Games,Log out,Shut down', 0
+	menuoptions				db 'Programs,Games,Log out,Power off', 0
 	gameoptions				db 'Cosmic Flight,InkSpill,Space Inventors,aSMtris,Sudoku,Deep Sea Fisher,MikeTron,Muncher,Hangman,Snake', 0
 	debugoptions			db 'Disk detection test,Keyboard tester,Serial communication tester,RTC clock tester,Disk Sector inspector,Memory editor,Boxes,Dots,Disk sector checker,TSC register tester,Simple test app,TV static generator (CGA)', 0
 	progoptions				db 'File manager,Text editor,Image viewer,Calculator,Clock,Terminal,Settings,ASCII art editor,Pixel art editor,Music player,Hardware checker,About MichalOS,Other stuff...', 0
