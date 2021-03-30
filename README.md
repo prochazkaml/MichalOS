@@ -1,8 +1,8 @@
-# MichalOS
+![MichalOS Logo](https://i.ibb.co/fkk1SYF/Capture.png)
 
-![Desktop screenshot](https://user-images.githubusercontent.com/41787099/112810298-291bd880-907b-11eb-8d70-37cf3e56b18a.png)
+A 16-bit keyboard controlled operating system based on MikeOS 4.5, aimed to be more advanced and lightweight on the inside, but simple and easy to use on the outside.
 
-This project is essentially a beefed-up version of MikeOS 4.5. It includes high-end OS features, such as:
+It includes high-end OS features, such as:
 - Screensaver with customizable timeout
 - Customizable user interface (custom background, window colors etc.)
 - Custom font
@@ -16,7 +16,23 @@ Even though all of these mind-blowing features are included, the system requirem
 - An EGA video card, VGA recommended
 - A keyboard
 
+## Screenshots
+
+![Demo Tour](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202019-07-11%2020-50-09.png/max/max/1)
+![Login Screen](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202019-07-11%2020-50-20.png/max/max/1)
+![Desktop](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202019-07-11%2020-50-27.png/max/max/1)
+![Main Menu](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202018-07-29%2008-56-45.png/max/max/1)
+![Clock](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202020-05-21%2014-41-54.png/max/max/1)
+![Music Player](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202020-05-21%2014-42-18.png/max/max/1)
+
 ## Building instructions
+
+### Requirements
+
+- Unix based Operating System (Debian is preferred)
+- DosBox (For testing live builds) ``` sudo apt install dosbox ```
+- Nasm (For assembling the OS) ``` sudo apt install nasm ```
+- Make (Makefile & make commands) ``` sudo apt install make ```
 
 ### First-time setup
 
@@ -31,5 +47,6 @@ This command compiles and installs a program for compressing files using the ZX7
 ```
 make
 ```
+## License
 
-Couldn't get any simpler than that. [nasm](https://www.nasm.us/) is required for assembling the OS.
+MichalOS is licensed under the BSD License
