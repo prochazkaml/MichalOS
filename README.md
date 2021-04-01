@@ -9,7 +9,7 @@ A 16-bit keyboard controlled operating system based on MikeOS 4.5, aimed to be m
 - Custom font
 - On-screen clock with timezone support
 - AdLib synthesizer support
-- Build-in graphics drawing functions
+- Built-in graphics drawing functions
 
 ## System requirements
 
