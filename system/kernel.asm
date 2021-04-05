@@ -325,6 +325,8 @@ logoinput:
 	mov cx, 07h					; Colour: black
 	call os_draw_background
 
+	call os_hide_cursor
+
 	mov dx, 9 * 256
 	call os_move_cursor
 
@@ -336,12 +338,23 @@ logoinput:
 	mov si, logo
 	call os_draw_icon
 
+	mov dx, 20 * 256 + 2
+	call os_move_cursor
+
+	mov si, greetingmsg
+	call os_print_string
+
+	mov si, 57036
+	call os_print_string
+
+	mov al, '!'
+	call os_putchar
+
 	mov dx, 22 * 256 + 2
 	call os_move_cursor
 
 	mov si, passwordmsg
 	call os_print_string
-	call os_hide_cursor
 
 	mov ax, 523
 	mov cx, 2
@@ -395,6 +408,7 @@ checkformenuloop:
 	je near load_fileman		; Open the file manager
 	jmp checkformenuloop
 	
+	greetingmsg			db 'Greetings, ', 0
 	passwordmsg			db 'Press any key to log in...', 0
 	passentermsg		db 'Enter your password: ', 0
 

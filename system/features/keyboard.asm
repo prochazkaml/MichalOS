@@ -149,16 +149,8 @@ special_keys:
 	je near .enable_sound
 	cmp ah, 107
 	je near .exit_app
-	cmp ah, 139
-	je near .intended_system_crash
 	popa
 	ret
-	
-.intended_system_crash:
-	mov ax, .crash_msg
-	call os_fatal_error
-	
-	.crash_msg		db 'Intended system crash', 0
 	
 .exit_app:
 	cmp byte [app_running], 0
@@ -206,6 +198,7 @@ special_keys:
 	
 .no_display_spkr:
 	popa
+	mov ax, 0
 	ret
 	
 ; ==================================================================
