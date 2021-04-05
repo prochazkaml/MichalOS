@@ -15,13 +15,15 @@ FILEDIRS := programs/*.bas programs/*.dat content/*.pcx content/*.rad content/*.
 FILES := $(PROGRAMS) $(SONGS) $(DROS) $(foreach dir,$(FILEDIRS),$(sort $(wildcard $(dir))))
 
 # Default target: build the image and boot it.
-build: build/michalos.flp boot
+build: build/michalos.flp
+	dosbox -conf misc/dosbox.conf
 
 # Optional target: force rebuild everything.
 force: clean build
 
 # Development target: build as usual, but use dosbox-debug instead of regular DOSBox.
-dev: build/michalos.flp bootdebug
+dev: build/michalos.flp
+	dosbox-debug -conf misc/dosbox.conf
 
 # Bootloader target
 source/bootload/bootload.bin: source/bootload/bootload.asm
@@ -68,11 +70,3 @@ clean:
 	-rm content/*.mmf
 	-rm source/*.sys
 	-rm source/bootload/*.bin
-	
-# Boots the floppy.
-boot:
-	dosbox -conf misc/dosbox.conf
-	
-# Boots the floppy with dosbox-debug.
-bootdebug:
-	dosbox-debug -conf misc/dosbox.conf
