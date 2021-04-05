@@ -18,9 +18,6 @@ FILES := $(PROGRAMS) $(SONGS) $(DROS) $(foreach dir,$(FILEDIRS),$(sort $(wildcar
 build: build/michalos.flp
 	dosbox -conf misc/dosbox.conf
 
-# Optional target: force rebuild everything.
-force: clean build
-
 # Development target: build as usual, but use dosbox-debug instead of regular DOSBox.
 dev: build/michalos.flp
 	dosbox-debug -conf misc/dosbox.conf
@@ -36,11 +33,8 @@ source/michalos.sys: source/system.asm source/features/*.asm
 # Assembles all programs.
 # Note: % means file name prefix, $@ means output file and $< means source file.
 programs/%.app: programs/%.asm programs/%/*.asm programs/michalos.inc
-	nasm -O2 -w+orphan-labels -f bin -I programs/ -o $@ $< #-l $@.lst 
+	nasm -O2 -w+orphan-labels -f bin -I programs/ -o $@ $< 
 	
-programs/%.app: programs/%.asm programs/michalos.inc
-	nasm -O2 -w+orphan-labels -f bin -I programs/ -o $@ $< #-l $@.lst 
-
 # Assembles all songs.
 content/%.mmf: content/%.mus content/notelist.txt
 	nasm -O2 -w+orphan-labels -f bin -I content/ -o $@ $<
