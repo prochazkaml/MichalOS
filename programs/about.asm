@@ -119,7 +119,7 @@ start:
 	.licensetext:			incbin "../misc/LICENSE"
 							db 0
 							
-	%INCLUDE "../source/features/name.asm"
+	%INCLUDE "../system/features/name.asm"
 
 print_text_wall:
 	pusha

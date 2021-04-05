@@ -1,66 +1,68 @@
 ### MichalOS Makefile
 
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := retail
 
 # These targets aren't triggered by a change of a file.
-.PHONY: clean boot bootdebug
+.PHONY: clean
 
 # This selects all programs and music files to be built.
-PROGRAMS := $(patsubst %.asm,%.app,$(sort $(wildcard programs/*.asm)))
-SONGS := $(patsubst %.mus,%.mmf,$(sort $(wildcard content/*.mus)))
-DROS := $(patsubst %.dro,%.drz,$(sort $(wildcard content/*.dro)))
+PROGRAMS := $(patsubst programs/%.asm,build/%.app,$(sort $(wildcard programs/*.asm)))
+SONGS := $(patsubst content/%.mus,build/%.mmf,$(sort $(wildcard content/*.mus)))
+DROS := $(patsubst content/%.dro,build/%.drz,$(sort $(wildcard content/*.dro)))
 
 # This selects all files to copy to the final image.
-FILEDIRS := programs/*.bas programs/*.dat content/*.pcx content/*.rad content/*.asc source/sys/*.sys programs/res/*.mlz
+FILEDIRS := programs/*.bas programs/*.dat content/*.pcx content/*.rad content/*.asc system/binary/*.sys
 FILES := $(PROGRAMS) $(SONGS) $(DROS) $(foreach dir,$(FILEDIRS),$(sort $(wildcard $(dir))))
 
-# Default target: build the image and boot it.
-build: build/michalos.flp
+build:
+	mkdir -p $@
+
+build/images:
+	mkdir -p $@
+
+# Default target: builds the image and boots it.
+retail: build/images/michalos.flp
 	dosbox -conf misc/dosbox.conf
 
-# Development target: build as usual, but use dosbox-debug instead of regular DOSBox.
-dev: build/michalos.flp
+# Development target: builds as usual, but uses dosbox-debug instead of regular DOSBox.
+debug: build/images/michalos.flp
 	dosbox-debug -conf misc/dosbox.conf
 
 # Bootloader target
-source/bootload/bootload.bin: source/bootload/bootload.asm
-	nasm -O2 -w+orphan-labels -f bin -o source/bootload/bootload.bin source/bootload/bootload.asm
+build/bootload.bin: system/bootload/bootload.asm | build
+	nasm -O2 -w+orphan-labels -f bin -o build/bootload.bin -l build/bootload.lst system/bootload/bootload.asm
 
 # Kernel target
-source/michalos.sys: source/system.asm source/features/*.asm
-	nasm -O2 -w+orphan-labels -f bin -I source/ -o source/michalos.sys source/system.asm -l source/system.lst
+build/michalos.sys: system/kernel.asm system/features/*.asm | build
+	nasm -O2 -w+orphan-labels -f bin -I system/ -o build/michalos.sys -l build/kernel.lst system/kernel.asm
 
 # Assembles all programs.
 # Note: % means file name prefix, $@ means output file and $< means source file.
-programs/%.app: programs/%.asm programs/%/*.asm programs/michalos.inc
+build/%.app: programs/%.asm programs/%/*.asm programs/michalos.inc | build
+	nasm -O2 -w+orphan-labels -f bin -I programs/ -o $@ $< 
+	
+build/%.app: programs/%.asm programs/michalos.inc | build
 	nasm -O2 -w+orphan-labels -f bin -I programs/ -o $@ $< 
 	
 # Assembles all songs.
-content/%.mmf: content/%.mus content/notelist.txt
+build/%.mmf: content/%.mus content/notelist.txt | build
 	nasm -O2 -w+orphan-labels -f bin -I content/ -o $@ $<
 
-content/%.drz: content/%.dro
+build/%.drz: content/%.dro | build
 	misc/compress $< $@
 
 # Builds the image.
-build/michalos.flp: source/bootload/bootload.bin source/michalos.sys \
-					$(PROGRAMS) $(SONGS) $(DROS)
-	-rm build/*
-
-	dd if=/dev/zero of=build/michalos.flp bs=512 count=2880
-	dd status=noxfer conv=notrunc if=source/bootload/bootload.bin of=build/michalos.flp
+build/images/michalos.flp: build/bootload.bin build/michalos.sys \
+					$(PROGRAMS) $(SONGS) $(DROS) | build/images
+	dd if=/dev/zero of=build/images/michalos.flp bs=512 count=2880
+	dd status=noxfer conv=notrunc if=build/bootload.bin of=build/images/michalos.flp
 	
-	mcopy -i $@ source/michalos.sys ::michalos.sys
+	mcopy -i $@ build/michalos.sys ::michalos.sys
 	$(foreach file,$(FILES),mcopy -i $@ $(file) ::$(notdir $(file));)
 
-	mkisofs -quiet -V 'MICHALOS' -input-charset iso8859-1 -o build/michalos.iso -b michalos.flp build/
+	-rm build/images/michalos.iso
+	mkisofs -quiet -V 'MICHALOS' -input-charset iso8859-1 -o build/images/michalos.iso -b michalos.flp build/images/
 
 # Removes all of the built pieces.
 clean:
-	-rm build/*
-	-rm programs/*.app
-	-rm programs/*.lst
-	-rm content/*.drz
-	-rm content/*.mmf
-	-rm source/*.sys
-	-rm source/bootload/*.bin
+	-rm -rf build
