@@ -452,7 +452,7 @@ os_demotour:
 	.test_pass_enabled	db 0
 	.test_pass_data		times 33 db 0
 	.test_username		db 'Test user'
-	.test_usernamepad	times 33 - 4 db 0
+	.test_usernamepad	times 33 - 9 db 0
 	.test_sndenable		db 1
 	.test_adlibdrv		db 0
 	.test_menudim		db 1
