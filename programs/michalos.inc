@@ -181,6 +181,7 @@ os_attach_app_timer		equ 80CCh
 os_return_app_timer		equ 80DEh
 os_int_1Ah				equ 810Eh
 os_set_timer_speed		equ 807Eh
+os_decompress_zx7		equ 8114h
 
 ; Graphics functions
 

@@ -44,7 +44,7 @@ start_drz:
 	mov si, ax
 
 	push cx
-	call dzx7_size		; Decompress the chunk
+	call os_decompress_zx7	; Decompress the chunk
 	pop cx
 	pop si
 

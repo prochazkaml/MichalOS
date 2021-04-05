@@ -285,7 +285,6 @@ start:
 	%include "player/rad.asm"
 	%include "player/monopian.asm"
 	%include "player/polypian.asm"
-	%include "player/zx7.asm"
 
 align 16
 ;test_module: incbin RAD_MODULE_NAME

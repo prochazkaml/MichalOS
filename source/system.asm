@@ -169,7 +169,7 @@ os_call_vectors:
 	jmp os_adlib_noteoff		; 810Bh
 	jmp os_int_1Ah				; 810Eh
 	jmp os_int_to_bcd			; 8111h
-	jmp os_illegal_call			; 8114h ; FREE!!!!!!!!!!!!!!!!!!!
+	jmp os_decompress_zx7		; 8114h
 	jmp os_password_dialog		; 8117h
 	jmp os_adlib_mute			; 811Ah
 	jmp os_draw_rectangle		; 811Dh
@@ -827,6 +827,7 @@ systemfilemissing:
 	%INCLUDE "features/graphics.asm"
 	%INCLUDE "features/name.asm"
 	%INCLUDE "features/shutdown.asm"
+	%INCLUDE "features/zx7.asm"
 
 ; ==================================================================
 ; END OF KERNEL

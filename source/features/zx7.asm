@@ -20,7 +20,7 @@
 ;material, the same speed as the original dzx7_standard conversion.
 ;==========================================================================
 
-dzx7_size:
+os_decompress_zx7:
         mov     al, 80h
         xor     cx, cx
         mov     bp, @@dzx7si_next_bit
