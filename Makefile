@@ -30,23 +30,23 @@ debug: build/images/michalos.flp
 
 # Bootloader target
 build/bootload.bin: system/bootload/bootload.asm | build
-	nasm -O2 -w+orphan-labels -f bin -o build/bootload.bin -l build/bootload.lst system/bootload/bootload.asm
+	nasm -O2 -w+all -f bin -o build/bootload.bin -l build/bootload.lst system/bootload/bootload.asm
 
 # Kernel target
 build/michalos.sys: system/kernel.asm system/features/*.asm | build
-	nasm -O2 -w+orphan-labels -f bin -I system/ -o build/michalos.sys -l build/kernel.lst system/kernel.asm
+	nasm -O2 -w+all -f bin -I system/ -o build/michalos.sys -l build/kernel.lst system/kernel.asm
 
 # Assembles all programs.
 # Note: % means file name prefix, $@ means output file and $< means source file.
 build/%.app: programs/%.asm programs/%/*.asm programs/michalos.inc | build
-	nasm -O2 -w+orphan-labels -f bin -I programs/ -o $@ $< 
+	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< 
 	
 build/%.app: programs/%.asm programs/michalos.inc | build
-	nasm -O2 -w+orphan-labels -f bin -I programs/ -o $@ $< 
+	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< 
 	
 # Assembles all songs.
 build/%.mmf: content/%.mus content/notelist.txt | build
-	nasm -O2 -w+orphan-labels -f bin -I content/ -o $@ $<
+	nasm -O2 -w+all -f bin -I content/ -o $@ $<
 
 build/%.drz: content/%.dro | build
 	misc/compress $< $@
