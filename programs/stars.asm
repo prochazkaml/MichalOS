@@ -29,10 +29,10 @@ start:
 	push gs
 	pop es
 
-	mov di, 0
-	mov al, 0
-	mov cx, 64000
-	rep stosb
+	clr di
+	clr eax
+	mov cx, 64000 / 4
+	rep stosd
 
 	; Process the stars!
 
@@ -53,14 +53,12 @@ start:
 	movzx ebx, word [si + 2]
 	idiv ebx
 	
-	add ax, 160
-	mov cx, ax
-
 	; Is the star out of range?
 	
-	cmp cx, 0
-	jl .no_render
-	
+	add ax, 160
+	js .no_render
+	mov cx, ax
+
 	cmp cx, 320
 	jge .no_render
 	
@@ -73,13 +71,11 @@ start:
 	movzx ebx, word [si + 2]
 	idiv ebx
 
-	add ax, 100
-	mov dx, ax
-
 	; Is the star out of range?
 	
-	cmp dx, 0
-	jl .no_render
+	add ax, 100
+	js .no_render
+	mov dx, ax
 	
 	cmp dx, 200
 	jge .no_render
@@ -94,7 +90,7 @@ start:
 
 	; Calculate the color
 	
-	mov dx, 0
+	clr dx
 	mov ax, [si + 2]
 	mov bx, MAX_DEPTH / 15
 
@@ -112,9 +108,7 @@ start:
 	; Move the star closer to the camera
 
 	dec word [si + 2]
-	
-	cmp word [si + 2], 0
-	jg .no_reset
+	jnz .no_reset
 	
 	mov word [si + 2], MAX_DEPTH
 
@@ -135,8 +129,8 @@ start:
 
 	clr si
 	clr di
-	mov cx, 64000
-	rep movsb
+	mov cx, 64000 / 4
+	rep movsd
 
 	pop ds
 
@@ -156,7 +150,7 @@ start:
 	pusha
 
 	; Generate new X/Y coordinates
-	mov ax, 0
+	clr ax
 	mov bx, 99
 	call os_get_random
 	
