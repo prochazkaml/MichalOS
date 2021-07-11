@@ -27,10 +27,10 @@ More screenshots are available in the [gallery](https://github.com/prochazkaml/M
 
 ## Building instructions
 
-For building the OS, a Unix-based system is required (Linux, BSD, WSL, macOS) with **NASM** and **make** installed. **DOSBox** is required for testing MichalOS builds (QEMU, VirtualBox, VMware etc. could also be used, but you will be met with limited functionality).
+For building the OS, a Unix-based system is required (Linux, BSD, WSL, macOS) with **NASM**, **mtools** and **make** installed. **DOSBox** is required for testing MichalOS builds (QEMU, VirtualBox, VMware etc. could also be used, but you will be met with limited functionality).
 
-On Debian GNU/Linux (and its derivates, such as Linux Mint or Ubuntu), these requirements can be met by running ```sudo apt-get install nasm make dosbox```.
+On Debian GNU/Linux (and its derivates, such as Linux Mint or Ubuntu), these requirements can be met by running ```sudo apt-get install nasm mtools make dosbox```.
 
-It is also necessary to install a ZX7 data compressor with ```sudo ./misc/zx7/build.sh```. It will install in the ```/usr/bin/``` directory.
+It is also necessary to install a ZX7 data compressor with ```cd misc/zx7 && sudo ./build.sh```, which requires gcc. It will install in the ```/usr/bin/``` directory.
 
 Then, you can simply build the image by running ```make```.
