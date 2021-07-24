@@ -27,7 +27,7 @@ More screenshots are available in the [gallery](https://github.com/prochazkaml/M
 
 ## Building instructions
 
-For building the OS, a Unix-based system is required (Linux, BSD, WSL, macOS) with **NASM**, **mtools** and **make** installed. **DOSBox** is required for testing MichalOS builds (QEMU, VirtualBox, VMware etc. could also be used, but you will be met with limited functionality).
+For building the OS, a Unix-based system is required (Linux, BSD, WSL, macOS) with **NASM**, **mtools** and **make** installed. **DOSBox** is required for testing MichalOS builds (QEMU, [VirtualBox](https://github.com/prochazkaml/MichalOS/blob/master/misc/VirtualBox.md), VMware etc. could also be used, but you will be met with limited functionality).
 
 On Debian GNU/Linux (and its derivates, such as Linux Mint or Ubuntu), these requirements can be met by running ```sudo apt-get install nasm mtools make dosbox```.
 
