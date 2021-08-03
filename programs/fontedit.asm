@@ -198,7 +198,7 @@ start:
 
 	push es
 	
-	mov ax, 800h
+	mov ax, 160h
 	mov es, ax
 	
 	mov cx, 4096 / 4
