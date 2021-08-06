@@ -68,7 +68,7 @@ void write_elias_gamma(int value) {
     }
 }
 
-unsigned char *compress(Optimal *optimal, unsigned char *input_data, size_t input_size, long skip, size_t *output_size, long *delta) {
+unsigned char *compress(Optimal *optimal, unsigned char *input_data, size_t input_size, size_t *output_size, long *delta) {
     size_t input_index;
     size_t input_prev;
     int offset1;
@@ -85,12 +85,12 @@ unsigned char *compress(Optimal *optimal, unsigned char *input_data, size_t inpu
     }
 
     /* initialize delta */
-    diff = *output_size - input_size + skip;
+    diff = *output_size - input_size;
     *delta = 0;
 
     /* un-reverse optimal sequence */
     optimal[input_index].bits = 0;
-    while (input_index != skip) {
+    while (input_index) {
         input_prev = input_index - (optimal[input_index].len > 0 ? optimal[input_index].len : 1);
         optimal[input_prev].bits = input_index;
         input_index = input_prev;

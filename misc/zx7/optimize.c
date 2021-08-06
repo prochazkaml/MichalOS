@@ -43,7 +43,7 @@ int count_bits(int offset, int len) {
     return 1 + (offset > 128 ? 12 : 8) + elias_gamma_bits(len-1);
 }
 
-Optimal* optimize(unsigned char *input_data, size_t input_size, long skip) {
+Optimal* optimize(unsigned char *input_data, size_t input_size) {
     size_t *min;
     size_t *max;
     size_t *matches;
@@ -69,19 +69,11 @@ Optimal* optimize(unsigned char *input_data, size_t input_size, long skip) {
          exit(1);
     }
 
-    /* index skipped bytes */
-    for (i = 1; i <= skip; i++) {
-        match_index = input_data[i-1] << 8 | input_data[i];
-        match_slots[i] = matches[match_index];
-        matches[match_index] = i;
-    }
-
     /* first byte is always literal */
-    optimal[skip].bits = 8;
+    optimal[0].bits = 8;
 
     /* process remaining bytes */
-    for (; i < input_size; i++) {
-
+    for (i = 1; i < input_size; i++) {
         optimal[i].bits = optimal[i-1].bits + 9;
         match_index = input_data[i-1] << 8 | input_data[i];
         best_len = 1;
@@ -92,7 +84,7 @@ Optimal* optimize(unsigned char *input_data, size_t input_size, long skip) {
                 break;
             }
 
-            for (len = 2; len <= MAX_LEN && i >= skip+len; len++) {
+            for (len = 2; len <= MAX_LEN && i >= len; len++) {
                 if (len > best_len) {
                     best_len = len;
                     bits = optimal[i-len].bits + count_bits(offset, len);

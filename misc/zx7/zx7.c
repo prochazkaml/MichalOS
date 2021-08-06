@@ -31,73 +31,29 @@
 
 #include "zx7.h"
 
-long parse_long(char *str) {
-    long value;
-
-    errno = 0;
-    value = strtol(str, NULL, 10);
-    return !errno ? value : LONG_MIN;
-}
-
-void reverse(unsigned char *first, unsigned char *last) {
-    unsigned char c;
-
-    while (first < last) {
-        c = *first;
-        *first++ = *last;
-        *last-- = c;
-    }
-}
-
 int main(int argc, char *argv[]) {
-    long skip = 0;
-    int forced_mode = 0;
-    int backwards_mode = 0;
-    char *output_name;
     unsigned char *input_data;
     unsigned char *output_data;
     FILE *ifp;
     FILE *ofp;
+    size_t size;
     size_t input_size;
     size_t output_size;
     size_t partial_counter;
     size_t total_counter;
     long delta;
-    int i;
+    int i, segments, ptr;
 
-    printf("ZX7: Optimal LZ77/LZSS compression by Einar Saukas\n");
-
-    /* process hidden optional parameters */
-    for (i = 1; i < argc && (*argv[i] == '-' || *argv[i] == '+'); i++) {
-        if (!strcmp(argv[i], "-f")) {
-            forced_mode = 1;
-        } else if (!strcmp(argv[i], "-b")) {
-            backwards_mode = 1;
-        } else if ((skip = parse_long(argv[i])) <= 0) {
-            fprintf(stderr, "Error: Invalid parameter %s\n", argv[i]);
-            exit(1);
-        }
-    }
-
-    /* determine output filename */
-    if (argc == i+1) {
-        output_name = (char *)malloc(strlen(argv[i])+5);
-        strcpy(output_name, argv[i]);
-        strcat(output_name, ".zx7");
-    } else if (argc == i+2) {
-        output_name = argv[i+1];
-    } else {
-        fprintf(stderr, "Usage: %s [-f] [-b] input [output.zx7]\n"
-                        "  -f      Force overwrite of output file\n"
-                        "  -b      Compress backwards\n", argv[0]);
+    if(argc != 3) {
+        fprintf(stderr, "Usage: %s input output\n", argv[0]);
 
         exit(1);
     }
 
     /* open input file */
-    ifp = fopen(argv[i], "rb");
+    ifp = fopen(argv[1], "rb");
     if (!ifp) {
-        fprintf(stderr, "Error: Cannot access input file %s\n", argv[i]);
+        fprintf(stderr, "Error: Cannot access input file %s\n", argv[1]);
         exit(1);
     }
 
@@ -106,13 +62,7 @@ int main(int argc, char *argv[]) {
     input_size = ftell(ifp);
     fseek(ifp, 0L, SEEK_SET);
     if (!input_size) {
-        fprintf(stderr, "Error: Empty input file %s\n", argv[i]);
-        exit(1);
-    }
-
-    /* validate skip against input size */
-    if (skip >= input_size) {
-        fprintf(stderr, "Error: Skipping entire input file %s\n", argv[i]);
+        fprintf(stderr, "Error: Empty input file %s\n", argv[1]);
         exit(1);
     }
 
@@ -131,51 +81,47 @@ int main(int argc, char *argv[]) {
     } while (partial_counter > 0);
 
     if (total_counter != input_size) {
-        fprintf(stderr, "Error: Cannot read input file %s\n", argv[i]);
+        fprintf(stderr, "Error: Cannot read input file %s\n", argv[1]);
         exit(1);
     }
 
     /* close input file */
     fclose(ifp);
 
-    /* check output file */
-    if (!forced_mode && fopen(output_name, "rb") != NULL) {
-        fprintf(stderr, "Error: Already existing output file %s\n", output_name);
-        exit(1);
-    }
-
     /* create output file */
-    ofp = fopen(output_name, "wb");
+    ofp = fopen(argv[2], "wb");
     if (!ofp) {
-        fprintf(stderr, "Error: Cannot create output file %s\n", output_name);
+        fprintf(stderr, "Error: Cannot create output file %s\n", argv[2]);
         exit(1);
-    }
-
-    /* conditionally reverse input file */
-    if (backwards_mode) {
-        reverse(input_data, input_data+input_size-1);
     }
 
     /* generate output file */
-    output_data = compress(optimize(input_data, input_size, skip), input_data, input_size, skip, &output_size, &delta);
+    segments = ((input_size - 1) >> 16) + 1;
+    fputc(segments, ofp);
 
-    /* conditionally reverse output file */
-    if (backwards_mode) {
-        reverse(output_data, output_data+output_size-1);
-    }
+    ptr = segments * 2 + 1;
 
-    /* write output file */
-    if (fwrite(output_data, sizeof(char), output_size, ofp) != output_size) {
-        fprintf(stderr, "Error: Cannot write output file %s\n", output_name);
-        exit(1);
+    for(i = 0; i < segments; i++) {
+        size = (input_size > 0x10000) ? 0x10000 : input_size;
+
+        output_data = compress(optimize(input_data + (i << 16), size), input_data + (i << 16), size, &output_size, &delta);
+        input_size -= 0x10000;
+
+        fseek(ofp, ptr, SEEK_SET);
+
+        /* write output file */
+        if (fwrite(output_data, sizeof(char), output_size, ofp) != output_size) {
+            fprintf(stderr, "Error: Cannot write output file %s\n", argv[2]);
+            exit(1);
+        }
+
+        fseek(ofp, i * 2 + 1, SEEK_SET);
+        fputc(ptr & 0xFF, ofp);
+        fputc(ptr >> 8, ofp);
+
+        ptr += output_size;
     }
 
     /* close output file */
     fclose(ofp);
-
-    /* done! */
-    printf("File%s converted%s from %lu to %lu bytes! (delta %ld)\n", (skip ? " partially" : ""), (backwards_mode ? " backwards" : ""), 
-        (unsigned long)(input_size-skip), (unsigned long)output_size, delta);
-
-    return 0;
 }

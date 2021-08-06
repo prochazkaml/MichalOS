@@ -49,7 +49,7 @@ build/%.mmf: content/%.mus content/notelist.txt | build
 	nasm -O2 -w+all -f bin -I content/ -o $@ $<
 
 build/%.drz: content/%.dro | build
-	misc/compress $< $@
+	misc/zx7/segmented_zx7 $< $@
 
 # Builds the image.
 build/images/michalos.flp: build/bootload.bin build/michalos.sys \

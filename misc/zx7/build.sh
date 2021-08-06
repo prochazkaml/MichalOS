@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cc zx7.c optimize.c compress.c -o /usr/bin/zx7
+cc zx7.c optimize.c compress.c -o segmented_zx7

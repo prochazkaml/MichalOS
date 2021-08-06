@@ -32,6 +32,6 @@ typedef struct optimal_t {
     int len;
 } Optimal;
 
-Optimal *optimize(unsigned char *input_data, size_t input_size, long skip);
+Optimal *optimize(unsigned char *input_data, size_t input_size);
 
-unsigned char *compress(Optimal *optimal, unsigned char *input_data, size_t input_size, long skip, size_t *output_size, long *delta);
+unsigned char *compress(Optimal *optimal, unsigned char *input_data, size_t input_size, size_t *output_size, long *delta);
