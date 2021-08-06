@@ -31,6 +31,6 @@ For building the OS, a Unix-based system is required (Linux, BSD, WSL, macOS) wi
 
 On Debian GNU/Linux (and its derivates, such as Linux Mint or Ubuntu), these requirements can be met by running ```sudo apt-get install nasm mtools make dosbox```.
 
-It is also necessary to install a ZX7 data compressor with ```cd misc/zx7 && sudo ./build.sh```, which requires gcc. It will install in the ```/usr/bin/``` directory.
+It is also necessary to compile a ZX7 data compressor with ```cd misc/zx7 && ./build.sh```, which requires gcc/clang.
 
 Then, you can simply build the image by running ```make```.
