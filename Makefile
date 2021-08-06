@@ -55,11 +55,15 @@ build/%.drz: content/%.dro | build
 build/images/michalos.flp: build/bootload.bin build/michalos.sys \
 					$(PROGRAMS) $(SONGS) $(DROS) | build/images
 	dd if=/dev/zero of=build/images/michalos.flp bs=512 count=2880
-	dd status=noxfer conv=notrunc if=build/bootload.bin of=build/images/michalos.flp
+	dd conv=notrunc if=build/bootload.bin of=build/images/michalos.flp
 	
 	mcopy -i $@ build/michalos.sys ::michalos.sys
 	$(foreach file,$(FILES),mcopy -i $@ $(file) ::$(notdir $(file));)
 
+# Optional target: builds a bootable ISO image for CDs.
+iso: build/images/michalos.iso
+
+build/images/michalos.iso: build/images/michalos.flp
 	-rm build/images/michalos.iso
 	mkisofs -quiet -V 'MICHALOS' -input-charset iso8859-1 -o build/images/michalos.iso -b michalos.flp build/images/
 
