@@ -99,18 +99,19 @@ start:
 	.introtext0				db '  MichalOS: Copyright (C) Michal Prochazka, 2017-2021', 13, 10
 	.introtext1				db '  MichalOS Font & logo: Copyright (C) Krystof Kubin, 2017-2021', 13, 10, 10
 	.introtext2				db '  If you find a bug, or you just have a feature request, please leave a ticket', 13, 10
-	.introtext3				db '  in the Tickets section on SourceForge. I welcome any kind of feedback.', 0
+	.introtext3				db '  in the Issues section on GitHub. I welcome any kind of feedback.', 0
 	
 	.hoftext0				db '  Special thanks to: (in alphabetical order)', 13, 10
 	.hoftext1				db '    fanzyflani for porting the Reality AdLib Tracker to NASM', 13, 10
 	.hoftext2				db '    Ivan Ivanov for discovering and helping with fixing bugs', 13, 10
 	.hoftext3				db '    Jasper Ziller for making the Fisher game', 13, 10
 	.hoftext4				db '    Leonardo Ono for making the Snake game', 13, 10
-	.hoftext5				db '    Mike Saunders for making the base OS - MikeOS :)', 13, 10
+	.hoftext5				db '    MikeOS developers for making the base OS - MikeOS :)', 13, 10
 	.hoftext6				db '    My wonderful classmates for providing feedback (and doing bug-hunting)', 13, 10
 	.hoftext7				db '    REALITY for releasing the Reality AdLib Tracker source code back in 1995', 13, 10
 	.hoftext8				db '    Sebastian Mihai for creating & releasing the source code of aSMtris', 13, 10
-	.hoftext9				db '    ZeroKelvinKeyboard for creating TachyonOS & writing apps for MikeOS', 13, 10, 0
+	.hoftext9				db '    Shoaib Jamal for making the MichalOS website', 13, 10
+	.hoftext10				db '    ZeroKelvinKeyboard for creating TachyonOS & writing apps for MikeOS', 13, 10, 0
 
 	.footer_msg				db '[Space] Visit the hall of fame [L] View the license', 0
 	.footer_msg_hall		db '[Space] Go back [L] View the license', 0
