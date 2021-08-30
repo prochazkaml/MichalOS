@@ -755,7 +755,7 @@ systemfilemissing:
 	noprogerror				db 'System file not found', 0
 
 	appindex1				dw edit_name, viewer_name, calc_name, clock_name, cmd_name, config_name, ascii_name, pixel_name, player_name, hwcheck_name, about_name
-	debugindex1				dw debug1_name, debug2_name, debug3_name, debug4_name, debug5_name, debug6_name, debug7_name, debug8_name, debug11_name, debug12_name, debug13_name, debug14_name
+	debugindex1				dw debug1_name, debug2_name, debug3_name, debug4_name, debug5_name, debug6_name, debug7_name, debug8_name, debug9_name, debug11_name, debug12_name, debug13_name, debug14_name
 	gameindex1				dw cf_name, inkspill_name, spaceinv_name, asmtris_name, sudoku_name, fisher_name, miketron_name, muncher_name, hangman_name, snake_name
 	
 	edit_name				db 'EDIT', 0
@@ -778,6 +778,7 @@ systemfilemissing:
 	debug6_name				db 'MEMEDIT', 0
 	debug7_name				db 'BOXES', 0
 	debug8_name				db 'DOTS', 0
+	debug9_name				db 'DEADPIXL', 0
 	debug11_name			db 'CHECK', 0
 	debug12_name			db 'RDTSC', 0
 	debug13_name			db 'TEST', 0
@@ -810,7 +811,7 @@ systemfilemissing:
 	
 	menuoptions				db 'Programs,Games,Log out,Reboot,Power off', 0
 	gameoptions				db 'Cosmic Flight,InkSpill,Space Inventors,aSMtris,Sudoku,Deep Sea Fisher,MikeTron,Muncher,Hangman,Snake', 0
-	debugoptions			db 'Disk detection test,Keyboard tester,Serial communication tester,RTC clock tester,Disk Sector inspector,Memory editor,Boxes,Dots,Disk sector checker,TSC register tester,Simple test app,TV static generator (CGA)', 0
+	debugoptions			db 'Disk detection test,Keyboard tester,Serial communication tester,RTC clock tester,Disk Sector inspector,Memory editor,Boxes,Dots,Dead pixel tester,Disk sector checker,TSC register tester,Simple test app,TV static generator (CGA)', 0
 	progoptions				db 'File manager,Text editor,Image viewer,Calculator,Clock,Terminal,Settings,ASCII art editor,Pixel art editor,Music player,Hardware checker,About MichalOS,Other stuff...', 0
 	
 ; ------------------------------------------------------------------
