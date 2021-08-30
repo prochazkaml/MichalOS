@@ -20,8 +20,8 @@ A 16-bit keyboard controlled operating system based on MikeOS 4.5, aimed to be m
 
 ## Screenshots
 
-![Login screen](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202019-07-11%2020-50-20.png/max/max/1)
-![Desktop](https://a.fsdn.com/con/app/proj/michalos/screenshots/Screenshot%20from%202019-07-11%2020-50-27.png/max/max/1)
+![Login screen](https://user-images.githubusercontent.com/41787099/128972820-d9d31c96-0e88-4fcb-b216-772a4f0d1568.png)
+![Desktop](https://user-images.githubusercontent.com/41787099/128972823-3aae09a0-7684-4dc7-a195-92c6e2fb33d7.png)
 
 More screenshots are available in the [gallery](https://github.com/prochazkaml/MichalOS/blob/master/misc/gallery.md).
 
