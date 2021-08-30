@@ -281,6 +281,7 @@ os_get_file_list:
 ; OUT: BX = file size (in bytes), carry set if file not found
 
 os_load_file:
+	pusha
 	push es
 	mov [.old_segment], es
 
@@ -379,8 +380,9 @@ os_load_file:
 	loop .next_root_entry
 
 .root_problem:
-	mov bx, 0			; If file not found or major disk error,
 	pop es
+	popa
+	mov bx, 0			; If file not found or major disk error,
 
 	stc				; return with size = 0 and carry set
 	ret
@@ -483,12 +485,14 @@ os_load_file:
 
 
 .end:
+	pop es
+	popa
+
 	mov ebx, [.file_size]		; Get file size to pass back in BX
 	pusha
 	xor si, si
 	call os_print_footer
 	popa
-	pop es
 
 	clc				; Carry clear = good load
 	ret

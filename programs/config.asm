@@ -98,6 +98,8 @@ start:
 	jmp .look
 
 .bg_img_change:
+	call .draw_background
+
 	mov byte [0087h], 1
 	mov bx, .extension_number
 	call os_file_selector		; Get filename
