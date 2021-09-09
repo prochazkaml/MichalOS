@@ -14,6 +14,18 @@ start:
 	
 	jc .exit
 	
+	pusha
+	mov ax, .helpmsg
+	mov bx, .helpmsg2
+	clr cx
+	mov dx, 1
+
+	call os_dialog_box
+
+	xor ax, 1
+	mov [showhints], al
+	popa
+
 	dec ax
 	mov bx, 81
 	mul bx
@@ -74,11 +86,6 @@ start:
 .put_number:
 	sub al, '0' - 10
 	
-	cmp al, 10
-	jne .no_clear
-
-	mov al, 0
-	
 .no_clear:
 	mov dx, [cursor_x]	; Load the entire word
 	call sub_set_board_number
@@ -116,6 +123,9 @@ start:
 	.listmsg	db 'Welcome to MichalOS Sudoku!', 0
 	.listmsg2	db 0
 	
+	.helpmsg	db 'Do you want to show whether you made', 0
+	.helpmsg2	db 'a mistake during your playthrough?', 0
+
 check_board:
 	pusha
 	call check_free_spaces
@@ -125,10 +135,9 @@ check_board:
 	mov byte [tmp_table_ptr], 0
 	
 .rule_loop:
-	
 	mov di, tmp_num_table
 	mov al, 0
-	mov cx, 9
+	mov cx, 10
 	rep stosb
 	
 	movzx bx, byte [tmp_table_ptr]
@@ -137,11 +146,11 @@ check_board:
 	
 	mov ax, bx
 	mov bx, 9
-	xor dx, dx
+	clr dx
 	div bx			; Get the offset to the "offset_add" table	
 	mul bx
-	
-	mov cx, bx		; Counter
+
+	mov cx, bx		; Counter (9)
 	mov bx, ax		; Offset of "offset_add"
 	
 .number_loop:
@@ -159,35 +168,66 @@ check_board:
 .no_adjust:
 	push bx
 	movzx bx, al
-	inc byte [tmp_num_table + bx - 1]
+	inc byte [tmp_num_table + bx]
 	pop bx
 	
 	inc bx
 	loop .number_loop
 	
-	mov si, expected_table
-	mov di, tmp_num_table
+	mov si, tmp_num_table + 1
 	mov cx, 9
-	rep cmpsb
-	jne .fail
-	
+	mov bl, 0
+
+.checkloop:
+	lodsb
+	add bl, al
+	cmp al, 1
+	jg .fail
+
+	loop .checkloop
+
+	cmp bl, 9
+	je game_end
+
 	inc byte [tmp_table_ptr]
 	cmp byte [tmp_table_ptr], 9 * 3
 	jne .rule_loop
 	
-	jmp game_end
-	
+.ok:
+	cmp byte [showhints], 0
+	je .exit
+
+	mov16 dx, 1, 21
+	call os_move_cursor
+
+	mov si, .okmsg
+	call os_print_string
+
+	jmp near .exit
+
 .fail:
+	cmp byte [showhints], 0
+	je .exit
+
+	mov16 dx, 1, 21
+	call os_move_cursor
+
+	mov si, .errmsg
+	call os_print_string
+
+.exit:
 	popa
 	ret
 	
+	.okmsg			db 'The sudoku has no mistakes.      ', 0
+	.errmsg			db 'There is a mistake in the sudoku.', 0
+
 	offset_table	db 0, 9, 18, 27, 36, 45, 54, 63, 72, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 3, 6, 27, 30, 33, 54, 57, 60
 	offset_add		db 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 18, 27, 36, 45, 54, 63, 72, 0, 1, 2, 9, 10, 11, 18, 19, 20
-	expected_table	times 9 db 1
 	
 	tmp_table_ptr	db 0
-	tmp_num_table	times 9 db 0
-	
+	tmp_num_table	times 10 db 0
+
 game_end:
 	popa
 	add sp, 2		; There is no "ret"
@@ -219,8 +259,7 @@ check_free_spaces:
 	cmp bx, 81
 	jne .loop
 	
-	mov dh, 22
-	mov dl, 1
+	mov16 dx, 1, 22
 	call os_move_cursor
 	
 	mov si, .free_msg
@@ -449,6 +488,7 @@ draw_background:
 ; ------------------------------------------------------------------
 
 level_pointer	dw level_easy
+showhints		db 0
 cursor_x		db 0
 cursor_y		db 0
 
