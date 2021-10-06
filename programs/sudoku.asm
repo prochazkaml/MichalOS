@@ -48,6 +48,7 @@ start:
 	cmp bx, 81
 	jne .clear_loop
 	
+.loop_cls:
 	call draw_background
 	call os_hide_cursor
 
@@ -133,7 +134,9 @@ check_board:
 	; Check if the board is done
 	
 	mov byte [tmp_table_ptr], 0
-	
+	mov byte [sudokufinished], 1
+	mov byte [sudokumistake], 0
+
 .rule_loop:
 	mov di, tmp_num_table
 	mov al, 0
@@ -166,6 +169,12 @@ check_board:
 	sub al, 10
 	
 .no_adjust:
+	cmp al, 0
+	jne .no_blank
+
+	mov byte [sudokufinished], 0
+
+.no_blank:
 	push bx
 	movzx bx, al
 	inc byte [tmp_num_table + bx]
@@ -182,17 +191,21 @@ check_board:
 	lodsb
 	add bl, al
 	cmp al, 1
-	jg .fail
+	jg .sudoku_mistake_found
 
+.checkloop_cont:
 	loop .checkloop
-
-	cmp bl, 9
-	je game_end
 
 	inc byte [tmp_table_ptr]
 	cmp byte [tmp_table_ptr], 9 * 3
 	jne .rule_loop
 	
+	cmp byte [sudokufinished], 1
+	je game_end
+
+	cmp byte [sudokumistake], 1
+	je .fail
+
 .ok:
 	cmp byte [showhints], 0
 	je .exit
@@ -219,12 +232,19 @@ check_board:
 	popa
 	ret
 	
+.sudoku_mistake_found:
+	mov byte [sudokumistake], 1
+	jmp .checkloop_cont
+
 	.okmsg			db 'The sudoku has no mistakes.      ', 0
 	.errmsg			db 'There is a mistake in the sudoku.', 0
 
 	offset_table	db 0, 9, 18, 27, 36, 45, 54, 63, 72, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 3, 6, 27, 30, 33, 54, 57, 60
 	offset_add		db 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 9, 18, 27, 36, 45, 54, 63, 72, 0, 1, 2, 9, 10, 11, 18, 19, 20
 	
+	sudokufinished	db 0
+	sudokumistake	db 0
+
 	tmp_table_ptr	db 0
 	tmp_num_table	times 10 db 0
 
@@ -232,6 +252,9 @@ game_end:
 	popa
 	add sp, 2		; There is no "ret"
 	
+	cmp byte [sudokumistake], 1
+	je game_fail
+
 	mov ax, .winmsg
 	xor bx, bx
 	xor cx, cx
@@ -240,7 +263,23 @@ game_end:
 	jmp start
 	
 	.winmsg		db 'You win!', 0
-	
+
+game_fail:
+	mov ax, check_board.errmsg
+	mov bx, .errmsg2
+	mov cx, .errmsg3
+	clr dx
+	call os_dialog_box
+
+	mov al, 0
+	mov dx, [cursor_x]	; Load the entire word
+	call sub_set_board_number
+
+	jmp start.loop_cls
+
+	.errmsg2		db 'Please try again.', 0
+	.errmsg3		dd 'The current tile will be cleared.',0
+
 check_free_spaces:
 	pusha
 	mov si, [level_pointer]
