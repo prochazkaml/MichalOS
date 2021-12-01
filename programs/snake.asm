@@ -8,6 +8,8 @@
 	%include "michalos.inc"
 
 section .text
+		mov byte [0082h], 1
+		mov [startstack], sp
 		call hide_cursor
 	start:
 		call show_title
@@ -38,17 +40,12 @@ section .text
 			ret
 
 	clear_keyboard_buffer:
-			mov ah, 1
-			int 16h
-			jz .end
-			mov ah, 0h ; retrieve key from buffer
-			int 16h
-			jmp clear_keyboard_buffer
-		.end:
+			call os_check_for_key
+			jnz clear_keyboard_buffer
 			ret
 
 	exit_process:
-			mov sp, 0FFFEh - 2
+			mov sp, [startstack]
 			ret
 
 	buffer_clear:
@@ -164,8 +161,7 @@ section .text
 			call buffer_render
 			mov si, 5
 			call sleep
-			mov ah, 1
-			int 16h
+			call os_check_for_key
 			jnz .continue
 			mov si, .text_3
 			mov di, 1388
@@ -173,12 +169,11 @@ section .text
 			call buffer_render
 			mov si, 10
 			call sleep
-			mov ah, 1
-			int 16h
+			call os_check_for_key
 			jz .wait_for_key
 		.continue:
-			mov ah, 0
-			int 16h
+			cmp al, 27
+			jz exit_process
 			ret
 		.title:
 			dw 0342, 0341, 0340, 0339, 0338, 0337, 0336, 0335, 0415, 0495
@@ -227,11 +222,8 @@ section .text
 			db " SCORE: 000000", 0
 
 	update_snake_direction:
-			mov ah, 1
-			int 16h
+			call os_check_for_key
 			jz .end
-			mov ah, 0h ; retrieve key from buffer
-			int 16h
 			cmp al, 27 ; ESC
 			jz exit_process
 			cmp ah, 48h ; up
@@ -467,11 +459,11 @@ section .text
 			mov di, 1040 + 32
 			call buffer_print_string
 			call buffer_render
-			mov si, 48
-			call sleep
-			call clear_keyboard_buffer
-			mov ah, 0
-			int 16h
+
+			call os_wait_for_key
+
+			cmp al, 27
+			jz exit_process
 			ret
 		.text_1:
 			db "               ", 0
@@ -496,5 +488,7 @@ section .bss
 		snake_tail_y resb 1
 		snake_tail_previous_x resb 1
 		snake_tail_previous_y resb 1
+
+		startstack resw 1
 
 		buffer resb 2000
