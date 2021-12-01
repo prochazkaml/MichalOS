@@ -53,7 +53,7 @@ build/%.drz: content/%.dro | build
 
 # Builds the image.
 build/images/michalos.flp: build/bootload.bin build/michalos.sys \
-					$(PROGRAMS) $(SONGS) $(DROS) | build/images
+					$(FILES) | build/images
 	dd if=/dev/zero of=build/images/michalos.flp bs=512 count=2880
 	dd conv=notrunc if=build/bootload.bin of=build/images/michalos.flp
 	
