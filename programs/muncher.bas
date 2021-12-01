@@ -50,6 +50,8 @@ changelook:
       print chr c ;
     next a
   next b
+
+  move 0 24
 return
 
 pregame:
