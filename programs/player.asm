@@ -222,7 +222,7 @@ start:
 						   `device, based on the file's format.`, 13, 10, 10, \
 						   'Compatible file formats:', 13, 10, \
 						   '- MMF: MichalOS PCspk Music Format', 13, 10, \
-						   '- DRO: DOSBox Adlib capture', 13, 10, \
+						   '- DRO/DRZ: DOSBox Adlib capture', 13, 10, \
 						   '- RAD: Reality Adlib Tracker', 0
 	
 	.listitem3			db 'Play 2 MMF (MichalOS PCspk Music', 13, 10, \
