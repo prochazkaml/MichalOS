@@ -23,10 +23,10 @@ start:
 .callback:
 	ret
 
-	.gamelist	db "SorryAss,Exit", 0
+	.gamelist	db "Donkey,Exit", 0
 	.help_msg1	db "Please select a game:"	; No need to zero-terminate here
 	.help_msg2	db 0
 
-	.bootlist	dw sorryass, .dummy
+	.bootlist	dw donkey, .dummy
 
-	%include "arcade/sorryass.asm"
+	%include "arcade/donkey.asm"
