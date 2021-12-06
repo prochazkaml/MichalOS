@@ -770,7 +770,10 @@ move_all_chars_backward:
 
 load_file:
 	popa
-	call os_file_selector
+	mov byte [0087h], 1
+	mov bx, extension_filter
+	call os_file_selector		; Get filename
+	mov byte [0087h], 0
 	jc render_text
 
 	mov si, ax				; Save it for later usage
@@ -1156,6 +1159,10 @@ showbytepos:
 	untitled				db 'Unnamed document', 0
 	userfile				times 60 db 0
 	newname					times 60 db 0
+	
+	extension_filter	db 2
+	.mmf_extension		db 'TXT', 0
+	.dro_extension		db 'BAS', 0
 	
 	skiplines				dw 0
 
