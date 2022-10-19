@@ -25,6 +25,7 @@ start:
 
 .main_loop:
 	call .draw_box_16
+	call os_hide_cursor
 	call os_wait_for_key
 	cmp ah, 72
 	je .cursor_up
@@ -356,7 +357,7 @@ start:
 	call os_move_cursor
 	int 10h
 	
-	mov16 ax, 219, 09h	; int 10h function + Full character
+	mov16 ax, 32, 09h	; int 10h function + Full character
 	mov cx, 2			; Print 2 characters
 	mov16 dx, 2, 3		; Sprite position
 	clr bh				; Video page
@@ -375,6 +376,18 @@ start:
 	cmp dh, 3 + 16		; End of Y?
 	jl .draw_loop
 	
+	mov dl, [.cursor_x]	; Draw a visible cursor
+	shl dl, 1			; DL = DL * 2
+	add dl, 2
+	mov dh, [.cursor_y]
+	add dh, 3
+	call os_move_cursor
+
+	mov al, '['
+	call os_putchar
+	mov al, ']'
+	call os_putchar
+
 	ret
 
 .getcolor:
@@ -385,6 +398,12 @@ start:
 	mov bl, 0Fh
 
 .gotcolor:
+	push ax
+	mov al, bl
+	xor al, 0Fh
+	rol bl, 4
+	or bl, al
+	pop ax
 	ret
 	
 .draw_background:

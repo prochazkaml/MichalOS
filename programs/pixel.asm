@@ -351,15 +351,13 @@ start:
 	call os_move_cursor
 	int 10h
 	
-	mov al, 219			; Full character
+	mov16 ax, 32, 09h	; int 10h function + Full character
 	mov cx, 2			; Print 2 characters
-	mov dl, 2			; Sprite X position
-	mov dh, 3			; Sprite Y position
-	mov ah, 09h			; int 10h function
+	mov16 dx, 2, 3		; Sprite position
 	mov bh, 0			; Video page
 	mov si, buffer		; Buffer location
 .draw_loop:
-	mov bl, [si]		; Get the color
+	call .getcolor		; Get the color
 	call os_move_cursor
 	int 10h
 	inc si
@@ -371,6 +369,18 @@ start:
 	cmp dh, 3 + 16		; End of Y?
 	jl .draw_loop
 	
+	mov dl, [.cursor_x]	; Draw a visible cursor
+	shl dl, 1			; DL = DL * 2
+	add dl, 2
+	mov dh, [.cursor_y]
+	add dh, 3
+	call os_move_cursor
+
+	mov al, '['
+	call os_putchar
+	mov al, ']'
+	call os_putchar
+
 	mov dl, 29
 	mov dh, 0
 	call os_move_cursor
@@ -388,6 +398,17 @@ start:
 	call os_print_string
 	call os_hide_cursor
 	ret
+
+.getcolor:
+	mov bl, [si]
+	push ax
+	mov al, bl
+	xor al, 0Fh
+	rol bl, 4
+	or bl, al
+	pop ax
+	ret
+
 .fill_set:
 	mov si, .yes_msg
 	call os_print_string
