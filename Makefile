@@ -16,10 +16,15 @@ DRO := $(patsubst files/src/%.dro,build/%.drz,$(sort $(wildcard files/src/*.dro)
 FILES := $(PROGRAMS) $(MMF) $(DRO) $(wildcard files/*.*) $(wildcard files/gitignore/*.*)
 
 build:
-	@echo $(FILES)
 	mkdir -p $@
 
 build/images:
+	mkdir -p $@
+
+build/images/isoroot:
+	mkdir -p $@
+
+build/images/iso288root:
 	mkdir -p $@
 
 # Default target: builds the image and boots it.
@@ -82,15 +87,17 @@ build/images/michalos288.flp: build/images/michalos.flp files/gitignore/288data
 # Optional target: builds a bootable ISO image for CDs.
 iso: build/images/michalos.iso
 
-build/images/michalos.iso: build/images/michalos.flp
+build/images/michalos.iso: build/images/michalos.flp | build/images/isoroot
 	rm -f $@
-	mkisofs -V 'MICHALOS' -input-charset iso8859-1 -o $@ -b michalos.flp build/images/
+	cp $< build/images/isoroot/michalos.flp
+	mkisofs -V 'MICHALOS' -input-charset iso8859-1 -o $@ -b michalos.flp build/images/isoroot/
 
 bigiso: build/images/michalos288.iso
 
-build/images/michalos288.iso: build/images/michalos288.flp
+build/images/michalos288.iso: build/images/michalos288.flp | build/images/iso288root
 	rm -f $@
-	mkisofs -V 'MICHALOS' -input-charset iso8859-1 -o $@ -b michalos288.flp build/images/
+	cp $< build/images/iso288root/michalos.flp
+	mkisofs -V 'MICHALOS' -input-charset iso8859-1 -o $@ -b michalos.flp build/images/iso288root/
 
 # Removes all of the built pieces.
 clean:
