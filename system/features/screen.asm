@@ -300,8 +300,7 @@ os_file_selector:
 	
 	; Add the filters, if desired
 
-	mov di, 0051h
-	mov byte [di], 0
+	mov byte [0051h], 0
 	
 	cmp byte [0087h], 1
 	jne .no_filter
