@@ -1,3 +1,4 @@
 build
-images
+programs/gitignore
+files/gitignore
 misc/zx7/segmented_zx7

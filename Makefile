@@ -6,14 +6,17 @@
 .PHONY: clean
 
 # This selects all programs and music files to be built.
-PROGRAMS := $(patsubst programs/%.asm,build/%.app,$(sort $(wildcard programs/*.asm)))
-SONGS := $(patsubst files/src/%.mus,build/%.mmf,$(sort $(wildcard files/src/*.mus)))
-DROS := $(patsubst files/src/%.dro,build/%.drz,$(sort $(wildcard files/src/*.dro)))
+PROGRAMS := \
+	$(patsubst programs/%.asm,build/%.app,$(sort $(wildcard programs/*.asm))) \
+	$(patsubst programs/gitignore/%.asm,build/%.app,$(sort $(wildcard programs/gitignore/*.asm)))
+MMF := $(patsubst files/src/%.mus,build/%.mmf,$(sort $(wildcard files/src/*.mus)))
+DRO := $(patsubst files/src/%.dro,build/%.drz,$(sort $(wildcard files/src/*.dro)))
 
 # This selects all files to copy to the final image.
-FILES := $(PROGRAMS) $(SONGS) $(DROS) $(foreach dir,files/*.*,$(sort $(wildcard $(dir))))
+FILES := $(PROGRAMS) $(MMF) $(DRO) $(wildcard files/*.*) $(wildcard files/gitignore/*.*)
 
 build:
+	@echo $(FILES)
 	mkdir -p $@
 
 build/images:
@@ -37,6 +40,12 @@ build/michalos.sys: system/kernel.asm system/features/*.asm | build
 
 # Assembles all programs.
 # Note: % means file name prefix, $@ means output file and $< means source file.
+build/%.app: programs/gitignore/%.asm programs/gitignore/%/*.asm programs/michalos.inc | build
+	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< 
+	
+build/%.app: programs/gitignore/%.asm programs/michalos.inc | build
+	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< 
+	
 build/%.app: programs/%.asm programs/%/*.asm programs/michalos.inc | build
 	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< 
 	
