@@ -24,11 +24,18 @@ build/images:
 
 # Default target: builds the image and boots it.
 retail: build/images/michalos.flp
-	dosbox -conf misc/dosbox.conf
+	dosbox -conf misc/dosbox.conf -c "boot build/images/michalos.flp"
 
 # Development target: builds as usual, but uses dosbox-debug instead of regular DOSBox.
 debug: build/images/michalos.flp
-	dosbox-debug -conf misc/dosbox.conf
+	dosbox-debug -conf misc/dosbox.conf -c "boot build/images/michalos.flp"
+
+# "Big" floppy target: builds an 2.88 image (containing a 1.44 MB FAT filesystem and a 1.44 MB binary)
+big: build/images/michalos288.flp
+	dosbox -conf misc/dosbox.conf -c "boot build/images/michalos288.flp"
+
+bigdebug: build/images/michalos288.flp
+	dosbox-debug -conf misc/dosbox.conf -c "boot build/images/michalos288.flp"
 
 # Bootloader target
 build/bootload.bin: system/bootload/bootload.asm | build
@@ -67,12 +74,23 @@ build/images/michalos.flp: build/bootload.bin build/michalos.sys \
 	
 	mcopy -i $@ build/michalos.sys $(FILES) ::
 
+build/images/michalos288.flp: build/images/michalos.flp files/gitignore/288data
+	cp files/gitignore/288data build/288data
+	truncate -s 1474560 build/288data
+	cat build/images/michalos.flp build/288data > $@
+
 # Optional target: builds a bootable ISO image for CDs.
 iso: build/images/michalos.iso
 
 build/images/michalos.iso: build/images/michalos.flp
 	rm -f $@
 	mkisofs -V 'MICHALOS' -input-charset iso8859-1 -o $@ -b michalos.flp build/images/
+
+bigiso: build/images/michalos288.iso
+
+build/images/michalos288.iso: build/images/michalos288.flp
+	rm -f $@
+	mkisofs -V 'MICHALOS' -input-charset iso8859-1 -o $@ -b michalos288.flp build/images/
 
 # Removes all of the built pieces.
 clean:

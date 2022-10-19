@@ -2,12 +2,15 @@
 ; MichalOS PC Speaker PCM Demo
 ;
 ; WARNING: This demo uses the top 1.44 MB of a 2.88 MB disk.
-; It is not possible to run this demo from a 1.44 MB floppy disk.
-; Use the "build-linux.sh" build script, then run the following:
-; > dd if=audio.raw of=disk_images/michalos.flp bs=512 seek=2880 count=2880
-; "audio.raw" has to contain raw uncompressed 11025 Hz
-; *single-channel* 8-bit PCM audio. Only the first 1440 kB of audio.raw
-; will be copied to the disk image.
+; To generate a compatible image, run your favorite song through
+; FFmpeg to convert it to a 11025 Hz 8-bit PCM file:
+; 
+; ffmpeg -i <inputfile> -f u8 -acodec pcm_u8 -ac 1 -ar 11025 <outputfile>
+; 
+; Then, move the output file to files/gitignore/288data. After that,
+; you can generate the 2.88 MB image by running:
+; 
+; make big
 ; ------------------------------------------------------------------
 
 	%include "michalos.inc"
