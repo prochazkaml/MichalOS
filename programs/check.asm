@@ -16,6 +16,7 @@ start:
 	cmp ax, 1
 	je .exit
 
+	call os_clear_screen
 	mov dl, [0084h]
 
 	clr ax
