@@ -7,12 +7,11 @@
 
 # This selects all programs and music files to be built.
 PROGRAMS := $(patsubst programs/%.asm,build/%.app,$(sort $(wildcard programs/*.asm)))
-SONGS := $(patsubst content/%.mus,build/%.mmf,$(sort $(wildcard content/*.mus)))
-DROS := $(patsubst content/%.dro,build/%.drz,$(sort $(wildcard content/*.dro)))
+SONGS := $(patsubst files/src/%.mus,build/%.mmf,$(sort $(wildcard files/src/*.mus)))
+DROS := $(patsubst files/src/%.dro,build/%.drz,$(sort $(wildcard files/src/*.dro)))
 
 # This selects all files to copy to the final image.
-FILEDIRS := programs/*.bas programs/*.dat content/*.pcx content/*.rad content/*.asc system/binary/*.sys
-FILES := $(PROGRAMS) $(SONGS) $(DROS) $(foreach dir,$(FILEDIRS),$(sort $(wildcard $(dir))))
+FILES := $(PROGRAMS) $(SONGS) $(DROS) $(foreach dir,files/*.*,$(sort $(wildcard $(dir))))
 
 build:
 	mkdir -p $@
@@ -45,10 +44,10 @@ build/%.app: programs/%.asm programs/michalos.inc | build
 	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< 
 	
 # Assembles all songs.
-build/%.mmf: content/%.mus content/notelist.txt | build
-	nasm -O2 -w+all -f bin -I content/ -o $@ $<
+build/%.mmf: files/src/%.mus files/src/notelist.txt | build
+	nasm -O2 -w+all -f bin -I files/src/ -o $@ $<
 
-build/%.drz: content/%.dro | build
+build/%.drz: files/src/%.dro | build
 	misc/zx7/segmented_zx7 $< $@
 
 # Builds the image.
