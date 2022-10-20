@@ -12,7 +12,7 @@ start:
 	
 	mov16 dx, 2, 10
 	call os_move_cursor
-	mov si, osname
+	call os_get_os_name
 	call os_print_string
 	
 	mov16 dx, 0, 12
@@ -119,8 +119,6 @@ start:
 
 	.licensetext:			incbin "../misc/LICENSE"
 							db 0
-							
-	%INCLUDE "../system/features/name.asm"
 
 print_text_wall:
 	pusha

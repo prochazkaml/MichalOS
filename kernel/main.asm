@@ -184,7 +184,7 @@ os_call_vectors:
 	jmp os_math_root			; 8138h
 	jmp os_input_password		; 813Bh
 	jmp os_get_int_handler		; 813Eh
-	jmp os_illegal_call			; 8141h ; FREE!!!!!!!!!!!!!!!!!!!
+	jmp os_get_os_name			; 8141h ; FREE!!!!!!!!!!!!!!!!!!!
 	jmp os_temp_box				; 8144h
 	jmp os_adlib_unmute			; 8147h
 	jmp os_read_root			; 814Ah

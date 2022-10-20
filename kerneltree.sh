@@ -1,5 +1,5 @@
-linenums=($(grep "^........................................os" source/system.lst -n | awk '{print $1}' | grep -o '[0-9]\+'))
-linelabels=($(grep "^........................................os" source/system.lst -n | awk '{print $NF}'))
+linenums=($(grep "^........................................os" build/kernel.lst -n | awk '{print $1}' | grep -o '[0-9]\+'))
+linelabels=($(grep "^........................................os" build/kernel.lst -n | awk '{print $NF}'))
 
 for i in $(seq 0 `expr ${#linenums[@]} - 2`); do
 	next=`expr $i + 1`

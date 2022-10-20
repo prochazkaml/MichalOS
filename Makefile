@@ -43,12 +43,12 @@ bigdebug: build/images/michalos288.flp
 	dosbox-debug -conf misc/dosbox.conf -c "boot build/images/michalos288.flp"
 
 # Bootloader target
-build/bootload.bin: system/bootload/bootload.asm | build
-	nasm -O2 -w+all -f bin -o build/bootload.bin -l build/bootload.lst system/bootload/bootload.asm
+build/boot.bin: boot/boot.asm | build
+	nasm -O2 -w+all -f bin -o $@ -l build/boot.lst boot/boot.asm
 
 # Kernel target
-build/michalos.sys: system/kernel.asm system/features/*.asm | build
-	nasm -O2 -w+all -f bin -I system/ -o build/michalos.sys -l build/kernel.lst system/kernel.asm
+build/kernel.sys: kernel/main.asm kernel/features/*.asm | build
+	nasm -O2 -w+all -f bin -I kernel/ -o $@ -l build/kernel.lst kernel/main.asm
 
 # Assembles all programs.
 # Note: % means file name prefix, $@ means output file and $< means source file.
@@ -72,12 +72,12 @@ build/%.drz: files/src/%.dro | build
 	misc/zx7/segmented_zx7 $< $@
 
 # Builds the image.
-build/images/michalos.flp: build/bootload.bin build/michalos.sys \
+build/images/michalos.flp: build/boot.bin build/kernel.sys \
 					$(FILES) | build/images
 	dd if=/dev/zero of=build/images/michalos.flp bs=512 count=2880
-	dd conv=notrunc if=build/bootload.bin of=build/images/michalos.flp
+	dd conv=notrunc if=build/boot.bin of=build/images/michalos.flp
 	
-	mcopy -i $@ build/michalos.sys $(FILES) ::
+	mcopy -i $@ build/kernel.sys $(FILES) ::
 
 build/images/michalos288.flp: build/images/michalos.flp files/gitignore/288data
 	cp files/gitignore/288data build/288data

@@ -342,7 +342,7 @@ l2hts:			; Calculate head, track and sector settings for int 13h
 ; ------------------------------------------------------------------
 ; STRINGS AND VARIABLES
 
-	kern_filename	db "MICHALOSSYS"	; MichalOS/2 Kernel
+	kern_filename	db "KERNEL  SYS"	; MichalOS/2 Kernel
 
 	disk_error	db "DRV", 0
 	file_not_found	db "ERR", 0

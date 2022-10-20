@@ -111,6 +111,14 @@ os_update_clock:
 	.tmp_hours		db 0
 
 ; ------------------------------------------------------------------
+; os_get_os_name -- Get the OS name string
+; OUT: SI = OS name string, zero-terminated
+
+os_get_os_name:
+	mov si, osname
+	ret
+
+; ------------------------------------------------------------------
 ; os_fatal_error -- Display error message and halt execution
 ; IN: AX = error message string location
 
