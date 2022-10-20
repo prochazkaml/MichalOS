@@ -81,7 +81,7 @@ os_call_vectors:
 	jmp os_print_string			; 8003h
 	jmp os_move_cursor			; 8006h
 	jmp os_clear_screen			; 8009h
-	jmp os_print_horiz_line		; 800Ch
+	jmp os_illegal_call			; 800Ch
 	jmp os_print_newline		; 800Fh
 	jmp os_wait_for_key			; 8012h
 	jmp os_check_for_key		; 8015h
@@ -839,7 +839,6 @@ systemfilemissing:
 	%INCLUDE "features/basic.asm"
 	%INCLUDE "features/int.asm"
 	%INCLUDE "features/graphics.asm"
-	%INCLUDE "features/name.asm"
 	%INCLUDE "features/shutdown.asm"
 	%INCLUDE "features/zx7.asm"
 

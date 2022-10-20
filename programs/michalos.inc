@@ -56,7 +56,6 @@ os_main			equ	8000h	; Where the OS code starts
 os_clear_screen			equ	8009h	; (Nothing used)
 os_print_string			equ	8003h	; IN: SI = zero-terminated string location
 os_move_cursor			equ	8006h	; IN: DH/DL = row/column
-os_print_horiz_line		equ	800Ch	; IN: AX = 1 for double line, else single
 os_print_newline		equ	800Fh	; (Nothing used)
 os_draw_background		equ	802Ah	; IN: AX, BX = strings, CX = colour
 os_draw_block			equ	80B4h	; IN: BL = colour, DH/DL/SI/DI = pos
