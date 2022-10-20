@@ -35,12 +35,17 @@ retail: build/images/michalos.flp
 debug: build/images/michalos.flp
 	dosbox-debug -conf misc/dosbox.conf -c "boot build/images/michalos.flp"
 
+# Noboot target: builds as usual, but does not boot the image.
+noboot: build/images/michalos.flp
+
 # "Big" floppy target: builds an 2.88 image (containing a 1.44 MB FAT filesystem and a 1.44 MB binary)
 big: build/images/michalos288.flp
 	dosbox -conf misc/dosbox.conf -c "boot build/images/michalos288.flp"
 
 bigdebug: build/images/michalos288.flp
 	dosbox-debug -conf misc/dosbox.conf -c "boot build/images/michalos288.flp"
+
+bignoboot: build/images/michalos288.flp
 
 # Bootloader target
 build/boot.bin: boot/boot.asm | build
