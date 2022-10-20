@@ -848,3 +848,4 @@ systemfilemissing:
 ; ==================================================================
 
 os_kernel_end:
+	db 0 ; for kerneltree.py
