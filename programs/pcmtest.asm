@@ -27,13 +27,6 @@ start:
 	mov cx, 256
  	call os_draw_background
 	
-	clr si
-	clr ax
-	clr bx
-	clr cx
-	clr dx
-	call os_temp_box
-
 	;; Load data sector
 	mov bx, 8192
 	mov ax, 2880
@@ -41,7 +34,28 @@ start:
 	mov ah, 2
 	mov al, 8
 	int 13h
-	
+	jc .no_error
+
+	cmp ah, 0
+	je .no_error
+
+	mov ax, .error_msg1
+	mov bx, .error_msg2
+	mov cx, .error_msg3
+	mov dx, 1
+	call os_dialog_box
+
+	test ax, ax
+	jnz .appexit
+
+.no_error:
+	clr si
+	clr ax
+	clr bx
+	clr cx
+	clr dx
+	call os_temp_box
+
 	;; Replace IRQ0 with our sound code
 	mov     si, tick
 	call os_attach_app_timer
@@ -197,6 +211,7 @@ start:
 	and     al, 0xfc
 	out     0x61, al
 
+.appexit:
 	;; And quit with success
 	ret
 	
@@ -219,13 +234,17 @@ start:
 	jmp .mainlp
 	
 	.current_position	dw 2880 + 8
-	.titlemsg			db 'MichalOS PCM Test', 0
-	.footermsg			db 0
-	.secondmsg			db ' seconds played  ', 0
-	.buffmsg			db ' buffers read (', 0
-	.buffmsg2			db ' kB)     ', 0
+	.titlemsg			db "MichalOS PCM Test", 0
+	.footermsg			db "[Space] Play/Pause [Esc] Exit", 0
+	.secondmsg			db " seconds played  ", 0
+	.buffmsg			db " buffers read (", 0
+	.buffmsg2			db " kB)     ", 0
 	.previous_block		dw 1
 	.loadedbuffers		dw 1
+
+	.error_msg1			db "Error reading high disk sectors.", 0
+	.error_msg2			db "On some systems, this may be a false", 0
+	.error_msg3			db "positive. Do you still want to continue?", 0
 
 	;; *** IRQ0 TICK ROUTINE ***
 tick:   
