@@ -12,15 +12,10 @@ os_seed_random:
 	mov ah, 02h
 	int 1Ah
 	
-	xor ax, bx
+	mov ax, [os_random_seed]
+
 	add ax, cx
-	xor ax, dx
-	add ax, si
-	xor ax, di
-	add ax, sp
-	xor ax, bp
-	add ax, 0xDEAD
-	xor ax, 0xBEEF
+	sub ax, dx
 	
 	mov [os_random_seed], ax	; Store the data
 	popa
@@ -56,14 +51,13 @@ os_get_random:
 
 .generate_random:
 	push dx
-	push bx
 
+	call os_seed_random
 	mov ax, [os_random_seed]
 	mov dx, 0x7383			; The magic number (random.org)
 	mul dx				; DX:AX = AX * DX
 	mov [os_random_seed], ax
 
-	pop bx
  	pop dx
 	ret
 
