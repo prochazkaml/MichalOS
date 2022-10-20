@@ -518,8 +518,6 @@ game_selector:
 launch_program:
 	mov byte [32767], 0
 
-	call background
-	
 	pusha
 	mov si, ax
 	mov bx, si
