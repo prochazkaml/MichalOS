@@ -36,3 +36,5 @@ for row in rows:
 
 	except:
 		pass
+
+print("%d total" % oldstartaddr)
