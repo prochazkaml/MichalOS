@@ -30,7 +30,7 @@ start:
 	;; Load data sector
 	mov bx, 8192
 	mov ax, 2880
-	call os_disk_l2hts
+	call os_convert_l2hts
 	mov ah, 2
 	mov al, 8
 	int 13h
@@ -110,7 +110,7 @@ start:
 	mov word [.loadedbuffers], 0
 
 .no_reset:
-	call os_disk_l2hts
+	call os_convert_l2hts
 	mov ah, 2
 	mov al, 8
 	int 13h

@@ -333,7 +333,7 @@ os_file_selector:
 .no_filter:
 	; Create the filename index list
 
-	call disk_read_root_dir		; Get the files into the buffer
+	call int_read_root_dir		; Get the files into the buffer
 
 	mov si, disk_buffer			; Raw directory buffer
 	mov di, 64512				; Buffer for indexes

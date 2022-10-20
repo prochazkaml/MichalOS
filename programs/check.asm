@@ -51,7 +51,7 @@ start:
 	popa
 	
 	pusha
-	call os_disk_l2hts		; Entered number -> HTS
+	call os_convert_l2hts		; Entered number -> HTS
 	mov bx, DISK_BUFFER		; Read the sector
 	mov16 ax, 1, 2
 	mov dl, [.drive]

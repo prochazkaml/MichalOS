@@ -10,7 +10,7 @@ os_report_free_space:
 	mov word [.counter], 0
 	mov word [.sectors_read], 0
 	
-	call disk_read_fat				; Read the FAT into memory
+	call int_read_fat				; Read the FAT into memory
 	mov si, disk_buffer
 	
 .loop:
@@ -60,7 +60,7 @@ os_read_root:
 	pusha
 
 	mov ax, 19			; Root dir starts at logical sector 19
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov bx, ds
 	mov es, bx
@@ -80,7 +80,7 @@ os_read_root:
 	int 13h				; Read sectors
 
 	jnc .root_dir_finished
-	call disk_reset_floppy		; Reset controller and try again
+	call int_reset_floppy		; Reset controller and try again
 	jnc .read_root_dir_loop		; Floppy reset OK?
 
 	popa
@@ -119,10 +119,10 @@ os_get_file_list:
 
 	mov eax, 0			; Needed for some older BIOSes
 
-	call disk_reset_floppy		; Just in case disk was changed
+	call int_reset_floppy		; Just in case disk was changed
 
 	mov ax, 19			; Root dir starts at logical sector 19
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov si, disk_buffer		; ES:BX should point to our buffer
 	mov bx, si
@@ -138,10 +138,10 @@ os_get_file_list:
 
 	stc
 	int 13h				; Read sectors
-	call disk_reset_floppy		; Check we've read them OK
+	call int_reset_floppy		; Check we've read them OK
 	jnc .show_dir_init		; No errors, continue
 
-	call disk_reset_floppy		; Error = reset controller and try again
+	call int_reset_floppy		; Error = reset controller and try again
 	jnc .read_root_dir
 
 	mov ax, .error
@@ -306,7 +306,7 @@ os_load_file:
 
 	xor eax, eax			; Needed for some older BIOSes
 
-	call disk_reset_floppy		; In case floppy has been changed
+	call int_reset_floppy		; In case floppy has been changed
 	jnc .floppy_ok			; Did the floppy reset OK?
 
 	mov ax, .err_msg_floppy_reset	; If not, bail out
@@ -315,7 +315,7 @@ os_load_file:
 
 .floppy_ok:				; Ready to read first block of data
 	mov ax, 19			; Root dir starts at logical sector 19
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov si, disk_buffer		; ES:BX should point to our buffer
 	mov bx, si
@@ -334,7 +334,7 @@ os_load_file:
 	int 13h				; Read sectors
 	jnc .search_root_dir		; No errors = continue
 
-	call disk_reset_floppy		; Problem = reset controller and try again
+	call int_reset_floppy		; Problem = reset controller and try again
 	jnc .read_root_dir
 
 	popa
@@ -399,7 +399,7 @@ os_load_file:
 	mov word [.cluster], ax
 
 	mov ax, 1			; Sector 1 = first sector of first FAT
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov bx, disk_buffer		; ES:BX points to our buffer
 
@@ -416,7 +416,7 @@ os_load_file:
 	int 13h
 	jnc .read_fat_ok
 
-	call disk_reset_floppy
+	call int_reset_floppy
 	jnc .read_fat
 
 	popa
@@ -431,7 +431,7 @@ os_load_file:
 	mov ax, word [.cluster]		; Convert sector to logical
 	add ax, 31
 
-	call disk_convert_l2hts		; Make appropriate params for int 13h
+	call os_convert_l2hts		; Make appropriate params for int 13h
 
 	mov bx, [.load_position]
 	mov es, [.old_segment]
@@ -446,7 +446,7 @@ os_load_file:
 	
 	jnc .calculate_next_cluster	; If there's no error...
 
-	call disk_reset_floppy		; Otherwise, reset floppy and retry
+	call int_reset_floppy		; Otherwise, reset floppy and retry
 	jnc .load_file_sector
 
 	mov ax, .err_msg_floppy_reset	; Reset failed, bail out
@@ -592,7 +592,7 @@ os_write_file:
 	cmp bx, 0
 	je near .finished
 
-	call disk_read_fat		; Get FAT copy into RAM
+	call int_read_fat		; Get FAT copy into RAM
 	mov si, disk_buffer + 3		; And point SI at it (skipping first two clusters)
 
 	mov bx, 2			; Current cluster counter
@@ -746,7 +746,7 @@ os_write_file:
 .finito:
 	mov word [ds:si], ax
 
-	call disk_write_fat		; Save our FAT back to disk
+	call int_write_fat		; Save our FAT back to disk
 
 
 	; Now it's time to save the sectors to disk!
@@ -765,7 +765,7 @@ os_write_file:
 
 	add ax, 31
 
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov word bx, [.location]
 	mov es, [.old_segment]
@@ -790,10 +790,10 @@ os_write_file:
 	; Now it's time to head back to the root directory, find our
 	; entry and update it with the cluster in use and file size
 
-	call disk_read_root_dir
+	call int_read_root_dir
 
 	mov word ax, [.filename]
-	call disk_get_root_entry
+	call int_get_root_entry
 
 	mov word ax, [.free_clusters]	; Get first free cluster
 
@@ -805,7 +805,7 @@ os_write_file:
 	mov byte [di+30], 0		; File size
 	mov byte [di+31], 0
 
-	call disk_write_root_dir
+	call int_write_root_dir
 
 .finished:
 	popa
@@ -860,13 +860,13 @@ os_file_exists:
 	pop ax
 
 	push ax
-	call disk_read_root_dir
+	call int_read_root_dir
 
 	pop ax				; Restore filename
 
 	mov di, disk_buffer
 
-	call disk_get_root_entry	; Set or clear carry flag
+	call int_get_root_entry	; Set or clear carry flag
 
 	pushf
 
@@ -986,7 +986,7 @@ os_create_file:
 	mov cx, 21
 	rep movsb
 	
-	call disk_write_root_dir
+	call int_write_root_dir
 	jc .failure
 
 	popa
@@ -1024,13 +1024,13 @@ os_remove_file:
 
 	clc
 
-	call disk_read_root_dir		; Get root dir into disk_buffer
+	call int_read_root_dir		; Get root dir into disk_buffer
 
 	mov di, disk_buffer		; Point DI to root dir
 
 	pop ax				; Get chosen filename back
 
-	call disk_get_root_entry	; Entry will be returned in DI
+	call int_get_root_entry	; Entry will be returned in DI
 	jc .failure			; If entry can't be found
 
 
@@ -1049,10 +1049,10 @@ os_remove_file:
 	cmp cx, 31			; 32-byte entries, minus E5h byte we marked before
 	jl .clean_loop
 
-	call disk_write_root_dir	; Save back the root directory from RAM
+	call int_write_root_dir	; Save back the root directory from RAM
 
 
-	call disk_read_fat		; Now FAT is in disk_buffer
+	call int_read_fat		; Now FAT is in disk_buffer
 	mov di, disk_buffer		; And DI points to it
 
 
@@ -1100,7 +1100,7 @@ os_remove_file:
 	jmp .more_clusters		; If not, grab more
 
 .end:
-	call disk_write_fat
+	call int_write_fat
 	jc .failure
 
 .nothing_to_do:
@@ -1130,7 +1130,7 @@ os_rename_file:
 
 	clc
 
-	call disk_read_root_dir		; Get root dir into disk_buffer
+	call int_read_root_dir		; Get root dir into disk_buffer
 
 	mov di, disk_buffer		; Point DI to root dir
 
@@ -1140,7 +1140,7 @@ os_rename_file:
 	call int_filename_convert
 	jc .fail_read
 	
-	call disk_get_root_entry	; Entry will be returned in DI
+	call int_get_root_entry	; Entry will be returned in DI
 	jc .fail_read			; Quit out if file not found
 
 	pop bx				; Get new filename string (originally passed in BX)
@@ -1156,7 +1156,7 @@ os_rename_file:
 	mov cx, 11			; Copy new filename string into root dir entry in disk_buffer
 	rep movsb
 
-	call disk_write_root_dir	; Save root dir to disk
+	call int_write_root_dir	; Save root dir to disk
 	jc .fail_write
 
 
@@ -1190,14 +1190,14 @@ os_get_file_size:
 
 	push ax
 
-	call disk_read_root_dir
+	call int_read_root_dir
 	jc .failure
 
 	pop ax
 
 	mov di, disk_buffer
 
-	call disk_get_root_entry
+	call int_get_root_entry
 	jc .failure
 
 	mov ebx, [di+28]
@@ -1235,14 +1235,14 @@ os_get_file_datetime:
 
 	push ax
 
-	call disk_read_root_dir
+	call int_read_root_dir
 	jc .failure
 
 	pop ax
 
 	mov di, disk_buffer
 
-	call disk_get_root_entry
+	call int_get_root_entry
 	jc .failure
 
 	mov ax, [di+22]
@@ -1373,11 +1373,11 @@ int_filename_convert:
 
 
 ; --------------------------------------------------------------------------
-; disk_get_root_entry -- Search RAM copy of root dir for file entry
+; int_get_root_entry -- Search RAM copy of root dir for file entry
 ; IN: AX = filename; OUT: DI = location in disk_buffer of root dir entry,
 ; or carry set if file not found
 
-disk_get_root_entry:
+int_get_root_entry:
 	pusha
 
 	mov word [.filename], ax
@@ -1425,14 +1425,14 @@ disk_get_root_entry:
 
 
 ; --------------------------------------------------------------------------
-; disk_read_fat -- Read FAT entry from floppy into disk_buffer
+; int_read_fat -- Read FAT entry from floppy into disk_buffer
 ; IN: Nothing; OUT: carry set if failure
 
-disk_read_fat:
+int_read_fat:
 	pusha
 
 	mov ax, 1			; FAT starts at logical sector 1 (after boot sector)
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov si, disk_buffer		; Set ES:BX to point to 8K OS buffer
 	mov bx, cs
@@ -1453,7 +1453,7 @@ disk_read_fat:
 	int 13h				; Read sectors
 
 	jnc .fat_done
-	call disk_reset_floppy		; Reset controller and try again
+	call int_reset_floppy		; Reset controller and try again
 	jnc .read_fat_loop		; Floppy reset OK?
 
 	popa
@@ -1473,14 +1473,14 @@ disk_read_fat:
 
 
 ; --------------------------------------------------------------------------
-; disk_write_fat -- Save FAT contents from disk_buffer in RAM to disk
+; int_write_fat -- Save FAT contents from disk_buffer in RAM to disk
 ; IN: FAT in disk_buffer; OUT: carry set if failure
 
-disk_write_fat:
+int_write_fat:
 	pusha
 
 	mov ax, 1			; FAT starts at logical sector 1 (after boot sector)
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov si, disk_buffer		; Set ES:BX to point to 8K OS buffer
 	mov bx, ds
@@ -1506,14 +1506,14 @@ disk_write_fat:
 
 
 ; --------------------------------------------------------------------------
-; disk_read_root_dir -- Get the root directory contents
+; int_read_root_dir -- Get the root directory contents
 ; IN: Nothing; OUT: root directory contents in disk_buffer, carry set if error
 
-disk_read_root_dir:
+int_read_root_dir:
 	pusha
 
 	mov ax, 19			; Root dir starts at logical sector 19
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov si, disk_buffer		; Set ES:BX to point to OS buffer
 	mov bx, ds
@@ -1534,7 +1534,7 @@ disk_read_root_dir:
 	int 13h				; Read sectors
 
 	jnc .root_dir_finished
-	call disk_reset_floppy		; Reset controller and try again
+	call int_reset_floppy		; Reset controller and try again
 	jnc .read_root_dir_loop		; Floppy reset OK?
 
 	popa
@@ -1554,14 +1554,14 @@ disk_read_root_dir:
 	ret
 
 ; --------------------------------------------------------------------------
-; disk_write_root_dir -- Write root directory contents from disk_buffer to disk
+; int_write_root_dir -- Write root directory contents from disk_buffer to disk
 ; IN: root dir copy in disk_buffer; OUT: carry set if error
 
-disk_write_root_dir:
+int_write_root_dir:
 	pusha
 
 	mov ax, 19			; Root dir starts at logical sector 19
-	call disk_convert_l2hts
+	call os_convert_l2hts
 
 	mov si, disk_buffer		; Set ES:BX to point to OS buffer
 	mov bx, ds
@@ -1588,7 +1588,7 @@ disk_write_root_dir:
 ; --------------------------------------------------------------------------
 ; Reset floppy disk
 
-disk_reset_floppy:
+int_reset_floppy:
 	push ax
 	push dx
 	mov ax, 0
@@ -1603,10 +1603,10 @@ disk_reset_floppy:
 
 
 ; --------------------------------------------------------------------------
-; disk_convert_l2hts -- Calculate head, track and sector for int 13h
+; os_convert_l2hts -- Calculate head, track and sector for int 13h
 ; IN: logical sector in AX; OUT: correct registers for int 13h
 
-disk_convert_l2hts:
+os_convert_l2hts:
 	push bx
 	push ax
 

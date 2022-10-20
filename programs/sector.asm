@@ -147,7 +147,7 @@ start:
 .sectorselect:
 	call os_string_to_int	; Decode the entered number
 	mov [.sectornum], ax
-	call os_disk_l2hts		; Entered number -> HTS
+	call os_convert_l2hts		; Entered number -> HTS
 	mov bx, DISK_BUFFER		; Read the sector
 	mov ah, 2
 	mov al, 1

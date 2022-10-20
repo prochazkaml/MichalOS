@@ -191,7 +191,7 @@ os_call_vectors:
 	jmp os_illegal_call			; 814Dh ; FREE!!!!!!!!!!!!!!!!!!!
 	jmp os_illegal_call			; 8150h ; FREE!!!!!!!!!!!!!!!!!!!
 	jmp os_illegal_call			; 8153h ; FREE!!!!!!!!!!!!!!!!!!!
-	jmp disk_convert_l2hts		; 8156h
+	jmp os_convert_l2hts		; 8156h
 	
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE
