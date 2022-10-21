@@ -83,7 +83,7 @@ entrypoint:
 	add dx, 1			; Head numbers start at 0 - add 1 for total
 	mov [Sides], dx
 	
-	mov eax, 0			; Needed for some older BIOSes
+	clr eax				; Needed for some older BIOSes
 
 
 ; First, we need to load the root directory from the disk. Technical details:
