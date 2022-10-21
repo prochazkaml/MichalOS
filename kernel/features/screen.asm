@@ -680,7 +680,7 @@ os_list_dialog:
 
 	mov cx, ax
 
-	jmp .done_count_f
+	jmp .done_count
 
 .normal_count:
 	mov si, ax
@@ -689,7 +689,6 @@ os_list_dialog:
 
 .empty_list:
 	add sp, 6
-	popa
 
 	mov ax, .nofilesmsg
 	clr bx
@@ -697,6 +696,7 @@ os_list_dialog:
 	clr dx
 	call os_dialog_box
 
+	popa
 	stc
 	ret
 
@@ -705,22 +705,22 @@ os_list_dialog:
 .count_entries:	
 	mov cl, 0			; Count the number of entries in the list
 	
-.count_loop:
-	mov al, [es:si]
-	inc si
-	cmp al, 0
-	je .done_count
-	cmp al, ','
-	jne .count_loop
+.count_inc:
 	inc cl
-	jmp .count_loop
+
+.count_loop:
+	lodsb
+
+	cmp al, ','
+	je .count_inc
+
+	cmp al, 0
+	jne .count_loop
 
 .done_count:
-	inc cl
-
-.done_count_f:
 	mov byte [.num_of_entries], cl
 
+	; Draw the window
 
 	mov bl, [57001]		; Color from RAM
 	mov16 dx, 2, 2		; Start X/Y position
@@ -770,12 +770,20 @@ os_list_dialog:
 	mov bl, 11110000b		; Black on white for option list box
 	mov16 dx, 3, 5
 	mov si, [0089h]
-	sub si, byte 2
+	sub si, 2
 	mov di, 22
 	call os_draw_block
 	popa
 
-	call .draw_black_bar
+	pusha
+	mov dl, 4
+	mov bl, 00001111b		; White on black for the selection
+	mov si, [0089h]
+	sub si, 4
+	movzx di, dh
+	inc di
+	call os_draw_block
+	popa
 
 	mov word si, [.list_string]
  	call .draw_list
@@ -801,7 +809,7 @@ os_list_dialog:
 	je .esc_pressed
 	cmp al, 9			; Tab pressed?
 	je .tab_pressed
-	jmp .more_select	; If not, wait for another key
+	jmp .another_key	; If not, wait for another key
 
 .tab_pressed:
 	mov dh, 6
@@ -810,119 +818,81 @@ os_list_dialog:
 	
 .go_up:
 	cmp dh, 6			; Already at top?
-	jle .hit_top
+	jg .no_hit_top
 
-	call .draw_white_bar
-
-	mov dl, 25
-	call os_move_cursor
-
-	dec dh				; Row to select (increasing down)
-	jmp .more_select
-
-
-.go_down:				; Already at bottom of list?
-	cmp dh, 20
-	je .hit_bottom
-
-	clr cx
-	mov byte cl, dh
-
-	sub cl, 5
-	add byte cl, [.skip_num]
-
-	mov byte al, [.num_of_entries]
-	cmp cl, al
-	je .hit_bottom
-
-	call .draw_white_bar
-
-	mov dl, 25
-	call os_move_cursor
-
-	inc dh
-	jmp .more_select
-
-
-.hit_top:
-	mov byte cl, [.skip_num]	; Any lines to scroll up?
-	cmp cl, 0
-	je .skip_to_bottom			; If not, wait for another key
-
-	dec byte [.skip_num]		; If so, decrement lines to skip
-	jmp .more_select
-
-
-.hit_bottom:				; See if there's more to scroll
-	clr cx
-	mov byte cl, dh
-
-	sub cl, 6
-	inc cl
-	add byte cl, [.skip_num]
-
-	mov byte al, [.num_of_entries]
-	cmp cl, al
-	je .skip_to_top
-
-	inc byte [.skip_num]		; If so, increment lines to skip
-	jmp .more_select
-
-.skip_to_top:
-	mov byte [.skip_num], 0
-	mov dh, 6
-	jmp .more_select
+	cmp byte [.skip_num], 0	; Any lines to scroll up?
+	jne .no_skip_to_bottom			; If not, jump to the bottom
 
 .skip_to_bottom:
 	mov al, [.num_of_entries]
 	cmp al, 15
-	jle .basic_skip
+	jbe .basic_skip
 	
 .no_basic_skip:
 	mov dh, 20
 	sub al, 15
 	mov [.skip_num], al
-
 	jmp .more_select
 	
 .basic_skip:
-	cmp al, 0
-	jl .no_basic_skip
 	mov dh, al
 	add dh, 5
 	jmp .more_select
 	
+.no_skip_to_bottom:
+	dec byte [.skip_num]		; If so, decrement lines to skip
+	inc dh
+
+.no_hit_top:
+	dec dh				; Row to select (increasing down)
+	jmp .more_select
+
+.go_down:
+	clr cx				; Check if there are more entries
+	mov byte cl, dh
+
+	sub cl, 5
+	add cl, [.skip_num]
+
+	mov byte al, [.num_of_entries]
+	cmp cl, al
+	jne .no_hit_list_bottom
+
+	mov byte [.skip_num], 0 ; Reset the cursor back up
+	mov dh, 6 - 1
+
+.no_hit_list_bottom:
+	cmp dh, 20				; Already at bottom of list?
+	jne .no_hit_bottom
+
+	inc byte [.skip_num]		; If so, increment lines to skip
+	dec dh
+
+.no_hit_bottom:
+	inc dh
+	jmp .more_select
+
 .option_selected:
-	call os_show_cursor
-
-	cmp byte [os_file_selector.file_selector_calling], 1
-	jne .no_store_position
+	call .dialog_end
 	
-	mov [os_file_selector.file_selector_cursorpos], dh
-	mov al, [.skip_num]
-	mov [os_file_selector.file_selector_skipnum], al
-	mov al, [.num_of_entries]
-	mov [os_file_selector.file_selector_numofentries], al
-	
-.no_store_position:
-	sub dh, 6
+	sub dh, 6 - 1	; Options start from 1
+	add dh, [.skip_num]	; Add any lines skipped from scrolling
+	shr dx, 8
 
-	movzx ax, dh
-
-	inc al				; Options start from 1
-	add byte al, [.skip_num]	; Add any lines skipped from scrolling
-
-	mov word [.tmp], ax		; Store option number before restoring all other regs
+	mov bx, sp
+	mov [ss:bx + 14], dx
 
 	popa
-
-	mov word ax, [.tmp]
 	clc				; Clear carry as Esc wasn't pressed
 	ret
 
-
-
 .esc_pressed:
+	call .dialog_end
+	popa
+	stc				; Set carry for Esc
+	ret
+
+.dialog_end:
 	call os_show_cursor
 
 	cmp byte [os_file_selector.file_selector_calling], 1
@@ -935,11 +905,7 @@ os_list_dialog:
 	mov [os_file_selector.file_selector_numofentries], al
 	
 .no_store_position_on_exit:
-	popa
-	stc				; Set carry for Esc
 	ret
-
-
 
 .draw_list:
 	pusha
@@ -947,31 +913,27 @@ os_list_dialog:
 	mov16 dx, 5, 6		; Get into position for option list text
 	call os_move_cursor
 
-	clr cx				; Skip lines scrolled off the top of the dialog
-	mov byte cl, [.skip_num]
+	movzx cx, byte [.skip_num]	; Skip lines scrolled off the top of the dialog
 
 	cmp byte [os_file_selector.file_selector_calling], 1
 	je .file_draw_list
 
 .skip_loop:
-	cmp cx, 0
-	je .skip_loop_finished
+	test cx, cx
+	jz .skip_loop_finished
+
 .more_lodsb:
-	mov al, [es:si]
-	inc si
+	lodsb
 	cmp al, ','
 	jne .more_lodsb
 	dec cx
 	jmp .skip_loop
 
-
 .skip_loop_finished:
 	clr bx				; Counter for total number of options
 
-
 .more:
-	mov al, [es:si]		; Get next character in file name, increment pointer
-	inc si
+	lodsb				; Get next character in name, increment pointer
 	
 	cmp al, 0			; End of string?
 	je .done_list
@@ -979,8 +941,7 @@ os_list_dialog:
 	cmp al, ','			; Next option? (String is comma-separated)
 	je .newline
 
-	mov ah, 0Eh
-	int 10h
+	call os_putchar
 	jmp .more
 
 .newline:
@@ -999,38 +960,38 @@ os_list_dialog:
 	push dx
 	mov16 dx, 5, 22
 	call os_move_cursor
-	
-	mov si, .string1
-	call os_print_string
-	
 	pop dx
-	mov al, [.skip_num]
-	add al, dh
-	sub al, 5
-	movzx ax, al
+
+	mov al, '('
+	call os_putchar
+
+	call .get_selected_id
 	call os_int_to_string
 	mov si, ax
 	call os_print_string
 	
-	mov si, .string2
-	call os_print_string
+	mov al, '/'
+	call os_putchar
 	
 	movzx ax, byte [.num_of_entries]
 	call os_int_to_string
 	mov si, ax
 	call os_print_string
 	
-	mov si, .string3
+	mov si, .str_pos_end
 	call os_print_string
 	
+	call .get_selected_id
+	call [.callback] ; Address 0 always contains RET, so that's fine
 	
+	popa
+	ret
+
+.get_selected_id:
 	mov al, [.skip_num]
 	add al, dh
 	sub al, 5
-	movzx ax, al
-	call [.callback]
-	
-	popa
+	mov ah, 0
 	ret
 
 .file_draw_list:
@@ -1058,46 +1019,10 @@ os_list_dialog:
 	jl .f_more
 	jmp .done_list
 
-.draw_black_bar:
-	pusha
-
-	mov dl, 4
-	call os_move_cursor
-
-	mov16 ax, ' ', 09h			; Draw white bar at top
-	mov16 bx, 00001111b, 0	; White text on black background
-	mov cx, [0089h]
-	sub cx, byte 4
-	int 10h
-
-	popa
-	ret
-
-
-
-.draw_white_bar:
-	pusha
-
-	mov dl, 4
-	call os_move_cursor
-
-	mov16 ax, ' ', 09h			; Draw white bar at top
-	mov16 bx, 11110000b, 0	; White text on black background
-	mov cx, [0089h]
-	sub cx, byte 4
-	int 10h
-
-	popa
-	ret
-
-
-	.tmp			dw 0
 	.num_of_entries	db 0
 	.skip_num		db 0
 	.list_string	dw 0
-	.string1		db '(', 0
-	.string2		db '/', 0
-	.string3		db ')  ', 0
+	.str_pos_end	db ')  ', 0
 	.callback		dw 0
 	
 ; ------------------------------------------------------------------
@@ -1588,15 +1513,14 @@ os_color_selector:
 	call os_list_dialog
 	
 	dec al						; Output from os_list_dialog starts with 1, so decrement it
-	mov [.tmp_byte], al
+	mov bx, sp
+	mov [ss:bx + 14], al
 	popa
-	mov al, [.tmp_byte]
 	ret
 	
 	.colorlist	db 'Black,Blue,Green,Cyan,Red,Magenta,Brown,Light Gray,Dark Gray,Light Blue,Light Green,Light Cyan,Light Red,Pink,Yellow,White', 0
 	.colormsg0	db 'Choose a color...' ; termination not necessary here
 	.colormsg1	db 0
-	.tmp_byte	db 0
 	
 ; Displays EAX in hex format
 ; IN: EAX = unsigned integer
@@ -1796,7 +1720,7 @@ os_draw_icon:
 os_option_menu:
 	pusha
 
-	cmp byte [57071], 0
+	cmp byte [57071], 0	; "Blur" the background if requested
 	je .skip
 	
 	mov16 dx, 0, 1
@@ -1826,29 +1750,27 @@ os_option_menu:
 
 	mov cl, 0			; Count the number of entries in the list
 	mov si, ax
-	
+
+.count_inc:
+	inc cl
+
 .count_loop:
 	lodsb
-	cmp al, 0
-	je .done_count
+
 	cmp al, ','
+	je .count_inc
+
+	cmp al, 0
 	jne .count_loop
-	inc cl
-	jmp .count_loop
 
 .done_count:
-	inc cl
 	mov byte [.num_of_entries], cl
-
 
 	pop si				; SI = location of option list string (pushed earlier)
 	mov word [.list_string], si
 
-
 	; Now that we've drawn the list, highlight the currently selected
 	; entry and let the user move up and down using the cursor keys
-
-	mov byte [.skip_num], 0		; Not skipping any lines at first showing
 
 	mov16 dx, 25, 2			; Set up starting position for selector
 
@@ -1860,12 +1782,20 @@ os_option_menu:
 	mov16 dx, 1, 1
 
 	mov si, [.width]
-	movzx di, [.num_of_entries]
+	movzx di, byte [.num_of_entries]
 	add di, 3
 	call os_draw_block
 	popa
 
-	call .draw_black_bar
+	pusha
+	mov dl, 2
+	mov bl, 00001111b		; White on black for the selection
+	mov si, [.width]
+	sub si, 2
+	movzx di, dh
+	inc di
+	call os_draw_block
+	popa
 
 	mov word si, [.list_string]
 	call .draw_list
@@ -1895,97 +1825,60 @@ os_option_menu:
 	je .right_pressed
 	jmp .another_key		; If not, wait for another key
 
-
 .go_up:
 	cmp dh, 2			; Already at top?
-	jle .hit_top
+	jg .no_hit_top
 
-	call .draw_white_bar
+	mov dh, [.num_of_entries]
+	add dh, 2
 
-	mov dl, 25
-	call os_move_cursor
-
+.no_hit_top:
 	dec dh				; Row to select (increasing down)
 	jmp .more_select
-
 
 .go_down:				; Already at bottom of list?
 	mov bl, [.num_of_entries]
 	inc bl
 	cmp dh, bl
-	je .hit_bottom
+	jl .no_hit_bottom
 
-	mov cx, 0
-	mov byte cl, dh
+	mov dh, 1
 
-	sub cl, 6
-	inc cl
-	add byte cl, [.skip_num]
-
-	mov byte al, [.num_of_entries]
-	cmp cl, al
-	je .another_key
-
-	call .draw_white_bar
-
-	mov dl, 25
-	call os_move_cursor
-
+.no_hit_bottom:
 	inc dh
 	jmp .more_select
-
-
-.hit_top:
-	mov dh, 1
-	add dh, [.num_of_entries]
-	jmp .more_select
-
-
-.hit_bottom:
-	mov dh, 2
-	jmp .more_select
-
-
 
 .option_selected:
 	call os_show_cursor
 
-	sub dh, 2
+	sub dh, 2 - 1		; Options start from 1
+	shr dx, 8
 
-	mov ax, 0
-	mov al, dh
-
-	inc al				; Options start from 1
-	add byte al, [.skip_num]	; Add any lines skipped from scrolling
-
-	mov word [.tmp], ax		; Store option number before restoring all other regs
-
+	mov bx, sp
+	mov [ss:bx + 14], dx
+	
 	popa
-
-	mov word ax, [.tmp]
 	clc				; Clear carry as Esc wasn't pressed
 	ret
 
-
-
 .esc_pressed:
-	call os_show_cursor
-	popa
 	mov ax, 0
-	stc
-	ret
+	jmp .keyexit
 
 .left_pressed:
-	call os_show_cursor
-	popa
 	mov ax, 1
-	stc
-	ret
+	jmp .keyexit
 
 .right_pressed:
-	call os_show_cursor
-	popa
 	mov ax, 2
+
+.keyexit:
+	call os_show_cursor
+
+	mov bx, sp
+	mov [ss:bx + 14], ax
+
+	popa
 	stc
 	ret
 
@@ -1995,90 +1888,25 @@ os_option_menu:
 	mov16 dx, 3, 2			; Get into position for option list text
 	call os_move_cursor
 
-
-	mov cx, 0			; Skip lines scrolled off the top of the dialog
-	mov byte cl, [.skip_num]
-
-.skip_loop:
-	cmp cx, 0
-	je .skip_loop_finished
-	
-.more_lodsb:
-	lodsb
-	cmp al, ','
-	jne .more_lodsb
-	dec cx
-	jmp .skip_loop
-
-
-.skip_loop_finished:
-	mov bx, 0			; Counter for total number of options
-
-
 .more:
 	lodsb				; Get next character in file name, increment pointer
 
 	cmp al, 0			; End of string?
-	je .done_list
+	je int_popa_ret
 
 	cmp al, ','			; Next option? (String is comma-separated)
 	je .newline
 
-	mov ah, 0Eh
-	int 10h
+	call os_putchar
 	jmp .more
 
 .newline:
 	mov dl, 3			; Go back to starting X position
 	inc dh				; But jump down a line
 	call os_move_cursor
+	jmp .more
 
-	inc bx				; Update the number-of-options counter
-	movzx di, [.num_of_entries]	; Low 8 bits of DI = [.items], high 8 bits = 0
-	cmp bx, di			; Limit to one screen of options
-	jl .more
-
-.done_list:
-	popa
-	call os_move_cursor
-
-	ret
-
-
-
-.draw_black_bar:
-	pusha
-
-	mov dl, 2
-	call os_move_cursor
-
-	mov ax, 0920h			; Draw white bar at top
-	mov cx, [.width]
-	sub cx, 2
-	mov bx, 00001111b		; White text on black background
-	int 10h
-
-	popa
-	ret
-
-.draw_white_bar:
-	pusha
-
-	mov dl, 2
-	call os_move_cursor
-
-	mov ax, 0920h			; Draw white bar at top
-	mov cx, [.width]
-	sub cx, 2
-	movzx bx, byte [57072]	; Black text on white background
-	int 10h
-
-	popa
-	ret
-
-	.tmp					dw 0
 	.num_of_entries			db 0
-	.skip_num				db 0
 	.list_string			dw 0
 	.width					dw 0
 
