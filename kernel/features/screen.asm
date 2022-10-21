@@ -12,6 +12,7 @@ os_putchar:
 
 .no_pusha:
 	mov ah, 0Eh
+	mov bx, 15
 	int 10h
 	popa
 	ret
@@ -28,15 +29,11 @@ os_put_chars:
 .loop:
 	lodsb
 	cmp al, bl
-	je .done
+	je int_popa_ret
 	
 	call os_putchar
 	
 	loop .loop
-	
-.done:
-	popa
-	ret
 
 ; ------------------------------------------------------------------
 ; os_print_string -- Displays text
