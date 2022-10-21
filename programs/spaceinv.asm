@@ -286,8 +286,8 @@ draw_counter:
 	mov di, 7600					; 7600: X=0, Y=190
 	
 	mov cx, ax
-	cmp cx, 0						; Is the counter value < 8?
-	je .draw_remainder
+	test cx, cx						; Is the counter value < 8?
+	jz .draw_remainder
 	
 	mov al, 255
 	
@@ -302,8 +302,8 @@ draw_counter:
 .draw_remainder:
 	pop bx
 	
-	cmp bx, 0
-	je .exit
+	test bx, bx
+	jz .exit
 	
 	dec bx
 	
@@ -390,8 +390,8 @@ check_for_creature:
 	cmp bx, 20
 	jne .empty_loop
 	
-	cmp al, 0								; Are all the squares empty?
-	jne .no_bonus
+	test al, al								; Are all the squares empty?
+	jnz .no_bonus
 	
 	cmp byte [game_begun], 0				; Are we at the start of the game (on start, the board is empty)
 	je .no_bonus
@@ -573,8 +573,8 @@ extend_byte:
 	div bx
 	pop bx
 	
-	cmp ch, 0
-	je .no_flip
+	test ch, ch
+	jz .no_flip
 	
 	add bx, dx
 	rol ebx, 1
@@ -597,8 +597,8 @@ extend_byte:
 	cmp cl, 8
 	jne .decode_loop
 	
-	cmp ch, 0
-	je .big_ror
+	test ch, ch
+	jz .big_ror
 	
 	ror ebx, 1
 	jmp .routine_end

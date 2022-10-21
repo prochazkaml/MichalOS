@@ -13,8 +13,8 @@ start_poly_mmf:
 .error_bypass:
 	clr dx
 	mov ax, [buffer]
-	cmp ax, 0
-	jne .no_18_2
+	test ax, ax
+	jnz .no_18_2
 	
 	inc dx
 	
@@ -123,11 +123,11 @@ start_poly_mmf:
 	lodsw
 	mov [.pointer], si
 	
-	cmp ax, 0
-	je near .notone
+	test ax, ax
+	jz .notone
 	
 	cmp ax, 1
-	je near .end
+	je .end
 	
 	call os_adlib_calcfreq
 
@@ -144,11 +144,11 @@ start_poly_mmf:
 	lodsw
 	mov [.pointer_2], si
 	
-	cmp ax, 0
-	je near .notone_2
+	test ax, ax
+	jz .notone_2
 	
 	cmp ax, 1
-	je near .end
+	je .end
 	
 	call os_adlib_calcfreq
 	
@@ -177,8 +177,8 @@ start_poly_mmf:
 	call os_dialog_box
 	mov byte [0085h], 0
 	
-	cmp ax, 0
-	je .error_bypass
+	test ax, ax
+	jz .error_bypass
 	
 	ret
 	

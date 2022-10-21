@@ -9,7 +9,7 @@ start:
 .loop:
 	inc dx
 	cmp dx, 256
-	je near .exit
+	je .exit
 	mov cx, 1				; Load first disk sector into RAM
 	mov dh, 0
 	mov bx, disk_buffer

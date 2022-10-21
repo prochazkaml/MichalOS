@@ -94,8 +94,8 @@ start:
 	
 .prefixloop:
 	lodsb
-	cmp al, 0
-	jne .print
+	test al, al
+	jnz .print
 	
 	loop .prefixloop
 	

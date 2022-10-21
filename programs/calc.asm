@@ -66,8 +66,8 @@ start:
 	call .draw_background
 	call .get_numbers
 
-	cmp ebx, 0
-	je near .divide_error
+	test ebx, ebx
+	jz .divide_error
 	clr edx
 	div ebx
 
@@ -87,8 +87,8 @@ start:
 	mov ebx, 2
 	call os_math_root
 	
-	cmp edx, 0
-	jne .root_result
+	test edx, edx
+	jnz .root_result
 	
 	jmp .result
 	
@@ -99,8 +99,8 @@ start:
 	mov ebx, 3
 	call os_math_root
 	
-	cmp edx, 0
-	jne .root_result
+	test edx, edx
+	jnz .root_result
 	
 	jmp .result
 	
@@ -168,8 +168,8 @@ start:
 	mov ax, .resultmsg
 	call os_string_add	
 	
-	cmp edx, 0
-	je near .skipremainder
+	test edx, edx
+	jz .skipremainder
 	
 	mov bx, .remainder_msg
 	call os_string_add

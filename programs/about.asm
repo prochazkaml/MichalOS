@@ -85,8 +85,8 @@ start:
 	jmp .licenseloop
 		
 .license_cur_up:
-	cmp cl, 0
-	je .licenseloop
+	test cl, cl
+	jz .licenseloop
 	
 	dec cl
 	call .draw_license
@@ -131,14 +131,14 @@ print_text_wall:
 ;	mov al, cl
 ;	call os_print_2hex
 	
-	cmp cl, 0
-	je .print_loop
+	test cl, cl
+	jz .print_loop
 	
 .skip_loop:
 	lodsb
 	
-	cmp al, 0
-	je .exit
+	test al, al
+	jz .exit
 	
 	cmp al, 10
 	jne .skip_loop
@@ -147,8 +147,8 @@ print_text_wall:
 	
 .print_loop:
 	lodsb
-	cmp al, 0
-	je .exit
+	test al, al
+	jz .exit
 	
 	call os_putchar
 	

@@ -8,8 +8,8 @@
 
 os_pause:
 	pusha
-	cmp ax, 0
-	je .time_up			; If delay = 0 then bail out
+	test ax, ax
+	jz .time_up			; If delay = 0 then bail out
 
 	mov word [.counter_var], 0		; Zero the counter variable
 

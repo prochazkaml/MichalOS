@@ -17,7 +17,7 @@ features_loop:
 
 	inc di
 	cmp di, 24032
-	jl near features_loop
+	jl features_loop
 	
 features_loop2:
 	mov al, cl
@@ -27,7 +27,7 @@ features_loop2:
 	
 	inc di
 	cmp di, 24064
-	jl near features_loop2
+	jl features_loop2
 	
 features_output:
 	mov di, 24000
@@ -43,7 +43,7 @@ features_loop_output:
 	
 	mov al, [di]
 	cmp al, 1
-	je near feature_enabled
+	je feature_enabled
 	
 	mov si, disabled
 	call os_print_string
@@ -54,10 +54,10 @@ feature_loop_continue:
 	add cx, 14
 	
 	cmp di, 24064
-	je near feature_end
+	je feature_end
 	
 	cmp dh, 24
-	je near feature_loop_nextcolumn
+	je feature_loop_nextcolumn
 	
 	jmp features_loop_output
 	

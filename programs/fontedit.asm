@@ -503,8 +503,8 @@ char_picker:
 	
 	mov dl, 15
 	inc dh
-	cmp al, 0
-	jne .char_loop
+	test al, al
+	jnz .char_loop
 	
 	mov dx, 3 * 256 + 50
 	call os_move_cursor

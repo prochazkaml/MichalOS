@@ -397,9 +397,9 @@ checkformenu:
 checkformenuloop:	
 	call os_wait_for_key
 	cmp al, 32					; Space pressed?
-	je near option_screen		; Open the menu
+	je option_screen		; Open the menu
 	cmp al, 'a'					; a pressed?
-	je near load_fileman		; Open the file manager
+	je load_fileman		; Open the file manager
 	jmp checkformenuloop
 	
 	greetingmsg			db 'Greetings, ', 0
@@ -421,19 +421,19 @@ option_screen:
 	jc checkformenu
 	
 	cmp ax, 1
-	je near app_selector
+	je app_selector
 
 	cmp ax, 2
-	je near game_selector
+	je game_selector
 	
 	cmp ax, 3
-	je near logoinput
+	je logoinput
 	
 	cmp ax, 4
-	je near os_reboot
+	je os_reboot
 
 	cmp ax, 5
-	je near os_shutdown
+	je os_shutdown
 
 app_selector:
 	call menu_background
@@ -445,10 +445,10 @@ app_selector:
 	jc option_screen
 
 	cmp ax, 1
-	je near load_fileman
+	je load_fileman
 
 	cmp ax, 13
-	je near debug_stuff
+	je debug_stuff
 	
 	mov si, ax
 	sub si, 2
@@ -704,10 +704,10 @@ finish:
 	popa
 	
 	cmp byte [7FFFh], 1
-	je near launch_program
+	je launch_program
 	
 	cmp byte [7FFEh], 1
-	je near return_to_app
+	je return_to_app
 	
 	jmp checkformenu		; When finished, go back to the program list
 

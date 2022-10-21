@@ -33,19 +33,19 @@ start:
 	jc .exit
 	
 	cmp ax, 1
-	je near piano
+	je piano
 	
 	cmp ax, 2
-	je near polypiano
+	je polypiano
 	
 	cmp ax, 3
-	je near .play_file
+	je .play_file
 	
 	cmp ax, 4
-	je near .play_duo
+	je .play_duo
 	
 	cmp ax, 5
-	je near .exit
+	je .exit
 	
 .play_file:
 	mov byte [0087h], 1

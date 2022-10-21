@@ -9,12 +9,12 @@
 os_speaker_tone:
 	pusha
 	cmp byte [0083h], 0
-	je near .exit
+	je .exit
 	popa
 	
 	pusha
-	cmp ax, 0
-	je near .exit
+	test ax, ax
+	jz .exit
 	
 	call os_speaker_off
 	mov cx, ax			; Store note value for now
@@ -194,8 +194,8 @@ os_check_adlib:
 	
 	mov dx, 388h
 	in al, dx
-	cmp al, 0
-	jne .error
+	test al, al
+	jnz .error
 	
 .ok:
 	popa
@@ -445,8 +445,8 @@ pwm_handler:
 .channel_count_loop:
 	lodsw
 	
-	cmp ax, 0
-	je .channel_count_loop_no_inc
+	test ax, ax
+	jz .channel_count_loop_no_inc
 	
 	inc bx
 	
@@ -462,8 +462,8 @@ pwm_handler:
 .handler_loop:
 	lodsw
 	
-	cmp ax, 0
-	je .handler_loop_no_inc
+	test ax, ax
+	jz .handler_loop_no_inc
 	
 	add di, 2
 	add [di], ax

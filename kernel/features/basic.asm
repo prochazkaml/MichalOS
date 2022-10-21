@@ -39,8 +39,8 @@ os_run_basic:
 	call clear_ram				; Clear variables etc. from previous run
 						; of a BASIC program
 
-	cmp si, 0				; Passed a parameter string?
-	je mainloop
+	test si, si				; Passed a parameter string?
+	jz mainloop
 
 	mov di, string_vars			; If so, copy it into $1
 	call os_string_copy
@@ -54,10 +54,10 @@ mainloop:
 	je .keyword				; If so, let's see if it's a keyword to process
 
 	cmp ax, VARIABLE			; If it's a variable at the start of the line,
-	je near assign				; this is an assign (eg "X = Y + 5")
+	je assign				; this is an assign (eg "X = Y + 5")
 
 	cmp ax, STRING_VAR			; Same for a string variable (eg $1)
-	je near assign
+	je assign
 
 	cmp ax, LABEL				; Don't need to do anything here - skip
 	je mainloop
@@ -71,199 +71,199 @@ mainloop:
 
 	mov di, alert_cmd
 	call os_string_compare
-	jc near do_alert
+	jc do_alert
 
 	mov di, askfile_cmd
 	call os_string_compare
-	jc near do_askfile
+	jc do_askfile
 
 	mov di, break_cmd
 	call os_string_compare
-	jc near do_break
+	jc do_break
 
 	mov di, case_cmd
 	call os_string_compare
-	jc near do_case
+	jc do_case
 
 	mov di, call_cmd
 	call os_string_compare
-	jc near do_call
+	jc do_call
 
 	mov di, cls_cmd
 	call os_string_compare
-	jc near do_cls
+	jc do_cls
 
 	mov di, cursor_cmd
 	call os_string_compare
-	jc near do_cursor
+	jc do_cursor
 
 	mov di, curschar_cmd
 	call os_string_compare
-	jc near do_curschar
+	jc do_curschar
 
 	mov di, curscol_cmd
 	call os_string_compare
-	jc near do_curscol
+	jc do_curscol
 
 	mov di, curspos_cmd
 	call os_string_compare
-	jc near do_curspos
+	jc do_curspos
 	
 	mov di, delete_cmd
 	call os_string_compare
-	jc near do_delete
+	jc do_delete
 	
 	mov di, do_cmd
 	call os_string_compare
-	jc near do_do
+	jc do_do
 
 	mov di, end_cmd
 	call os_string_compare
-	jc near do_end
+	jc do_end
 
 	mov di, else_cmd
 	call os_string_compare
-	jc near do_else
+	jc do_else
 
 	mov di, files_cmd
 	call os_string_compare
-	jc near do_files
+	jc do_files
 
 	mov di, for_cmd
 	call os_string_compare
-	jc near do_for
+	jc do_for
 
 	mov di, getkey_cmd
 	call os_string_compare
-	jc near do_getkey
+	jc do_getkey
 
 	mov di, gosub_cmd
 	call os_string_compare
-	jc near do_gosub
+	jc do_gosub
 
 	mov di, goto_cmd
 	call os_string_compare
-	jc near do_goto
+	jc do_goto
 
 	mov di, if_cmd
 	call os_string_compare
-	jc near do_if
+	jc do_if
 
 	mov di, include_cmd
 	call os_string_compare
-	jc near do_include
+	jc do_include
 
 	mov di, ink_cmd
 	call os_string_compare
-	jc near do_ink
+	jc do_ink
 
 	mov di, input_cmd
 	call os_string_compare
-	jc near do_input
+	jc do_input
 	
 	mov di, len_cmd
 	call os_string_compare
-	jc near do_len
+	jc do_len
 
 	mov di, listbox_cmd
 	call os_string_compare
-	jc near do_listbox
+	jc do_listbox
 
 	mov di, load_cmd
 	call os_string_compare
-	jc near do_load
+	jc do_load
 
 	mov di, loop_cmd
 	call os_string_compare
-	jc near do_loop
+	jc do_loop
 
 	mov di, move_cmd
 	call os_string_compare
-	jc near do_move
+	jc do_move
 
 	mov di, next_cmd
 	call os_string_compare
-	jc near do_next
+	jc do_next
 
 	mov di, number_cmd
 	call os_string_compare
-	jc near do_number
+	jc do_number
 
 	mov di, page_cmd
 	call os_string_compare
-	jc near do_page
+	jc do_page
 
 	mov di, pause_cmd
 	call os_string_compare
-	jc near do_pause
+	jc do_pause
 
 	mov di, peek_cmd
 	call os_string_compare
-	jc near do_peek
+	jc do_peek
 
 	mov di, peekint_cmd
 	call os_string_compare
-	jc near do_peekint
+	jc do_peekint
 	
 	mov di, poke_cmd
 	call os_string_compare
-	jc near do_poke
+	jc do_poke
 	
 	mov di, pokeint_cmd
 	call os_string_compare
-	jc near do_pokeint
+	jc do_pokeint
 
 	mov di, port_cmd
 	call os_string_compare
-	jc near do_port
+	jc do_port
 
 	mov di, print_cmd
 	call os_string_compare
-	jc near do_print
+	jc do_print
 
 	mov di, rand_cmd
 	call os_string_compare
-	jc near do_rand
+	jc do_rand
 
 	mov di, read_cmd
 	call os_string_compare
-	jc near do_read
+	jc do_read
 
 	mov di, rem_cmd
 	call os_string_compare
-	jc near do_rem
+	jc do_rem
 
 	mov di, rename_cmd
 	call os_string_compare
-	jc near do_rename
+	jc do_rename
 
 	mov di, return_cmd
 	call os_string_compare
-	jc near do_return
+	jc do_return
 
 	mov di, save_cmd
 	call os_string_compare
-	jc near do_save
+	jc do_save
 
 	mov di, serial_cmd
 	call os_string_compare
-	jc near do_serial
+	jc do_serial
 
 	mov di, size_cmd
 	call os_string_compare
-	jc near do_size
+	jc do_size
 
 	mov di, sound_cmd
 	call os_string_compare
-	jc near do_sound
+	jc do_sound
 	
 	mov di, string_cmd
 	call os_string_compare
-	jc near do_string
+	jc do_string
 
 	mov di, waitkey_cmd
 	call os_string_compare
-	jc near do_waitkey
+	jc do_waitkey
 
 	mov bl, err_cmd_unknown			; Command not found?
 	jmp error
@@ -326,14 +326,14 @@ assign:
 	call get_token
 	mov byte al, [token]
 	cmp al, '='
-	jne near .error
+	jne .error
 
 	call get_token				; See if second is quote
 	cmp ax, QUOTE
 	je .second_is_quote
 
 	cmp ax, STRING_VAR
-	jne near .error
+	jne .error
 
 	mov si, string_vars			; Otherwise it's a string var
 	mov ax, 128
@@ -433,7 +433,7 @@ assign:
 	call get_token
 	mov byte al, [token]
 	cmp al, '='
-	jne near .error
+	jne .error
 
 	call get_token
 	cmp ax, NUMBER
@@ -443,18 +443,18 @@ assign:
 	je .second_is_variable
 
 	cmp ax, STRING
-	je near .second_is_string
+	je .second_is_string
 
 	cmp ax, UNKNOWN
-	jne near .error
+	jne .error
 
 	mov byte al, [token]			; Address of string var?
 	cmp al, '&'
-	jne near .error
+	jne .error
 
 	call get_token				; Let's see if there's a string var
 	cmp ax, STRING_VAR
-	jne near .error
+	jne .error
 
 	mov di, string_vars
 	mov ax, 128
@@ -560,8 +560,8 @@ assign:
 	cmp byte [.delim], '/'
 	jne .not_divide
 
-	cmp bx, 0
-	je .divide_zero
+	test bx, bx
+	jz .divide_zero
 	
 	xor dx, dx
 	div bx
@@ -1070,7 +1070,7 @@ do_delete:
 	je .is_quote
 
 	cmp ax, STRING_VAR
-	jne near .error
+	jne .error
 
 	mov si, string_vars
 	mov ax, 128
@@ -1200,8 +1200,8 @@ do_files:
 	cmp al, ','				; a comma means the next file, so create a new line for it
 	je .nextfile
 	
-	cmp al, 0				; the list is null terminated
-	je .end_of_list
+	test al, al				; the list is null terminated
+	jz .end_of_list
 	
 	int 10h					; okay, it's not a comma or a null so print it
 
@@ -1257,7 +1257,7 @@ do_for:
 	call get_token				; Get the variable we're using in this loop
 
 	cmp ax, VARIABLE
-	jne near .error
+	jne .error
 
 	movzx ax, byte [token]
 	mov byte [.tmp_var], al			; Store it in a temporary location for now
@@ -1578,7 +1578,7 @@ do_if:
 	je .num_var
 
 	cmp ax, STRING_VAR
-	je near .string_var
+	je .string_var
 
 	mov bl, err_syntax
 	jmp error
@@ -1615,7 +1615,7 @@ do_if:
 	call os_string_to_int
 
 	cmp ax, dx				; On to the THEN bit if 'X = num' matches
-	je near .on_to_then
+	je .on_to_then
 
 	jmp .finish_line			; Otherwise skip the rest of the line
 
@@ -1624,7 +1624,7 @@ do_if:
 	movzx ax, byte [token]
 
 	cmp ax, dx
-	je near .on_to_then
+	je .on_to_then
 
 	jmp .finish_line
 
@@ -1635,7 +1635,7 @@ do_if:
 	call get_var
 
 	cmp ax, dx				; Do the variables match?
-	je near .on_to_then				; On to the THEN bit if so
+	je .on_to_then				; On to the THEN bit if so
 
 	jmp .finish_line			; Otherwise skip the rest of the line
 
@@ -1650,7 +1650,7 @@ do_if:
 	call os_string_to_int
 
 	cmp ax, dx
-	jl near .on_to_then
+	jl .on_to_then
 
 	jmp .finish_line
 
@@ -1857,8 +1857,8 @@ do_input:
 
 	mov ax, .tmpstring
 	call os_string_length
-	cmp ax, 0
-	jne .char_entered
+	test ax, ax
+	jnz .char_entered
 
 	mov byte [.tmpstring], '0'		; If enter hit, fill variable with zero
 	mov byte [.tmpstring + 1], 0
@@ -2787,8 +2787,8 @@ do_print:
 	mov si, token
 .print_quote_loop:
 	lodsb
-	cmp al, 0
-	je .newline_or_not
+	test al, al
+	jz .newline_or_not
 
 	mov ah, 09h
 	mov byte bl, [ink_colour]
@@ -3262,8 +3262,8 @@ do_rename:
 
 do_return:
 	movzx ax, byte [gosub_depth]
-	cmp al, 0
-	jne .is_ok
+	test al, al
+	jnz .is_ok
 
 	mov si, err_return
 	jmp error
@@ -3288,7 +3288,7 @@ do_save:
 	je .is_quote
 
 	cmp ax, STRING_VAR
-	jne near .error
+	jne .error
 
 	mov si, string_vars
 	mov ax, 128
@@ -3646,8 +3646,8 @@ do_string:
 .got_number:
 	cmp ax, 128
 	jg .outrange
-	cmp ax, 0
-	je .outrange
+	test ax, ax
+	jz .outrange
 	sub ax, 1
 	mov dx, ax
 	
@@ -3809,7 +3809,7 @@ get_token:
 	je get_char_token
 
 	cmp al, '$'
-	je near get_string_var_token
+	je get_string_var_token
 
 	jmp get_string_token
 

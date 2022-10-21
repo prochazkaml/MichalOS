@@ -60,8 +60,8 @@ start:
 	cmp ah, 134
 	je .help
 	
-	cmp al, 0
-	je .loop
+	test al, al
+	jz .loop
 	
 	cmp al, 27
 	je .exit
@@ -408,8 +408,8 @@ char_picker:
 	
 	mov dl, 15
 	inc dh
-	cmp al, 0
-	jne .char_loop
+	test al, al
+	jnz .char_loop
 	
 	mov dx, 3 * 256 + 50
 	call os_move_cursor

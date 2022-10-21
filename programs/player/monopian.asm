@@ -39,8 +39,8 @@ piano:
 	inc si
 	add di, 2
 	
-	cmp bh, 0
-	je .pianoloop
+	test bh, bh
+	jz .pianoloop
 	
 	cmp ah, bh
 	jne .decodeloop

@@ -11,7 +11,7 @@ start:
 	
 	call os_get_via_serial		; Is the other computer waiting for connection?
 	cmp al, 123
-	je near .connection_request
+	je .connection_request
 	
 	mov si, .wait_msg1
 	mov ax, .wait_msg2
@@ -26,11 +26,11 @@ start:
 	
 	call os_get_via_serial
 	cmp al, 125
-	je near .request_confirm
+	je .request_confirm
 	
 	call os_check_for_key
 	cmp al, 27
-	je near .exit
+	je .exit
 	
 	jmp .loop
 	

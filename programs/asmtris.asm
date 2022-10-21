@@ -1801,8 +1801,8 @@ procedure_delay:
     
     mov [previous_note], ax
     
-    cmp ax, 0
-    je .spkr_off
+    test ax, ax
+    jz .spkr_off
     
     shr ax, 1
     call os_speaker_tone

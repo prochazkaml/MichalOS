@@ -311,8 +311,8 @@ start_dro:
 	call os_dialog_box
 	mov byte [0085h], 0
 	
-	cmp ax, 0
-	je .error_bypass
+	test ax, ax
+	jz .error_bypass
 	
 	popa
 	jmp start.play_file

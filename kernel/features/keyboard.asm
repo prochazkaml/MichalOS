@@ -34,8 +34,8 @@ os_wait_for_key:
 	call .screensaver
 	call os_check_for_key
 	
-	cmp ax, 0
-	je .loop
+	test ax, ax
+	jz .loop
 
 	pusha
 	mov ax, 0500h
@@ -144,17 +144,17 @@ os_check_for_key:
 special_keys:
 	pusha
 	cmp ah, 105
-	je near .disable_sound
+	je .disable_sound
 	cmp ah, 106
-	je near .enable_sound
+	je .enable_sound
 	cmp ah, 107
-	je near .exit_app
+	je .exit_app
 	popa
 	ret
 	
 .exit_app:
 	cmp byte [app_running], 0
-	je near .no_exit
+	je .no_exit
 	
 	popa
 	

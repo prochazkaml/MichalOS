@@ -25,7 +25,7 @@ start:
 	call os_move_cursor
 	mov si, DISK_BUFFER
 	cmp byte [.halfnum], 0
-	je near .zerohalf
+	je .zerohalf
 	add si, 256
 .zerohalf:
 	pusha
@@ -62,13 +62,13 @@ start:
 	call os_string_uppercase
 	lodsb
 	cmp al, 'Q'				; 'Q' typed?
-	je near .exit
+	je .exit
 	cmp al, 'S'
-	je near .sectorselect
+	je .sectorselect
 	cmp al, 'H'
-	je near .selecthalf
+	je .selecthalf
 	cmp al, 'D'
-	je near .selectdrive
+	je .selectdrive
 	jmp .draw_loop
 	
 .selectdrive:
@@ -89,7 +89,7 @@ start:
 .asciidraw:
 	lodsb
 	cmp al, 32
-	jge near .asciichar
+	jge .asciichar
 	mov al, '.'
 .asciichar:
 	mov ah, 0Eh
@@ -113,7 +113,7 @@ start:
 	call os_print_2hex
 	
 ;	cmp si, disk_buffer+512
-;	je near .draw_loop
+;	je .draw_loop
 	
 	push si
 	mov si, .space
@@ -137,7 +137,7 @@ start:
 .selecthalf:
 	lodsb
 	cmp al, '0'
-	je near .selectfirsthalf
+	je .selectfirsthalf
 	mov byte [.halfnum], 1
 	jmp .draw_loop
 .selectfirsthalf:
@@ -182,8 +182,8 @@ start:
 	mov dh, 6
 	call os_move_cursor
 	mov al, [.halfnum]
-	cmp al, 0
-	je near .firsthalf
+	test al, al
+	jz .firsthalf
 	mov si, .hexchars1
 	call os_print_string
 	ret

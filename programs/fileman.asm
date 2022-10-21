@@ -12,7 +12,7 @@ start:
 	mov byte [32767], 0
 	
 	call os_file_selector
-	jc near .exit
+	jc .exit
 
 	mov bx, ax
 	mov cx, .screenstring
@@ -32,22 +32,22 @@ start:
 	call os_list_dialog
 	mov word [0089h], 76
 
-	jc near .clearstack				; User pressed Esc?
+	jc .clearstack				; User pressed Esc?
 
 	cmp ax, 1						; Otherwise respond to choice
-	je near .launch_file
+	je .launch_file
 	
 	cmp ax, 2
-	je near .create_file
+	je .create_file
 	
 	cmp ax, 3
-	je near .delete_file
+	je .delete_file
 	
 	cmp ax, 4
-	je near .rename_file
+	je .rename_file
 	
 	cmp ax, 5
-	je near .copy_file
+	je .copy_file
 	
 .clearstack:
 	pop ax
@@ -73,7 +73,7 @@ start:
 	mov ax, .filename_input
 	call os_write_file
 
-	jc near .writing_error
+	jc .writing_error
 
 	jmp start
 
@@ -88,8 +88,8 @@ start:
 	mov dx, 1
 	call os_dialog_box
 
-	cmp ax, 0
-	je .ok_to_delete
+	test ax, ax
+	jz .ok_to_delete
 
 	pop ax
 	jmp start
@@ -97,7 +97,7 @@ start:
 .ok_to_delete:
 	pop ax
 	call os_remove_file
-	jc near .disk_error
+	jc .disk_error
 	jmp start
 
 .rename_file:
@@ -128,7 +128,7 @@ start:
 	mov bx, .filename_tmp2
 
 	call os_rename_file
-	jc near .writing_error
+	jc .writing_error
 
 	jmp start
 
@@ -188,7 +188,7 @@ start:
 	call os_write_file
 	pop es
 	
-	jc near .writing_error
+	jc .writing_error
 
 	mov word [.load_segment], cs
 	mov word [.load_offset], 1000h

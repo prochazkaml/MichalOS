@@ -14,7 +14,7 @@ start:
 .test:
 	call os_check_for_key
 	cmp al, "Q"
-	je near .exit
+	je .exit
 
 	mov cl, 0
 	

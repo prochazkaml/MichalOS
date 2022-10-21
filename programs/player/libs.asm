@@ -36,8 +36,8 @@ draw_progress_bar:		; EAX = current position, EBX = total
 	
 	shr ax, 1
 	
-	cmp ax, 0
-	je .nodraw
+	test ax, ax
+	jz .nodraw
 	
 	mov cx, ax
 	

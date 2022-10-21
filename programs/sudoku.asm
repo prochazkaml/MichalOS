@@ -169,8 +169,8 @@ check_board:
 	sub al, 10
 	
 .no_adjust:
-	cmp al, 0
-	jne .no_blank
+	test al, al
+	jnz .no_blank
 
 	mov byte [sudokufinished], 0
 
@@ -216,7 +216,7 @@ check_board:
 	mov si, .okmsg
 	call os_print_string
 
-	jmp near .exit
+	jmp .exit
 
 .fail:
 	cmp byte [showhints], 0
@@ -288,8 +288,8 @@ check_free_spaces:
 	
 .loop:
 	lodsb
-	cmp al, 0
-	jne .no_free_space
+	test al, al
+	jnz .no_free_space
 	
 	inc cx
 	
@@ -348,8 +348,8 @@ draw_board:
 	popa
 	
 .no_adjust:
-	cmp al, 0
-	je .no_print
+	test al, al
+	jz .no_print
 
 	call os_print_1hex
 	jmp .print_end
@@ -495,8 +495,7 @@ sub_draw_line:		; In: BH = line number (0-3)
 	
 	mov cx, 7
 	dec dx
-	cmp dx, 0
-	jne .loop
+	jnz .loop
 	
 	popa
 	ret

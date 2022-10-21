@@ -23,13 +23,13 @@ os_demotour:
 	call os_wait_for_key
 	
 	cmp al, 'a'
-	je near .setup
+	je .setup
 	
 	cmp al, 'b'
-	je near .tutorial
+	je .tutorial
 	
 	cmp al, 'p'
-	je near .skip
+	je .skip
 	
 	jmp os_demotour
 	
@@ -88,7 +88,7 @@ os_demotour:
 	call os_dialog_box
 
 	cmp ax, 1
-	je near .cancel_pressed
+	je .cancel_pressed
 	
 .ok_pressed:
 	mov ax, .t2cancel
@@ -97,8 +97,8 @@ os_demotour:
 	mov dx, 1
 	call os_dialog_box
 	
-	cmp ax, 0
-	je near .ok_pressed
+	test ax, ax
+	jz .ok_pressed
 	jmp .pressed
 	
 .cancel_pressed:
@@ -109,7 +109,7 @@ os_demotour:
 	call os_dialog_box
 	
 	cmp ax, 1
-	je near .cancel_pressed
+	je .cancel_pressed
 	
 .pressed:
 	mov cx, 4
@@ -318,7 +318,7 @@ os_demotour:
 .draw_data:
 	call os_move_cursor
 	cmp dh, 11
-	je near .draw_end
+	je .draw_end
 	cmp cl, dh
 	
 	jg .gray

@@ -98,8 +98,8 @@ polypiano:
 	inc si
 	add di, 2
 	
-	cmp bh, 0
-	je .pianoloop
+	test bh, bh
+	jz .pianoloop
 	
 	cmp ah, bh
 	jne .decodeloop
@@ -167,8 +167,8 @@ polypiano:
 	call os_dialog_box
 	mov byte [0085h], 0
 	
-	cmp ax, 0
-	je .error_bypass
+	test ax, ax
+	jz .error_bypass
 	
 	popa
 	jmp start

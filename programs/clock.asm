@@ -42,7 +42,7 @@ start:
 	hlt
 	call os_check_for_key
 	cmp al, 27
-	je near .exit
+	je .exit
 	cmp al, '2'
 	je .stopwatch
 	cmp al, '3'
@@ -63,7 +63,7 @@ start:
 	call os_check_for_key
 	
 	cmp al, 27
-	je near .exit
+	je .exit
 	cmp al, '1'
 	je .time
 	cmp al, '3'
@@ -108,7 +108,7 @@ start:
 	call os_check_for_key
 	
 	cmp al, 27
-	je near .exit
+	je .exit
 	cmp al, '1'
 	je .time
 	cmp al, '2'

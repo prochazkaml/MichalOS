@@ -36,27 +36,27 @@ start:
 
 	lodsb
 	cmp al, 'Q'				; 'Q' typed?
-	je near .exit
+	je .exit
 	cmp al, 'O'
-	je near .inputaddress
+	je .inputaddress
 	cmp al, 'S'
-	je near .inputsegment
+	je .inputsegment
 	cmp al, 'D'
-	je near .inputdata
+	je .inputdata
 	cmp al, 'H'
-	je near .help
+	je .help
 	cmp al, 'W'
-	je near .save
+	je .save
 	cmp al, 'L'
-	je near .load
+	je .load
 	jmp .loop
 	
 .save:
 	lodsb
 	cmp al, 'D'
-	je near .savedecimal
+	je .savedecimal
 	cmp al, 'H'
-	je near .savehexadecimal
+	je .savehexadecimal
 	jmp .loop
 	
 .savedecimal:
@@ -116,9 +116,9 @@ start:
 .inputaddress:
 	lodsb
 	cmp al, 'D'
-	je near .addressdecimal
+	je .addressdecimal
 	cmp al, 'H'
-	je near .addresshexadecimal
+	je .addresshexadecimal
 	jmp .loop
 	
 .addressdecimal:
@@ -134,9 +134,9 @@ start:
 .inputsegment:
 	lodsb
 	cmp al, 'D'
-	je near .segmentdecimal
+	je .segmentdecimal
 	cmp al, 'H'
-	je near .segmenthexadecimal
+	je .segmenthexadecimal
 	jmp .loop
 	
 .segmentdecimal:
@@ -152,9 +152,9 @@ start:
 .inputdata:
 	lodsb
 	cmp al, 'D'
-	je near .datadecimal
+	je .datadecimal
 	cmp al, 'H'
-	je near .datahexadecimal
+	je .datahexadecimal
 	jmp .loop
 	
 .datadecimal:
@@ -271,7 +271,7 @@ start:
 	inc si
 
 	cmp al, 32
-	jge near .asciichar
+	jge .asciichar
 	mov al, '.'
 	
 .asciichar:

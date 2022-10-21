@@ -119,9 +119,9 @@ os_int_to_bcd:
 os_math_power:
 	pushad
 	cmp ebx, 1
-	je near .power_end
-	cmp ebx, 0
-	je near .zero
+	je .power_end
+	test ebx, ebx
+	jz .zero
 	mov ecx, ebx				; Prepare the data
 	mov ebx, eax
 .power_loop:
@@ -156,8 +156,8 @@ os_math_root:
 	mov eax, esi
 	call os_math_power
 	cmp eax, ecx
-	je near .root_exact
-	jg near .root_range
+	je .root_exact
+	jg .root_range
 	inc esi
 	jmp .root_loop
 .root_exact:

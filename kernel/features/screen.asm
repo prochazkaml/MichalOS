@@ -62,8 +62,8 @@ os_print_string_box:
 
 .repeat:
 	lodsb				; Get char from string
-	cmp al, 0
-	je int_popa_ret		; If char is zero, end of string
+	test al, al
+	jz int_popa_ret		; If char is zero, end of string
 
 	cmp al, 13
 	je .cr
@@ -96,8 +96,8 @@ os_format_string:
 	je .cr
 	cmp al, 10
 	je .lf
-	cmp al, 0
-	je int_popa_ret		; If char is zero, end of string
+	test al, al
+	jz int_popa_ret		; If char is zero, end of string
 
 	int 10h				; Otherwise, print it
 
@@ -313,8 +313,8 @@ os_file_selector:
 	cmp al, 229			; If we read 229 = deleted filename
 	je .skip
 
-	cmp al, 0			; 1st byte = entry never used
-	je .done
+	test al, al			; 1st byte = entry never used
+	jz .done
 
 	pusha
 
@@ -675,8 +675,8 @@ os_list_dialog:
 	cmp byte [os_file_selector.file_selector_calling], 1
 	jne .normal_count
 
-	cmp ax, 0
-	je .empty_list
+	test ax, ax
+	jz .empty_list
 
 	mov cx, ax
 
@@ -714,8 +714,8 @@ os_list_dialog:
 	cmp al, ','
 	je .count_inc
 
-	cmp al, 0
-	jne .count_loop
+	test al, al
+	jnz .count_loop
 
 .done_count:
 	mov byte [.num_of_entries], cl
@@ -935,8 +935,8 @@ os_list_dialog:
 .more:
 	lodsb				; Get next character in name, increment pointer
 	
-	cmp al, 0			; End of string?
-	je .done_list
+	test al, al			; End of string?
+	jz .done_list
 
 	cmp al, ','			; Next option? (String is comma-separated)
 	je .newline
@@ -1455,15 +1455,15 @@ int_input_string:
 
 	inc cl				; Characters processed += 1
 	
-	jmp near .more			; Still room for more
+	jmp .more			; Still room for more
 
 .backspace:
-	cmp cl, 0			; Backspace at start of string?
-	je .more			; Ignore it if so
+	test cl, cl			; Backspace at start of string?
+	jz .more			; Ignore it if so
 
 	call os_get_cursor_pos		; Backspace at start of screen line?
-	cmp dl, 0
-	je .backspace_linestart
+	test dl, dl
+	jz .backspace_linestart
 
 	dec dl
 	call os_move_cursor
@@ -1561,8 +1561,8 @@ os_temp_box:
 	call os_move_cursor
 
 	pop si
-	cmp si, 0			; Skip string params if zero
-	je .no_string
+	test si, si			; Skip string params if zero
+	jz .no_string
 
 	call os_print_string
 
@@ -1584,8 +1584,8 @@ os_print_footer:
 	push dx
 	
 	mov di, 1
-	cmp si, 0
-	je .restore
+	test si, si
+	jz .restore
 	
 	mov16 dx, 0, 24
 	
@@ -1600,7 +1600,7 @@ os_print_footer:
 	
 	inc dl
 	cmp di, 81
-	jnge near .loop
+	jnge .loop
 	
 	mov byte [80], 0
 
@@ -1760,8 +1760,8 @@ os_option_menu:
 	cmp al, ','
 	je .count_inc
 
-	cmp al, 0
-	jne .count_loop
+	test al, al
+	jnz .count_loop
 
 .done_count:
 	mov byte [.num_of_entries], cl
@@ -1891,8 +1891,8 @@ os_option_menu:
 .more:
 	lodsb				; Get next character in file name, increment pointer
 
-	cmp al, 0			; End of string?
-	je int_popa_ret
+	test al, al			; End of string?
+	jz int_popa_ret
 
 	cmp al, ','			; Next option? (String is comma-separated)
 	je .newline

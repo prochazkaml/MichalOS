@@ -31,19 +31,19 @@ start:
 
 	call os_list_dialog
 
-	jc near .exit					; User pressed Esc?
+	jc .exit					; User pressed Esc?
 
 	cmp ax, 1
-	je near .look
+	je .look
 
 	cmp ax, 2
-	je near .sound
+	je .sound
 	
 	cmp ax, 3
-	je near .password
+	je .password
 		
 	cmp ax, 4
-	je near .timezone
+	je .timezone
 		
 .look:
 	mov ax, .look_list			; Draw list of settings
@@ -52,37 +52,37 @@ start:
 
 	call os_list_dialog
 
-	jc near .start					; User pressed Esc?
+	jc .start					; User pressed Esc?
 
 	cmp ax, 1
-	je near .bg_change
+	je .bg_change
 	
 	cmp ax, 2
-	je near .bg_img_change
+	je .bg_img_change
 	
 	cmp ax, 3
-	je near .bg_img_reset
+	je .bg_img_reset
 		
 	cmp ax, 4
-	je near .window_change
+	je .window_change
 	
 	cmp ax, 5
-	je near .menu_change
+	je .menu_change
 	
 	cmp ax, 6
-	je near .screensaver_settings
+	je .screensaver_settings
 	
 	cmp ax, 7
-	je near .font_change
+	je .font_change
 
 	cmp ax, 8
-	je near .enable_dimming
+	je .enable_dimming
 	
 	cmp ax, 9
-	je near .disable_dimming
+	je .disable_dimming
 	
 	cmp ax, 10
-	je near .img_help
+	je .img_help
 
 .bg_img_reset:
 	mov ax, .bg_name
@@ -182,10 +182,10 @@ start:
 	jc .look
 	
 	cmp ax, 1
-	je near .disable_screensaver
+	je .disable_screensaver
 	
 	cmp ax, 2
-	je near .screensaver_change_time
+	je .screensaver_change_time
 	
 .disable_screensaver:
 	mov byte [57074], 0
@@ -228,13 +228,13 @@ start:
 
 	call os_list_dialog
 
-	jc near .look					; User pressed Esc?
+	jc .look					; User pressed Esc?
 	
 	cmp ax, 1
-	je near .michalos_font
+	je .michalos_font
 	
 	cmp ax, 2
-	je near .bios_font
+	je .bios_font
 	
 .michalos_font:
 	mov byte [57073], 0
@@ -324,16 +324,16 @@ start:
 
 	call os_list_dialog
 
-	jc near .start					; User pressed Esc?
+	jc .start					; User pressed Esc?
 
 	cmp ax, 1
-	je near .enable_sound
+	je .enable_sound
 	
 	cmp ax, 2
-	je near .disable_sound
+	je .disable_sound
 
 	cmp ax, 3
-	je near .adlib_drv
+	je .adlib_drv
 	
 .enable_sound:
 	mov byte [57069], 1
@@ -351,7 +351,7 @@ start:
 	mov cx, .help_msg2
 	call os_list_dialog
 	
-	jc near .sound
+	jc .sound
 	
 	dec al
 	mov [57070], al
@@ -368,13 +368,13 @@ start:
 	jc .start
 	
 	cmp ax, 1
-	je near .change_name
+	je .change_name
 	
 	cmp ax, 2
-	je near .disable_password
+	je .disable_password
 	
 	cmp ax, 3
-	je near .set_password
+	je .set_password
 	
 .change_name:
 	call .draw_background

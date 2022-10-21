@@ -72,8 +72,8 @@ file_chosen:
 	call os_dialog_box
 	mov byte [0085h], 0
 
-	cmp ax, 0
-	je valid_extension
+	test ax, ax
+	jz valid_extension
 	
 	mov byte [0E0h], 0
 	
@@ -145,8 +145,8 @@ render_text:
 	mov word cx, [skiplines]		; We're now going to skip lines depending on scroll level
 
 redraw:
-	cmp cx, 0				; Do we have any lines to skip?
-	je display_loop				; If not, start the displaying
+	test cx, cx				; Do we have any lines to skip?
+	jz display_loop				; If not, start the displaying
 	dec cx					; Otherwise work through the lines
 
 .skip_loop:
@@ -176,7 +176,7 @@ skip_return:
 .no_print:
 	mov word bx, [last_byte]
 	cmp si, bx				; Have we printed all characters in the file?
-	je near get_input
+	je get_input
 
 	call os_get_cursor_pos			; Are we at the bottom of the display area?
 	cmp dh, 23
@@ -200,21 +200,21 @@ get_input:
 	call os_wait_for_key			; Get input
 
 	cmp ah, KEY_UP				; Cursor key pressed?
-	je near go_up
+	je go_up
 	cmp ah, KEY_DOWN
-	je near go_down
+	je go_down
 	cmp ah, KEY_LEFT
-	je near go_left
+	je go_left
 	cmp ah, KEY_RIGHT
-	je near go_right
+	je go_right
 
 	cmp ah, 71					; Home key
-	je near go_home
+	je go_home
 	cmp ah, 79
-	je near go_end
+	je go_end
 	
 	cmp al, KEY_ESC				; Quit if Esc pressed
-	je near close
+	je close
 
 	jmp text_entry				; Otherwise it was probably a text entry char
 
@@ -475,44 +475,44 @@ text_entry:
 	pusha
 
 	cmp ah, 3Bh				; F1 pressed?
-	je near .f1_pressed
+	je .f1_pressed
 
 	cmp ah, 3Ch				; F2 pressed?
-	je near .f2_pressed
+	je .f2_pressed
 
 	cmp ah, 3Fh				; F5 pressed?
-	je near .f5_pressed
+	je .f5_pressed
 
 	cmp ah, 53h				; Delete?
-	je near .delete_pressed
+	je .delete_pressed
 
 	cmp al, 8
-	je near .backspace_pressed
+	je .backspace_pressed
 
 	cmp al, 13
-	je near .enter_pressed
+	je .enter_pressed
 
 	cmp al, 14				; Ctrl+N
-	je near new_file
+	je new_file
 	
 	cmp al, 15				; Ctrl+O
-	je near load_file
+	je load_file
 	
 	cmp al, 19				; Ctrl+S
-	je near save_file
+	je save_file
 	
 	cmp ax, 1F00h			; Alt+S
-	je near save_new_file
+	je save_new_file
 	
 	cmp al, 17				; Ctrl+Q
-	je near close_file
+	je close_file
 	
 	cmp al, 20h
-	jl near .nothing_to_do
+	jl .nothing_to_do
 	
 	call os_get_cursor_pos
 	cmp dl, 77
-	jng near .end_of_line
+	jng .end_of_line
 	
 	push ax
 
@@ -528,7 +528,7 @@ text_entry:
 	inc word [cursor_byte]
 	inc byte [cursor_x]
 
-	jmp near .enter_pressed
+	jmp .enter_pressed
 	
 .end_of_line:	
 	push ax
@@ -814,8 +814,8 @@ load_file:
 	call os_dialog_box
 	mov byte [0085h], 0
 
-	cmp ax, 0
-	je valid_extension
+	test ax, ax
+	jz valid_extension
 	
 	jmp render_text
 	

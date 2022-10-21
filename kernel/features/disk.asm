@@ -25,15 +25,14 @@ os_report_free_space:
 	and ah, 0Fh						; AX = 0000111122223333
 	and bh, 0Fh						; BX = 0000111122223333
 		
-	cmp ax, 0
-	jne .no_increment_1
+	test ax, ax
+	jnz .no_increment_1
 	
 	inc word [.counter]
 	
 .no_increment_1:
-	cmp bx, 0
-		
-	jne .no_increment_2
+	test bx, bx
+	jnz .no_increment_2
 	
 	inc word [.counter]
 	
@@ -168,8 +167,8 @@ os_get_file_list:
 	cmp al, 229			; If we read 229 = deleted filename
 	je .skip
 
-	cmp al, 0			; 1st byte = entry never used
-	je .done
+	test al, al			; 1st byte = entry never used
+	jz .done
 	
 	mov cx, 1			; Set char counter
 	mov dx, si			; Beginning of possible entry
@@ -353,8 +352,8 @@ os_load_file:
 
 	mov al, [di]			; First character of name
 
-	cmp al, 0			; Last file name already checked?
-	je .root_problem
+	test al, al			; Last file name already checked?
+	jz .root_problem
 
 	cmp al, 229			; Was this file deleted?
 	je .next_root_entry		; If yes, skip it
@@ -392,8 +391,8 @@ os_load_file:
 	mov eax, [di+28]			; Store file size to return to calling routine
 	mov [.file_size], eax
 
-	cmp eax, 0			; If the file size is zero, don't bother trying
-	je .end				; to read more clusters
+	test eax, eax			; If the file size is zero, don't bother trying
+	jz .end				; to read more clusters
 
 	mov ax, [di+26]			; Now fetch cluster and load FAT into RAM
 	mov word [.cluster], ax
@@ -463,8 +462,8 @@ os_load_file:
 	add si, ax
 	mov ax, word [ds:si]
 
-	cmp dx, 0			; If DX = 0 [CLUSTER] = even, if DX = 1 then odd
-	je .even			; If [CLUSTER] = even, drop last 4 bits of word
+	test dx, dx			; If DX = 0 [CLUSTER] = even, if DX = 1 then odd
+	jz .even			; If [CLUSTER] = even, drop last 4 bits of word
 					; with next cluster; if odd, drop first 4 bits
 
 .odd:
@@ -536,21 +535,21 @@ os_write_file:
 
 	mov si, ax
 	call os_string_length
-	cmp ax, 0
-	je near .failure
+	test ax, ax
+	jz .failure
 	mov ax, si
 
 	call os_string_uppercase
 
 	call int_filename_convert	; Make filename FAT12-style
-	jc near .failure
+	jc .failure
 
 	mov word [.filesize], cx
 	mov word [.location], bx
 	mov word [.filename], ax
 
 	call os_file_exists		; Don't overwrite a file if it exists!
-	jnc near .failure
+	jnc .failure
 
 
 	; First, zero out the .free_clusters list from any previous execution
@@ -586,11 +585,11 @@ os_write_file:
 	mov word ax, [.filename]	; Get filename back
 
 	call os_create_file		; Create empty root dir entry for this file
-	jc near .failure		; If we can't write to the media, jump out
+	jc .failure		; If we can't write to the media, jump out
 
 	mov word bx, [.filesize]
-	cmp bx, 0
-	je near .finished
+	test bx, bx
+	jz .finished
 
 	call int_read_fat		; Get FAT copy into RAM
 	mov si, disk_buffer + 3		; And point SI at it (skipping first two clusters)
@@ -758,8 +757,8 @@ os_write_file:
 	add di, cx
 	mov word ax, [di]
 
-	cmp ax, 0
-	je near .write_root_entry
+	test ax, ax
+	jz .write_root_entry
 
 	pusha
 
@@ -855,8 +854,8 @@ os_file_exists:
 
 	push ax
 	call os_string_length
-	cmp ax, 0
-	je .failure
+	test ax, ax
+	jz .failure
 	pop ax
 
 	push ax
@@ -904,8 +903,8 @@ os_create_file:
 	mov cx, 224			; Cycle through root dir entries
 .next_entry:
 	mov byte al, [di]
-	cmp al, 0			; Is this a free entry?
-	je .found_free_entry
+	test al, al			; Is this a free entry?
+	jz .found_free_entry
 	cmp al, 0E5h			; Is this a free entry?
 	je .found_free_entry
 	add di, 32			; If not, go onto next entry
@@ -1059,8 +1058,8 @@ os_remove_file:
 .more_clusters:
 	mov word ax, [.cluster]		; Get cluster contents
 
-	cmp ax, 0			; If it's zero, this was an empty file
-	je .nothing_to_do
+	test ax, ax			; If it's zero, this was an empty file
+	jz .nothing_to_do
 
 	mov bx, 3			; Determine if cluster is odd or even number
 	mul bx
@@ -1287,8 +1286,8 @@ int_filename_convert:
 	cmp ax, 12			; Filename too long?
 	jg .failure0			; Fail if so
 
-	cmp ax, 0
-	je .failure1			; Similarly, fail if zero-char string
+	test ax, ax
+	jz .failure1			; Similarly, fail if zero-char string
 
 	mov dx, ax			; Store string length for now
 
@@ -1306,8 +1305,8 @@ int_filename_convert:
 	jmp .copy_loop
 
 .extension_found:
-	cmp cx, 0
-	je .failure3			; Fail if extension dot is first char
+	test cx, cx
+	jz .failure3			; Fail if extension dot is first char
 
 	cmp cx, 8
 	je .do_extension		; Skip spaces if first bit is 8 chars
@@ -1325,16 +1324,16 @@ int_filename_convert:
 	; Finally, copy over the extension
 .do_extension:
 	lodsb				; 3 characters
-	cmp al, 0
-	je .failure4
+	test al, al
+	jz .failure4
 	stosb
 	lodsb
-	cmp al, 0
-	je .failure4
+	test al, al
+	jz .failure4
 	stosb
 	lodsb
-	cmp al, 0
-	je .failure4
+	test al, al
+	jz .failure4
 	stosb
 
 	mov byte [di], 0		; Zero-terminate filename

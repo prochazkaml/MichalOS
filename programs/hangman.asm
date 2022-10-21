@@ -55,13 +55,13 @@ start:
 
 	mov si, cities				; Skip number of lines stored in BL
 skip_loop:
-	cmp bl, 0
-	je skip_finished
+	test bl, bl
+	jz skip_finished
 	dec bl
 .inner:
 	lodsb					; Find a zero to denote end of line
-	cmp al, 0
-	jne .inner
+	test al, al
+	jnz .inner
 	jmp skip_loop
 
 
@@ -126,8 +126,8 @@ main_loop:
 	mov si, real_string
 find_loop:
 	lodsb
-	cmp al, 0				; End of string?
-	je done_find
+	test al, al				; End of string?
+	jz done_find
 	cmp al, bl				; Find char entered in string
 	je found_char
 	inc cx					; Move on to next character
@@ -150,8 +150,8 @@ done_find:
 	call os_string_compare
 	jc won_game
 
-	cmp dl, 0				; If char was found, skip next bit
-	jne main_loop
+	test dl, dl				; If char was found, skip next bit
+	jnz main_loop
 
 	call update_tried_chars			; Otherwise add char to list of misses
 
@@ -205,8 +205,8 @@ fix_spaces:
 	mov di, work_string
 .loop:
 	lodsb
-	cmp al, 0
-	je .done
+	test al, al
+	jz .done
 	cmp al, ' '
 	jne .no_space
 	mov byte [di], ' '
@@ -225,8 +225,8 @@ update_tried_chars:
 	mov si, tried_chars
 	mov al, bl
 	call os_find_char_in_string
-	cmp ax, 0
-	jne .nothing_to_add			; Skip next bit if char was already in list
+	test ax, ax
+	jnz .nothing_to_add			; Skip next bit if char was already in list
 
 	mov si, tried_chars
 	mov ax, 0
@@ -381,29 +381,29 @@ show_hangman:
 
 
 	cmp byte [misses], 0
-	je near .0
+	je .0
 	cmp byte [misses], 1
-	je near .1
+	je .1
 	cmp byte [misses], 2
-	je near .2
+	je .2
 	cmp byte [misses], 3
-	je near .3
+	je .3
 	cmp byte [misses], 4
-	je near .4
+	je .4
 	cmp byte [misses], 5
-	je near .5
+	je .5
 	cmp byte [misses], 6
-	je near .6
+	je .6
 	cmp byte [misses], 7
-	je near .7
+	je .7
 	cmp byte [misses], 8
-	je near .8
+	je .8
 	cmp byte [misses], 9
-	je near .9
+	je .9
 	cmp byte [misses], 10
-	je near .10
+	je .10
 	cmp byte [misses], 11
-	je near .11
+	je .11
 
 .11:					; Right leg
 	mov dh, 10

@@ -20,22 +20,22 @@ start:
 	popa
 	
 	cmp ax, 1
-	je near .test1
+	je .test1
 	
 	cmp ax, 2
-	je near .test2
+	je .test2
 	
 	cmp ax, 3
-	je near .test3
+	je .test3
 	
 	cmp ax, 4
-	je near .test4
+	je .test4
 	
 .test4:
 	mov ah, 10h
 	int 16h
 	cmp al, "Q"
-	je near start
+	je start
 	
 	push ax
 	
@@ -64,7 +64,7 @@ start:
 	mov ah, 0
 	int 16h
 	cmp al, "Q"
-	je near start
+	je start
 	
 	push ax
 	
@@ -100,7 +100,7 @@ start:
 
 .2nokey:
 	cmp al, "Q"
-	je near start
+	je start
 	
 	push ax
 	
@@ -140,7 +140,7 @@ start:
 
 .3nokey:
 	cmp al, "Q"
-	je near start
+	je start
 	
 	jmp .test3
 	

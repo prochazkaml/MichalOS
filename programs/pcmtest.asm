@@ -34,10 +34,7 @@ start:
 	mov ah, 2
 	mov al, 8
 	int 13h
-	jc .no_error
-
-	cmp ah, 0
-	je .no_error
+	jnc .no_error
 
 	mov ax, .error_msg1
 	mov bx, .error_msg2
@@ -256,8 +253,8 @@ tick:
 	mov     ah, [si]  ; If not, load up the value
 	mov cl, [shr_value]
 	shr     ax, cl           ; Make it a 7-bit value
-	cmp ah, 0
-	je .no_play				; If the value is 0, the PIT thinks it's actually 0x100, so it'll clip
+	test ah, ah
+	jz .no_play				; If the value is 0, the PIT thinks it's actually 0x100, so it'll clip
 
 	mov     al, 0xb0        ; And program PIT Channel 2 to
 	out     0x43, al        ; deliver a pulse that many

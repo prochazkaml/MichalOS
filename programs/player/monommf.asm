@@ -98,11 +98,11 @@ start_mono_mmf:
 	
 	mov [.previous], ax
 	
-	cmp ax, 0
-	je near .notone
+	test ax, ax
+	jz .notone
 	
 	cmp ax, 1
-	je near .end
+	je .end
 	
 	call os_speaker_tone
 	

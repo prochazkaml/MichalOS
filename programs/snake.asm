@@ -90,7 +90,7 @@ section .text
 	buffer_print_string:
 		.next:
 			mov al, [si]
-			cmp al, 0
+			test al, al
 			jz .end
 			mov byte [buffer + di], al
 			inc di
@@ -215,7 +215,7 @@ section .text
 			mov byte [buffer + di], al
 			pop ax
 			dec di
-			cmp ax, 0
+			test ax, ax
 			jnz .next_digit
 			ret
 		.text:
@@ -421,7 +421,7 @@ section .text
 			call buffer_render
 		
 			mov al, [is_game_over]
-			cmp al, 0
+			test al, al
 			jz .main_loop
 			ret
 

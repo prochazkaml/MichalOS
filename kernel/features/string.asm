@@ -20,8 +20,8 @@ os_string_encrypt:
 	
 .loop:
 	lodsb
-	cmp al, 0
-	je .exit
+	test al, al
+	jz .exit
 	
 	add al, cl
 	xor al, 10101010b
@@ -273,8 +273,8 @@ os_string_chomp:
 	jmp .keepcounting
 
 .counted:
-	cmp cx, 0			; No leading spaces?
-	je .finished_copy
+	test cx, cx			; No leading spaces?
+	jz .finished_copy
 
 	mov si, di			; Address of first non-space character
 	mov di, dx			; DI = original string start
@@ -282,8 +282,8 @@ os_string_chomp:
 .keep_copying:
 	mov al, [si]			; Copy SI into DI
 	mov [di], al			; Including terminator
-	cmp al, 0
-	je .finished_copy
+	test al, al
+	jz .finished_copy
 	inc si
 	inc di
 	jmp .keep_copying
@@ -292,8 +292,8 @@ os_string_chomp:
 	mov ax, dx			; AX = original string start
 
 	call os_string_length
-	cmp ax, 0			; If empty or all blank, done, return 'null'
-	je .done
+	test ax, ax			; If empty or all blank, done, return 'null'
+	jz .done
 
 	mov si, dx
 	add si, ax			; Move to end of string
@@ -325,8 +325,8 @@ os_string_compare:
 	cmp al, bl			; Compare characters at current location
 	jne .not_same
 
-	cmp al, 0			; End of first string? Must also be end of second
-	je .terminated
+	test al, al			; End of first string? Must also be end of second
+	jz .terminated
 
 	inc si
 	inc di
@@ -363,8 +363,8 @@ os_string_parse:
 
 .loop1:
 	lodsb				; Get a byte
-	cmp al, 0			; End of string?
-	je .finish
+	test al, al			; End of string?
+	jz .finish
 	cmp al, ' '			; A space?
 	jne .loop1
 	dec si
@@ -375,8 +375,8 @@ os_string_parse:
 
 .loop2:					; Repeat the above for CX and DX...
 	lodsb
-	cmp al, 0
-	je .finish
+	test al, al
+	jz .finish
 	cmp al, ' '
 	jne .loop2
 	dec si
@@ -387,8 +387,8 @@ os_string_parse:
 
 .loop3:
 	lodsb
-	cmp al, 0
-	je .finish
+	test al, al
+	jz .finish
 	cmp al, ' '
 	jne .loop3
 	dec si
@@ -431,8 +431,8 @@ os_string_to_hex:
 	lodsb					; Load a byte from SI
 	mov cl, al
 	pop eax
-	cmp cl, 0				; Have we reached the end?
-	je near .exit			; If we have, exit
+	test cl, cl				; Have we reached the end?
+	jz .exit			; If we have, exit
 	
 	cmp cl, '9'
 	jle .no_change
@@ -567,8 +567,8 @@ os_get_time_string:
 	
 .hour_loop:	
 	lodsb
-	cmp al, 0
-	je .hour_loop_end
+	test al, al
+	jz .hour_loop_end
 	stosb
 	jmp .hour_loop
 	
@@ -595,8 +595,8 @@ os_get_time_string:
 	lodsb
 	stosb
 	
-	cmp al, 0
-	jne .minute_loop
+	test al, al
+	jnz .minute_loop
 
 .exit:
 	popa
@@ -740,8 +740,8 @@ os_string_to_32int:
 	lodsb					; Load a byte from SI
 	mov cl, al
 	pop eax
-	cmp cl, 0				; Have we reached the end?
-	je near .exit			; If we have, exit
+	test cl, cl				; Have we reached the end?
+	jz .exit			; If we have, exit
 	sub cl, '0'				; Convert the value to decimal
 	and ecx, 255			; Keep the low 8 bits only
 	mul dword [.divisor]	; Multiply EAX by 10
