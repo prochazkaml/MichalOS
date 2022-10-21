@@ -205,6 +205,8 @@ start:
 
 	pop es
 	
+	call os_reset_font
+
 	mov ax, .font_file
 	call os_remove_file
 	jc .save_error
@@ -221,7 +223,6 @@ start:
 	clr dx
 	call os_dialog_box
 	
-	call os_reset_font
 	jmp .redraw_entire
 	
 .save_error:
@@ -452,6 +453,8 @@ start:
 	.driversgmt			dw 0
 	
 char_picker:
+	call os_show_cursor
+
 	mov bl, [57001]
 	mov dx, 2 * 256 + 11
 	mov si, 58
