@@ -46,6 +46,8 @@ start:
 	je .timezone
 		
 .look:
+	call .draw_background
+
 	mov ax, .look_list			; Draw list of settings
 	mov bx, .help_msg1
 	mov cx, .help_msg2
