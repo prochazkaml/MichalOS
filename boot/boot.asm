@@ -5,9 +5,16 @@
 
 	BITS 16
 
+	%macro clr 1
+		xor %1, %1
+	%endmacro
+
+	%macro mov16 3
+		mov %1, (%2 + %3 * 256)
+	%endmacro
+
 	jmp short bootloader_start	; Jump past disk description section
 	nop				; Pad out before disk description
-
 
 ; ------------------------------------------------------------------
 ; Disk description table, to make it a valid floppy
@@ -45,8 +52,8 @@ bootloader_start:
 	mov ax, 0050h			; Move the bootloader to the start of memory
 	mov es, ax
 	
-	xor si, si
-	xor di, di
+	clr si
+	clr di
 
 	mov cx, 512
 	rep movsb
@@ -93,8 +100,8 @@ floppy_ok:				; Ready to read first block of data
 	mov es, bx
 	mov bx, si
 
-	mov ah, 2			; Params for int 13h: read floppy sectors
-	mov al, 14			; And read 14 of them
+	mov16 ax, 14, 2		; Params for int 13h: read floppy sectors
+						; And read 14 of them
 
 	pusha				; Prepare to enter loop
 
@@ -121,7 +128,7 @@ search_dir:
 	mov di, buffer
 
 	mov cx, word [RootDirEntries]	; Search all (224) entries
-	mov ax, 0			; Searching at offset 0
+	clr ax				; Searching at offset 0
 
 
 next_root_entry:
@@ -155,8 +162,8 @@ found_file_to_load:			; Fetch cluster and load FAT into RAM
 	mov di, buffer			; ES:BX points to our buffer
 	mov bx, di
 
-	mov ah, 2			; int 13h params: read (FAT) sectors
-	mov al, 9			; All 9 sectors of 1st FAT
+	mov16 ax, 9, 2		; int 13h params: read (FAT) sectors
+						; All 9 sectors of 1st FAT
 
 	pusha				; Prepare to enter loop
 
@@ -185,10 +192,9 @@ read_fat_ok:
 
 	mov ax, 0360h + 0800h			; Segment where we'll load the kernel
 	mov es, ax
-	mov bx, 0
+	clr bx
 
-	mov ah, 2			; int 13h floppy read params
-	mov al, 1
+	mov16 ax, 1, 2		; int 13h floppy read params
 
 	push ax				; Save in case we (or int calls) lose it
 
@@ -228,7 +234,7 @@ load_file_sector:
 
 calculate_next_cluster:
 	mov ax, [cluster]
-	mov dx, 0
+	clr dx
 	mov bx, 3
 	mul bx
 	mov bx, 2
@@ -277,9 +283,9 @@ end:					; We've got the file to load!
 ; BOOTLOADER SUBROUTINES
 
 reboot:
-	mov ax, 0
+	clr ax
 	int 16h				; Wait for keystroke
-	mov ax, 0
+	clr ax
 	int 19h				; Reboot the system
 
 
@@ -291,8 +297,8 @@ print_string:				; Output string in SI to screen
 .repeat:
 	lodsb				; Get char from string
 	int 10h				; Otherwise, print it
-	cmp al, 0
-	jne	short .repeat
+	test al, al
+	jnz .repeat
 
 .done:
 	popa
@@ -302,7 +308,7 @@ print_string:				; Output string in SI to screen
 reset_floppy:		; IN: [bootdev] = boot device; OUT: carry set on error
 	push ax
 	push dx
-	mov ax, 0
+	clr ax
 	mov dl, [bootdev]
 	stc
 	int 13h
@@ -318,15 +324,15 @@ l2hts:			; Calculate head, track and sector settings for int 13h
 
 	mov bx, ax			; Save logical sector
 
-	mov dx, 0			; First the sector
+	clr dx				; First the sector
 	div word [SectorsPerTrack]
 	add dl, 01h			; Physical sectors start at 1
 	mov cl, dl			; Sectors belong in CL for int 13h
 	mov ax, bx
 
-	mov dx, 0			; Now calculate the head
+	clr dx				; Now calculate the head
 	div word [SectorsPerTrack]
-	mov dx, 0
+	clr dx
 	div word [Sides]
 	mov dh, dl			; Head/side
 	mov ch, al			; Track
@@ -347,12 +353,10 @@ l2hts:			; Calculate head, track and sector settings for int 13h
 	disk_error	db "DRV", 0
 	file_not_found	db "ERR", 0
 	boot_complete	db "OK", 0
-;	boot_fail		db "E03", 0
 	
 	bootdev		db 0 	; Boot device number
 	cluster		dw 0 	; Cluster of the file we want to load
 	pointer		dw 0 	; Pointer into Buffer, for loading kernel
-;	pointer		dw 32768 	; Pointer into Buffer, for loading kernel
 
 
 ; ------------------------------------------------------------------
