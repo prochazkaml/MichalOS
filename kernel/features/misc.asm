@@ -68,48 +68,6 @@ os_illegal_call:
 	
 	.msg db 'Called a non-existent system function', 0
 	
-os_update_clock:
-	pusha
-	cmp byte [0082h], 1
-	je near .update_time_end
-	
-	mov ah, 02h			; Get the time
-	call os_int_1Ah
-	cmp cx, [.tmp_time]
-	je near .update_time_end
-	mov [.tmp_time], cx
-	
-	call os_get_cursor_pos
-	push dx
-	
-	mov bx, .tmp_buffer
-	call os_get_date_string
-	
-	mov dx, 69			; Display date
-	call os_move_cursor
-
-	mov si, bx
-	call os_print_string
-	
-	mov bx, .tmp_buffer
-	call os_get_time_string
-
-	mov dx, 63			; Display time
-	call os_move_cursor
-	mov si, bx
-	call os_print_string
-	
-	pop dx
-	call os_move_cursor
-	
-.update_time_end:
-	popa
-	ret
-	
-	.tmp_buffer		times 12 db 0
-	.tmp_time		dw 0
-	.tmp_hours		db 0
-
 ; ------------------------------------------------------------------
 ; os_get_os_name -- Get the OS name string
 ; OUT: SI = OS name string, zero-terminated
@@ -389,6 +347,12 @@ os_int_1Ah:
 	.months		db 0
 	.years		db 0
 	.centuries	db 0
-	
+
+; Generic jump location for function termination
+
+int_popa_ret:
+	popa
+	ret
+
 ; ==================================================================
 

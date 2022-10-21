@@ -9,6 +9,8 @@
 
 os_putchar:
 	pusha
+
+.no_pusha:
 	mov ah, 0Eh
 	int 10h
 	popa
@@ -22,6 +24,7 @@ os_putchar:
 os_put_chars:
 	pusha
 	
+.no_pusha:
 .loop:
 	lodsb
 	cmp al, bl
@@ -43,17 +46,10 @@ os_put_chars:
 os_print_string:
 	pusha
 
-.repeat:
-	lodsb				; Get char from string
-	cmp al, 0
-	je .done			; If char is zero, end of string
+	mov bl, 0
+	clr cx
 
-	call os_putchar
-	jmp .repeat			; And move on to next char
-
-.done:
-	popa
-	ret
+	jmp os_put_chars.no_pusha
 
 ; ------------------------------------------------------------------
 ; os_print_string_box -- Displays text inside a text-box.
@@ -67,7 +63,7 @@ os_print_string_box:
 .repeat:
 	lodsb				; Get char from string
 	cmp al, 0
-	je .done			; If char is zero, end of string
+	je int_popa_ret		; If char is zero, end of string
 
 	cmp al, 13
 	je .cr
@@ -75,10 +71,6 @@ os_print_string_box:
 	call os_putchar
 	jmp .repeat			; And move on to next char
 
-.done:
-	popa
-	ret
-	
 .cr:
 	call os_get_cursor_pos
 	mov dl, cl
@@ -105,7 +97,7 @@ os_format_string:
 	cmp al, 10
 	je .lf
 	cmp al, 0
-	je .done			; If char is zero, end of string
+	je int_popa_ret		; If char is zero, end of string
 
 	int 10h				; Otherwise, print it
 
@@ -124,10 +116,6 @@ os_format_string:
 	call os_move_cursor
 	jmp .repeat
 	
-.done:
-	popa
-	ret
-
 
 ; ------------------------------------------------------------------
 ; os_clear_screen -- Clears the screen to background
@@ -136,7 +124,7 @@ os_format_string:
 os_clear_screen:
 	pusha
 
-	mov dx, 0			; Position cursor at top-left
+	clr dx				; Position cursor at top-left
 	call os_move_cursor
 
 	mov16 ax, 0, 6		; Scroll full-screen
@@ -156,6 +144,7 @@ os_clear_screen:
 os_move_cursor:
 	pusha
 
+.no_pusha:
 	mov bh, 0
 	mov ah, 2
 	int 10h				; BIOS interrupt to move cursor
@@ -175,39 +164,8 @@ os_get_cursor_pos:
 	mov ah, 3
 	int 10h				; BIOS interrupt to get cursor position
 
-	mov [.tmp], dx
-	popa
-	mov dx, [.tmp]
-	ret
-
-
-	.tmp dw 0
-
-
-; ------------------------------------------------------------------
-; os_print_horiz_line -- Draw a horizontal line on the screen
-; IN: AX = line type (1 for double (-), otherwise single (=))
-; OUT: Nothing (registers preserved)
-
-os_print_horiz_line:
-	pusha
-
-	mov cx, ax			; Store line type param
-	mov al, 196			; Default is single-line code
-
-	cmp cx, 1			; Was double-line specified in AX?
-	jne .ready
-	mov al, 205			; If so, here's the code
-
-.ready:
-	mov cx, 80			; Counter
-	mov ah, 0Eh			; BIOS output char routine
-	mov bh, 0
-	
-.loop:
-	int 10h
-	loop .loop
-	
+	mov bx, sp
+	mov [ss:bx + 10], dx
 	popa
 	ret
 
@@ -219,6 +177,7 @@ os_print_horiz_line:
 os_show_cursor:
 	pusha
 
+.no_pusha:
 	mov16 cx, 7, 6
 	mov16 ax, 3, 1
 	int 10h
@@ -691,8 +650,7 @@ os_list_dialog_tooltip:
 	mov16 dx, 42, 3
 	call os_move_cursor
 
-	call [.callbackaddr]
-	ret
+	jmp [.callbackaddr]
 	
 	.callbackaddr	dw 0
 	
@@ -1154,13 +1112,8 @@ os_draw_background:
 	push bx
 	push cx
 
-	mov dx, 0
-	call os_move_cursor
-
-	mov ax, 0920h			; Draw white bar at top
-	mov cx, 80
-	mov bx, 01110000b
-	int 10h
+	mov16 dx, 0, 0
+	call .draw_bar
 
 	mov dx, 256
 	call os_move_cursor
@@ -1168,7 +1121,8 @@ os_draw_background:
 	pop bx				; Get colour param (originally in CX)
 	cmp bx, 256
 	je .draw_default_background
-	
+
+.fill_bg:	
 	mov ax, 0920h			; Draw colour section
 	mov cx, 1840
 	mov bh, 0
@@ -1176,65 +1130,40 @@ os_draw_background:
 
 .bg_drawn:
 	mov16 dx, 0, 24
-	call os_move_cursor
-
-	mov ax, 0920h			; Draw white bar at top
-	mov cx, 80
-	mov bx, 01110000b
-	int 10h
+	call .draw_bar
 
 	mov16 dx, 1, 24
 	call os_move_cursor
 	pop si				; Get bottom string param
 	call os_print_string
 
-	mov dx, 1
+	mov16 dx, 1, 0
 	call os_move_cursor
 	pop si				; Get top string param
 	call os_print_string
 
-	mov bx, tmp_string
-	call os_get_date_string
-	
-	mov dx, 69			; Display date
-	call os_move_cursor
-	mov si, bx
-	call os_print_string
-	
-	mov bx, tmp_string
-	call os_get_time_string
-
-	mov dx, 63			; Display time
-	call os_move_cursor
-	mov si, bx
-	call os_print_string
-	
-	mov dl, 79			; Print the little speaker icon
-	call os_move_cursor
-	
-	mov ax, 0E17h
-	sub al, [0083h]
-	mov bh, 0
-	int 10h
-	
+	call os_print_clock
+		
 	mov16 dx, 0, 1		; Ready for app text
-	call os_move_cursor
-
-	popa
-	ret
+	jmp os_move_cursor.no_pusha
 
 .draw_default_background:
+	mov bl, byte [57000] ; In case it is necessary
+
 	cmp byte [fs:DESKTOP_BACKGROUND], 0
-	je .fill_color
+	je .fill_bg
 	
 	push ds
 	push es
 	
-	mov ds, [driversgmt]
+	push fs	; Set up source pointer
+	pop ds
+
 	mov si, DESKTOP_BACKGROUND
 
-	mov ax, 0B800h
-	mov es, ax
+	push 0B800h ; Set up destination pointer
+	pop es
+
 	mov di, 160
 	
 	mov cx, 80 * 23 * 2
@@ -1245,16 +1174,14 @@ os_draw_background:
 	pop ds
 	jmp .bg_drawn
 	
-.fill_color:
-	movzx bx, byte [57000]
-	mov ax, 0920h
-	mov cx, 1840
+.draw_bar:
+	call os_move_cursor
 
+	mov ax, 0920h			; Draw white bar at top
+	mov cx, 80
+	mov bx, 01110000b
 	int 10h
-	jmp .bg_drawn
-
-	tmp_string			times 15 db 0
-
+	ret
 
 ; ------------------------------------------------------------------
 ; os_print_newline -- Reset cursor to start of next line
@@ -1263,15 +1190,10 @@ os_draw_background:
 os_print_newline:
 	pusha
 
-	mov ah, 0Eh			; BIOS output char code
-
 	mov al, 13
-	int 10h
+	call os_putchar
 	mov al, 10
-	int 10h
-
-	popa
-	ret
+	jmp os_putchar.no_pusha
 
 
 ; ------------------------------------------------------------------
@@ -1323,55 +1245,8 @@ os_dump_registers:
 
 os_input_dialog:
 	pusha
-
-	push ax				; Save string location
-	push bx				; Save message to show
-
-
-	mov16 dx, 12, 10			; First, draw red background box
-
-.redbox:				; Loop to draw all lines of box
-	call os_move_cursor
-
-	pusha
-	mov16 ax, ' ', 09h
-	mov cx, 55
-	movzx bx, byte [57001]		; Color from RAM
-	int 10h
-	popa
-
-	inc dh
-	cmp dh, 16
-	je .boxdone
-	jmp .redbox
-
-
-.boxdone:
-	mov16 dx, 14, 14
-	call os_move_cursor
-
-	mov16 ax, ' ', 09h
-	mov bx, 240
-	mov cx, 51
-	int 10h
-	
-	mov16 dx, 14, 11
-	call os_move_cursor
-	
-
-	pop bx				; Get message back and display it
-	mov si, bx
-	call os_print_string
-
-	mov16 dx, 14, 14
-	call os_move_cursor
-
-
-	pop ax				; Get input string back
-	call os_input_string
-
-	popa
-	ret
+	mov ch, 0
+	jmp int_input_dialog
 
 ; ------------------------------------------------------------------
 ; os_password_dialog -- Get a password from user via a dialog box
@@ -1379,30 +1254,23 @@ os_input_dialog:
 
 os_password_dialog:
 	pusha
+	mov ch, 1
 
-	push ax				; Save string location
+; ------------------------------------------------------------------
+; int_input_dialog -- Get text string from user via a dialog box
+; IN: AX = string location, BX = message to show,
+;     CH = CH = 0 if normal input, 1 if password input
+
+int_input_dialog:
+	pusha
 	push bx				; Save message to show
 
-
+	mov bl, [57001]		; Color from RAM
 	mov16 dx, 12, 10			; First, draw red background box
+	mov si, 55
+	mov di, 16
+	call os_draw_block
 
-.redbox:				; Loop to draw all lines of box
-	call os_move_cursor
-
-	pusha
-	mov16 ax, ' ', 09h
-	mov cx, 55
-	movzx bx, byte [57001]		; Color from RAM
-	int 10h
-	popa
-
-	inc dh
-	cmp dh, 16
-	je .boxdone
-	jmp .redbox
-
-
-.boxdone:
 	mov16 dx, 14, 14
 	call os_move_cursor
 
@@ -1414,7 +1282,6 @@ os_password_dialog:
 	mov16 dx, 14, 11
 	call os_move_cursor
 	
-
 	pop bx				; Get message back and display it
 	mov si, bx
 	call os_print_string
@@ -1422,14 +1289,8 @@ os_password_dialog:
 	mov16 dx, 14, 14
 	call os_move_cursor
 
-
-	pop ax				; Get input string back
-	mov bl, 240
-	call os_input_password
-
 	popa
-	ret
-
+	jmp int_input_string
 
 ; ------------------------------------------------------------------
 ; os_dialog_box -- Print dialog box in middle of screen, with button(s)
@@ -1441,83 +1302,34 @@ os_password_dialog:
 
 os_dialog_box:
 	pusha
-
-	push dx
-
-	push cx
-	push bx
-	push ax
-	
-	call os_hide_cursor
+	mov si, ax
+	mov ax, bx
+	mov bx, cx
+	clr cx
+	clr dx
+	call os_temp_box
+	popa
 
 	pusha
-	mov bl, [57001]		; Color from RAM
-	mov16 dx, 19, 9			; First, draw red background box
-	mov si, 42
-	mov di, 16
-	call os_draw_block
-	popa
-	
-	mov16 dx, 20, 9
-	mov cx, 3
-	
-.loop:
-	inc dh
-	call os_move_cursor
-	
-	pop si
-	cmp si, 0
-	je .no_string
-	
-	call os_print_string
-	
-.no_string:
-	loop .loop
-	
-	pop dx
 	cmp dx, 1
 	je .two_button
 
-	
 .one_button:
-	mov bl, 11110000b		; Black on white
 	mov16 dx, 35, 14
-	mov si, 8
-	mov di, 15
-	call os_draw_block
-
-	mov16 dx, 38, 14		; OK button, centred at bottom of box
 	call os_move_cursor
+
+	mov bl, 0F0h
 	mov si, .ok_button_string
-	call os_print_string
+	call os_format_string
 
 .one_button_wait:
 	call os_wait_for_key
 	cmp al, 13			; Wait for enter key (13) to be pressed
 	jne .one_button_wait
 
-	call os_show_cursor
-
-	popa
-	ret
+	jmp os_show_cursor.no_pusha
 
 .two_button:
-	mov bl, 11110000b		; Black on white
-	mov16 dx, 27, 14
-	mov si, 8
-	mov di, 15
-	call os_draw_block
-
-	mov16 dx, 30, 14			; OK button
-	call os_move_cursor
-	mov si, .ok_button_string
-	call os_print_string
-
-	mov16 dx, 44, 14			; Cancel button
-	call os_move_cursor
-	mov si, .cancel_button_string
-	call os_print_string
-
 	cmp byte [0085h], 1
 	je .draw_right
 	jne .draw_left
@@ -1534,79 +1346,54 @@ os_dialog_box:
 	je .cancel
 	cmp al, 13			; Wait for enter key (13) to be pressed
 	jne .two_button_wait
-	
+
+.exit:	
 	call os_show_cursor
 
-	mov [.tmp], cx			; Keep result after restoring all regs
+	mov [.tmp], cl			; Keep result after restoring all regs
 	popa
-	mov ax, [.tmp]
+	movzx ax, byte [.tmp]
 
 	ret
 
 .cancel:
-	call os_show_cursor
-	popa
-	mov ax, 1
-	ret
+	mov cl, 1
+	jmp .exit
 
 .draw_left:
-	mov bl, 11110000b		; Black on white
-	mov16 dx, 27, 14
-	mov si, 8
-	mov di, 15
-	call os_draw_block
+	mov cl, 0
+	mov bl, 11110000b
+	mov bh, [57001]
 
-	mov16 dx, 30, 14		; OK button
-	call os_move_cursor
-	mov si, .ok_button_string
-	call os_print_string
-
-	mov bl, [57001]
-	mov16 dx, 42, 14
-	mov si, 9
-	mov di, 15
-	call os_draw_block
-
-	mov16 dx, 44, 14		; Cancel button
-	call os_move_cursor
-	mov si, .cancel_button_string
-	call os_print_string
-
-	mov cx, 0			; And update result we'll return
-	jmp .two_button_wait
+	jmp .draw_buttons
 
 .draw_right:
+	mov cl, 1
 	mov bl, [57001]
+	mov bh, 11110000b
+
+	jmp .draw_buttons
+
+.draw_buttons:
 	mov16 dx, 27, 14
-	mov si, 8
-	mov di, 15
-	call os_draw_block
-
-	mov16 dx, 30, 14			; OK button
 	call os_move_cursor
+
 	mov si, .ok_button_string
-	call os_print_string
+	call os_format_string
 
-	mov bl, 11110000b
-	mov16 dx, 43, 14
-	mov si, 8
-	mov di, 15
-	call os_draw_block
-
-	mov16 dx, 44, 14			; Cancel button
+	mov16 dx, 42, 14
 	call os_move_cursor
-	mov si, .cancel_button_string
-	call os_print_string
 
-	mov cx, 1			; And update result we'll return
+	mov bl, bh
+	mov si, .cancel_button_string
+	call os_format_string
+
 	jmp .two_button_wait
 
+	.ok_button_string	db '   OK   ', 0
+	.cancel_button_string	db ' Cancel ', 0
 
-
-	.ok_button_string	db 'OK', 0
-	.cancel_button_string	db 'Cancel', 0
-
-	.tmp dw 0
+	.tmp db 0
 
 ; ------------------------------------------------------------------
 ; os_print_space -- Print a space to the screen
@@ -1614,12 +1401,8 @@ os_dialog_box:
 
 os_print_space:
 	pusha
-
-	mov ax, 0E20h			; BIOS teletype function
-	int 10h
-
-	popa
-	ret
+	mov al, ' '
+	jmp os_putchar.no_pusha
 
 
 ; ------------------------------------------------------------------
@@ -1628,20 +1411,19 @@ os_print_space:
 ; IN: AX = "digit" to format and print
 
 os_print_digit:
-	pusha
+	push ax
 
-	cmp ax, 9			; There is a break in ASCII table between 9 and A
+.no_push_ax:
+	cmp al, 9			; There is a break in ASCII table between 9 and A
 	jle .digit_format
 
-	add ax, 'A'-'9'-1		; Correct for the skipped punctuation
+	add al, 'A'-'9'-1		; Correct for the skipped punctuation
 
 .digit_format:
-	add ax, '0'			; 0 will display as '0', etc.	
+	add al, '0'			; 0 will display as '0', etc.	
 
-	mov ah, 0Eh			; May modify other registers
-	int 10h
-
-	popa
+	call os_putchar
+	pop ax
 	ret
 
 
@@ -1650,13 +1432,11 @@ os_print_digit:
 ; IN: AL = number to format and print
 
 os_print_1hex:
-	pusha
+	push ax
 
-	and ax, 0Fh			; Mask off data to display
-	call os_print_digit
-
-	popa
-	ret
+.no_push_ax:
+	and al, 0Fh			; Mask off data to display
+	jmp os_print_digit.no_push_ax
 
 
 ; ------------------------------------------------------------------
@@ -1664,17 +1444,15 @@ os_print_1hex:
 ; IN: AL = number to format and print
 
 os_print_2hex:
-	pusha
+	push ax
 
+.no_push_ax:
 	push ax				; Output high nibble
 	shr ax, 4
 	call os_print_1hex
 
 	pop ax				; Output low nibble
-	call os_print_1hex
-
-	popa
-	ret
+	jmp os_print_1hex.no_push_ax
 
 
 ; ------------------------------------------------------------------
@@ -1682,104 +1460,114 @@ os_print_2hex:
 ; IN: AX = number to format and print
 
 os_print_4hex:
-	pusha
+	push ax
 
 	push ax				; Output high byte
 	mov al, ah
 	call os_print_2hex
 
 	pop ax				; Output low byte
-	call os_print_2hex
-
-	popa
-	ret
-
+	jmp os_print_2hex.no_push_ax
 
 ; ------------------------------------------------------------------
 ; os_input_string -- Take string from keyboard entry
-; IN/OUT: AX = location of string, other regs preserved
+; IN: AX = location of string
 ; (Location will contain up to [0088h] characters, zero-terminated)
 
 os_input_string:
 	pusha
 
+.no_pusha:
+	mov ch, 0
+	jmp int_input_string
+
+; ------------------------------------------------------------------
+; os_input_password -- Take password from keyboard entry
+; IN: AX = location of string
+; (Location will contain up to [0088h] characters, zero-terminated)
+
+os_input_password:
+	pusha
+
+.no_pusha:
+	mov ch, 1
+
+; ------------------------------------------------------------------
+; int_input_string -- Take string from keyboard entry
+; IN: AX = location of string, CH = 0 if normal input, 1 if password input
+; (Location will contain up to [0088h] characters, zero-terminated)
+
+int_input_string:
 	call os_show_cursor
 	
 	mov di, ax			; DI is where we'll store input (buffer)
-	mov cx, 0			; Character received counter for backspace
+	clr cl				; Received characters counter for backspace
 
-
-.more:					; Now onto string getting
+.more:
 	call os_wait_for_key
 
 	cmp al, 13			; If Enter key pressed, finish
 	je .done
 
 	cmp al, 8			; Backspace pressed?
-	je .backspace			; If not, skip following checks
+	je .backspace		; If so, skip following checks
 
 	cmp al, ' '			; In ASCII range (32 - 127)?
-	jl .more			; Ignore most non-printing characters
+	jl .more			; Ignore most non-printable characters
 
-	jmp .nobackspace
+	cmp cl, [0088h]		; Make sure we don't exhaust buffer
+	je .more
 
+	stosb				; Store character in designated buffer
+
+	cmp ch, 0
+	je .no_star
+
+	mov al, '*'			; If password input was selected, print stars instead
+
+.no_star:
+	call os_putchar
+
+	inc cl				; Characters processed += 1
+	
+	jmp near .more			; Still room for more
 
 .backspace:
-	cmp cx, 0			; Backspace at start of string?
+	cmp cl, 0			; Backspace at start of string?
 	je .more			; Ignore it if so
 
 	call os_get_cursor_pos		; Backspace at start of screen line?
 	cmp dl, 0
 	je .backspace_linestart
 
-	pusha
-	mov ax, 0E08h		; If not, write space and move cursor back
-	int 10h				; Backspace twice, to clear space
-	mov al, 32
-	int 10h
-	mov al, 8
-	int 10h
-	popa
+	dec dl
+	call os_move_cursor
+	mov al, ' '
+	call os_putchar
+	call os_move_cursor
 
 	dec di				; Character position will be overwritten by new
 						; character or terminator at end
 
-	dec cx				; Step back counter
+	dec cl				; Step back counter
 
 	jmp .more
-
 
 .backspace_linestart:
 	dec dh				; Jump back to end of previous line
 	mov dl, 79
 	call os_move_cursor
 
-	mov ax, 0E20h		; Print space there
-	int 10h
+	mov al, ' '			; Clear the character there
+	call os_putchar
 
 	mov dl, 79			; And jump back before the space
 	call os_move_cursor
 
 	dec di				; Step back position in string
-	dec cx				; Step back counter
+	dec cl				; Step back counter
 
 	jmp .more
-
-
-.nobackspace:
-	movzx bx, byte [0088h]
-	cmp cx, bx			; Make sure we don't exhaust buffer
-	jge near .more
-
-	pusha
-	mov ah, 0Eh			; Output entered, printable character
-	int 10h
-	popa
-
-	stosb				; Store character in designated buffer
-	inc cx				; Characters processed += 1
-	
-	jmp near .more			; Still room for more
 
 .done:
 	mov al, 0
@@ -1787,95 +1575,6 @@ os_input_string:
 
 	popa
 	ret
-
-; Input password(displays it as *s)
-; IN: AX = location of string, other regs preserved, BL = color
-; OUT: nothing
-; (Location will contain up to [0088h] characters, zero-terminated)
-
-os_input_password:
-	pusha
-
-	call os_get_cursor_pos	; Store the cursor position
-	mov [.cursor], dx
-	
-	mov di, ax			; DI is where we'll store input (buffer)
-	mov cx, 0			; Character received counter for backspace
-
-.more:					; Now onto string getting
-	call os_wait_for_key
-
-	cmp al, 13			; If Enter key pressed, finish
-	je .done
-
-	cmp al, 8			; Backspace pressed?
-	je .backspace			; If not, skip following checks
-
-	cmp al, ' '			; In ASCII range (32 - 126)?
-	jge .nobackspace	; Ignore most non-printing characters
-	
-	cmp al, 0
-	jl .nobackspace
-	
-	jmp .more
-
-
-.backspace:
-	cmp cx, 0			; Backspace at start of string?
-	je .more			; Ignore it if so
-
-	dec di				; Character position will be overwritten by new
-						; character or terminator at end
-
-	dec cx				; Step back counter
-
-	call .update
-	
-	jmp near .more
-
-
-.nobackspace:
-	movzx dx, byte [0088h]
-	cmp cx, dx			; Make sure we don't exhaust buffer
-	jge near .more
-
-	stosb				; Store character in designated buffer
-	inc cx				; Characters processed += 1
-
-	call .update
-	
-	jmp near .more		; Still room for more
-
-.done:
-	mov al, 0
-	stosb
-
-	popa
-	clc
-	ret
-
-.update:
-	pusha
-	mov dx, [.cursor]
-	call os_move_cursor
-	mov ax, 0920h		; Clear the line
-	mov bh, 0
-	mov cx, 32
-	int 10h
-	popa
-
-	pusha
-	mov dx, [.cursor]
-	call os_move_cursor
-	mov ax, 092Ah		; Print *s(amount in CX)
-	mov bh, 0
-	int 10h
-	add dl, cl
-	call os_move_cursor
-	popa
-	ret
-	
-	.cursor			dw 0
 	
 ; Opens up os_list_dialog with color.
 ; IN: nothing
@@ -1888,28 +1587,26 @@ os_color_selector:
 	mov cx, .colormsg1
 	call os_list_dialog
 	
-	dec ax						; Output from os_list_dialog starts with 1, so decrement it
-	mov [.tmp_word], ax
+	dec al						; Output from os_list_dialog starts with 1, so decrement it
+	mov [.tmp_byte], al
 	popa
-	mov al, [.tmp_word]
+	mov al, [.tmp_byte]
 	ret
 	
 	.colorlist	db 'Black,Blue,Green,Cyan,Red,Magenta,Brown,Light Gray,Dark Gray,Light Blue,Light Green,Light Cyan,Light Red,Pink,Yellow,White', 0
-	.colormsg0	db 'Choose a color...', 0
+	.colormsg0	db 'Choose a color...' ; termination not necessary here
 	.colormsg1	db 0
-	.tmp_word	dw 0
+	.tmp_byte	db 0
 	
 ; Displays EAX in hex format
 ; IN: EAX = unsigned integer
 ; OUT: nothing
 os_print_8hex:
 	pushad
-	pushad
 	shr eax, 16
 	call os_print_4hex
 	popad
 	call os_print_4hex
-	popad
 	ret
 	
 ; Displays a dialog similar to os_dialog_box, but without the buttons.
@@ -1926,25 +1623,12 @@ os_temp_box:
 	
 	call os_hide_cursor
 
+	mov bl, [57001]		; Color from RAM
 	mov16 dx, 19, 9			; First, draw red background box
+	mov si, 42
+	mov di, 16
+	call os_draw_block
 
-.redbox:				; Loop to draw all lines of box
-	call os_move_cursor
-
-	pusha
-	mov ax, 0920h
-	movzx bx, byte [57001]		; Color from RAM
-	mov cx, 42
-	int 10h
-	popa
-
-	inc dh
-	cmp dh, 16
-	je .boxdone
-	jmp .redbox
-
-
-.boxdone:
 	mov16 dx, 20, 9
 	mov cx, 5
 
@@ -1960,6 +1644,7 @@ os_temp_box:
 
 .no_string:
 	loop .loop
+
 	popa
 	ret
 
@@ -1968,16 +1653,15 @@ os_temp_box:
 ; OUT: nothing
 os_print_footer:
 	pusha
-	mov al, [0082h]
-	cmp al, 1
-	je near .exit
+	cmp byte [0082h], 1
+	je int_popa_ret
 	
 	call os_get_cursor_pos
 	push dx
 	
 	mov di, 1
 	cmp si, 0
-	je near .restore
+	je .restore
 	
 	mov16 dx, 0, 24
 	
@@ -1995,7 +1679,8 @@ os_print_footer:
 	jnge near .loop
 	
 	mov byte [80], 0
-	
+
+.print:
 	mov16 dx, 0, 24
 	call os_move_cursor
 	
@@ -2004,30 +1689,15 @@ os_print_footer:
 	mov cx, 80
 	int 10h
 	
-	mov16 dx, 0, 24
-	call os_move_cursor
-	
 	call os_print_string
 	
 	pop dx
-	call os_move_cursor
+	jmp os_move_cursor.no_pusha
 
-.exit:	
-	popa
-	ret
-	
 .restore:
-	mov16 dx, 0, 24
-	call os_move_cursor
 	mov si, 1
-	call os_print_string
-	
-	pop dx
-	call os_move_cursor
-	
-	popa
-	ret
-	
+	jmp .print
+
 ; Resets the font to the selected default.
 ; IN = nothing
 ; OUT = nothing
@@ -2035,7 +1705,7 @@ os_reset_font:
 	pusha
 	
 	cmp byte [57073], 1
-	je near .bios
+	je .bios
 	
 	push es
 	mov ax, 1100h
@@ -2046,9 +1716,7 @@ os_reset_font:
 	mov bp, SYSTEM_FONT
 	int 10h
 	pop es
-	popa
-	ret
-	
+
 .bios:
 	popa
 	ret
@@ -2059,18 +1727,13 @@ os_reset_font:
 os_draw_logo:
 	pusha
 	
-	mov16 dx, 0, 2
-	call os_move_cursor
-
 	mov ax, 0920h
 	mov bx, 00000100b
 	mov cx, 560
 	int 10h
 
 	mov si, logo
-	call os_draw_icon
-	popa
-	ret
+	jmp os_draw_icon.no_pusha
 
 ; Draws an icon (in the MichalOS format).
 ; IN: SI = address of the icon
@@ -2078,64 +1741,52 @@ os_draw_logo:
 os_draw_icon:
 	pusha
 	
+.no_pusha:
 	call os_get_cursor_pos
-	mov [.cursor], dx
 	
 	lodsw
-	mov [.size], ax
 	
 	clr cx
 	
 .loop:
-	lodsb
-	
-	mov ah, 0Eh
-	
+	push ax
 	push cx
-	mov cl, al
-	movzx bx, cl
+
+	lodsb
+		
+	mov cx, 4
+	mov ah, al
+
+.byteloop:
+	movzx bx, ah
 	and bl, 11000000b
 	shr bl, 6
 	mov al, [.chars + bx]
-	int 10h
-	
-	movzx bx, cl
-	and bl, 110000b
-	shr bl, 4
-	mov al, [.chars + bx]
-	int 10h
-	
-	movzx bx, cl
-	and bl, 1100b
-	shr bl, 2
-	mov al, [.chars + bx]
-	int 10h
-	
-	movzx bx, cl
-	and bl, 11b
-	mov al, [.chars + bx]
-	int 10h
+	call os_putchar
+
+	shl ah, 2
+
+	loop .byteloop
+
 	pop cx
-	
+	pop ax
+
 	inc cl
-	cmp cl, [.size]
+	cmp cl, al
 	jne .loop
 
-	inc byte [.cursor + 1]
-	mov dx, [.cursor]
+	inc dh
 	call os_move_cursor
 	
 	mov cl, 0
 	inc ch
-	cmp ch, [.size + 1]
+	cmp ch, ah
 	jne .loop
 	
 	popa
 	ret
 
-	.cursor		dw 0
 	.chars		db 32, 220, 223, 219
-	.size		dw 0
 	
 ; ------------------------------------------------------------------
 ; os_option_menu -- Show a menu with a list of options
@@ -2430,5 +2081,34 @@ os_option_menu:
 	.skip_num				db 0
 	.list_string			dw 0
 	.width					dw 0
+
+os_print_clock:
+	pusha
+	call os_get_cursor_pos
+	push dx
 	
+	mov bx, .tmp_buffer
+	call os_get_time_string
+
+	mov dx, 63			; Display time
+	call os_move_cursor
+	mov si, bx
+	call os_print_string
+
+	mov bx, .tmp_buffer
+	call os_get_date_string
+
+	call os_print_space
+	mov si, bx
+	call os_print_string
+	
+	mov al, 17h
+	sub al, [0083h]
+	call os_putchar
+
+	pop dx
+	jmp os_move_cursor.no_pusha
+		
+	.tmp_buffer		times 12 db 0
+
 ; ==================================================================

@@ -174,7 +174,6 @@ os_get_memory			equ 8120h	;										OUT: AX = conventional memory (kB), BX = ex
 os_get_int_handler		equ 813Eh	; IN: CL = int number					OUT: DI:SI = code location
 os_draw_logo			equ 8057h	;										OUT: A very beautiful logo
 os_modify_int_handler	equ 8126h	; IN: CL = int number, DI:SI = code location
-os_update_clock			equ 80E4h	; (Nothing used)
 os_crash_application	equ 80E7h	; (Nothing used)
 os_attach_app_timer		equ 80CCh
 os_return_app_timer		equ 80DEh

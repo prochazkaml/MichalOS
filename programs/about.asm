@@ -8,6 +8,9 @@ start:
 	mov bx, .footer_msg
 	call draw_background
 
+	mov16 dx, 0, 2
+	call os_move_cursor
+
 	call os_draw_logo
 	
 	mov16 dx, 2, 10
@@ -33,6 +36,9 @@ start:
 .hall_of_fame:
 	mov bx, .footer_msg_hall
 	call draw_background
+
+	mov16 dx, 0, 2
+	call os_move_cursor
 
 	call os_draw_logo
 	

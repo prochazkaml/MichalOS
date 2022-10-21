@@ -330,13 +330,7 @@ logoinput:
 	mov dx, 9 * 256
 	call os_move_cursor
 
-	mov ax, 0920h
-	mov bx, 00000100b
-	mov cx, 560
-	int 10h
-	
-	mov si, logo
-	call os_draw_icon
+	call os_draw_logo
 
 	mov dx, 20 * 256 + 2
 	call os_move_cursor

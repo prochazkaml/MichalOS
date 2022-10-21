@@ -171,8 +171,14 @@ os_compat_int1C:
 	
 	dec word [screensaver_timer]
 	
-.no_update_screensaver:	
-	call os_update_clock
+.no_update_screensaver:
+	mov ah, 02h			; Get the time
+	call os_int_1Ah
+	cmp cx, [.tmp_time]
+	je .no_update
+	mov [.tmp_time], cx
+
+	call os_print_clock
 
 .no_update:
 	cmp byte [cs:timer_application_attached], 1
@@ -183,6 +189,8 @@ os_compat_int1C:
 	popad
 	sti
 	iret
+
+	.tmp_time	dw 0
 
 .app_routine:
 	call [cs:timer_application_offset]
