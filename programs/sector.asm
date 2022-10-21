@@ -2,14 +2,29 @@
 	%INCLUDE "michalos.inc"
 
 start:
-	mov al, [0]
-	mov [.drive], al
-	
 	call .draw_background
-	mov16 dx, 0, 4
+	mov16 dx, 5, 4
 	call os_move_cursor
-	mov si, .hexchars
-	call os_print_string
+
+	clr al
+
+.hex2_title_loop:
+	call os_print_2hex
+	call os_print_space
+
+	inc al
+	cmp al, 10h
+	jne .hex2_title_loop
+
+	clr al
+	call os_print_space
+
+.hex_title_loop:
+	call os_print_1hex
+
+	inc al
+	cmp al, 10h
+	jne .hex_title_loop
 
 	mov cx, 512
 	mov di, DISK_BUFFER
@@ -19,7 +34,7 @@ start:
 .draw_loop:
 	call .bardraw
 	
-	mov16 dx, 4, 6
+	mov16 dx, 5, 6
 	call os_move_cursor
 	mov si, DISK_BUFFER
 	cmp byte [.halfnum], 0
@@ -30,14 +45,14 @@ start:
 	pusha
 	call .datadraw
 	popa
-	mov16 dx, 53, 6
+	mov16 dx, 54, 6
 	call os_move_cursor
 	call .asciidraw
 	
-	mov16 dx, 0, 2	; Print the input label
+	mov16 dx, 1, 2	; Print the input label
 	call os_move_cursor
-	mov si, .input_label
-	call os_print_string
+	mov al, '>'
+	call os_putchar
 	
 	mov ax, 0920h			; Clear the screen for the next input
 	clr bh
@@ -62,15 +77,8 @@ start:
 	je .sectorselect
 	cmp al, 'H'
 	je .selecthalf
-	cmp al, 'D'
-	je .selectdrive
 	jmp .draw_loop
-	
-.selectdrive:
-	call os_string_to_int
-	mov [.drive], al
-	jmp .draw_loop
-	
+		
 .sectordraw:
 	mov16 dx, 40, 2
 	call os_move_cursor
@@ -89,10 +97,10 @@ start:
 	call os_putchar
 	
 	call os_get_cursor_pos
-	cmp dl, 69
+	cmp dl, 70
 	jl .asciidraw
 	
-	mov dl, 53
+	mov dl, 54
 	inc dh	
 	call os_move_cursor
 
@@ -113,10 +121,10 @@ start:
 	pop si
 	
 	call os_get_cursor_pos
-	cmp dl, 52
+	cmp dl, 53
 	jl .datadraw
 	
-	mov dl, 4
+	mov dl, 5
 	inc dh	
 	call os_move_cursor
 
@@ -142,7 +150,7 @@ start:
 	call os_convert_l2hts		; Entered number -> HTS
 	mov bx, DISK_BUFFER		; Read the sector
 	mov16 ax, 1, 2
-	mov dl, [.drive]
+	mov dl, [0084h]
 	stc
 	int 13h
 	jc .error
@@ -169,46 +177,36 @@ start:
 	ret
 
 .bardraw:
-	mov16 dx, 0, 6
+	mov16 dx, 1, 6
+	clr bl
+
+.bardrawloop:
 	call os_move_cursor
+
 	mov al, [.halfnum]
-	test al, al
-	jz .firsthalf
-	mov si, .hexchars1
-	call os_print_string
+	call os_print_1hex
+
+	mov al, bl
+	call os_print_2hex
+
+	inc dh
+	add bl, 10h
+	jnz .bardrawloop
 	ret
-.firsthalf:
-	mov si, .hexchars0
-	call os_print_string
-	ret
-	
+
+
+
 	.title_msg			db 'MichalOS Disk Inspector', 0
 	.footer_msg			db 'q = Quit, sXYZ = Load sector XYZ, h0/h1 = Display 1st/2nd half', 0
 
-	.input_label		db ' >', 0
-
-	.hexchars			db '    00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F  0123456789ABCDEF', 13, 10, 0
-	.hexchars0			db '000', 13, 10, '010', 13, 10, '020', 13, 10, '030', 13, 10, '040', 13, 10, '050', 13, 10, '060', 13, 10, '070', 13, 10, '080', 13, 10, '090', 13, 10, '0A0', 13, 10, '0B0', 13, 10, '0C0', 13, 10, '0D0', 13, 10, '0E0', 13, 10, '0F0', 13, 10, 0
-	.hexchars1			db '100', 13, 10, '110', 13, 10, '120', 13, 10, '130', 13, 10, '140', 13, 10, '150', 13, 10, '160', 13, 10, '170', 13, 10, '180', 13, 10, '190', 13, 10, '1A0', 13, 10, '1B0', 13, 10, '1C0', 13, 10, '1D0', 13, 10, '1E0', 13, 10, '1F0', 13, 10, 0
-	
 	.halfnum			db 0
 	.sectornum			dw 0
 	
-	.drive				db 0
-	
 	.space				db ' ', 0
 	
-	.msg1				db 'Disk error!', 0
+	.msg1				db 'Disk error!' ; Termination not necessary here
 	.msg2				db 0
 	
-	.msgfdda			db 'A: (Floppy 1)', 0
-	.msgfddb			db 'B: (Floppy 2)', 0
-	.msghddc			db 'C: (Hard drive 1)', 0
-	.msghddd			db 'D: (Hard drive 2)', 0
-	.msgcdrom			db 'E: (CD-ROM)', 0
-	
-	.msgsector			db ', sector ', 0
-
-	.input_buffer		db 0		; Has to be on the end!
+	.input_buffer:	; Has to be at the end!
 ; ------------------------------------------------------------------
 
