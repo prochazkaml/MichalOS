@@ -91,6 +91,14 @@ game_start:
 	call get_random_piece
 	call update_screen				; Draw it all out
 
+	cmp byte [sfx], 1
+	jne .no_sfx
+
+	mov ax, 523
+	mov cx, 2
+	call os_speaker_note_length
+
+.no_sfx:
 	call clear_counter				; Clear the current counter
 	clr cx							; Reset the time counter
 	
@@ -166,9 +174,13 @@ game_start:
 .small_punish:
 	mov dword [current_score], 0
 
-.end_punish:	
+.end_punish:
 	call update_screen
 	
+	mov ax, 523 / 8
+	mov cx, 10
+	call os_speaker_note_length
+
 	pop bx
 	popa
 	jmp .key_detect
@@ -180,11 +192,17 @@ game_start:
 	mov byte [play_area + bx], 0	; Clear the current piece
 	
 	add dword [current_score], 10	; Add some score
-	
+
+	mov byte [sfx], 1
+
 	popa
 	jmp .main_loop
 	
+	sfx			db 0
+
 game_over:
+	mov byte [sfx], 1
+
 	call clear_screen
 	
 	clr dx
@@ -347,31 +365,42 @@ check_for_creature:
 
 	add dword [current_score], 490			; We've got an assembled creature, add 500 to the score (10 was already given)
 	
-	mov al, [play_area + 0 + bx]			; Is the creature assembled with the same pieces?
-	cmp al, [play_area + 1 + bx]
+	mov ax, 220
+
+	mov cl, [play_area + 0 + bx]			; Is the creature assembled with the same pieces?
+	cmp cl, [play_area + 1 + bx]
 	jne .not_the_same
 	
-	cmp al, [play_area + 2 + bx]
+	cmp cl, [play_area + 2 + bx]
 	jne .not_the_same
 	
-	cmp al, [play_area + 3 + bx]
+	cmp cl, [play_area + 3 + bx]
 	jne .not_the_same
 	
+	mov ax, 330
 	add dword [current_score], 1000			; Add some more to motivate the player
 	
 .not_the_same:
+	mov cx, 4
+
 	mov dword [play_area + bx], 0F0F0F0Fh	; Perform a little animation
 	call update_screen
-	mov ax, 4
-	call os_pause	
+
+	call os_speaker_note_length
+
 	mov dword [play_area + bx], 0
 	call update_screen
-	mov ax, 4
-	call os_pause	
+
+	shl ax, 1
+	call os_speaker_note_length
+
 	mov dword [play_area + bx], 0F0F0F0Fh	; (make all 4 squares blink)
 	call update_screen
-	mov ax, 4
-	call os_pause	
+
+	shl ax, 1
+	call os_speaker_note_length
+
+	mov byte [sfx], 0
 
 	mov dword [play_area + bx], 0			; Clear the whole box (4 bytes = 1 dword)
 	
@@ -401,7 +430,7 @@ check_for_creature:
 .no_bonus:
 	popa
 	ret
-	
+
 
 ; Gets a random piece, and places it randomly (if the slot is empty, of course).
 ; IN: nothing
@@ -499,8 +528,6 @@ update_screen:
 	inc cl
 	cmp cl, 20						; Are we done?
 	jne .loop
-	
-	; TO-DO: Sound feedback
 	
 	popad
 	ret
