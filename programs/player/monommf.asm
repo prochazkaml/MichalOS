@@ -54,7 +54,7 @@ start_mono_mmf:
 	mov word [.counter], 0
 	mov byte [.paused], 0
 	
-	mov cx, 0						; 18.2 Hz
+	clr cx					; 18.2 Hz
 	call os_set_timer_speed
 	ret
 	

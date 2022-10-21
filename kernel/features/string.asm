@@ -642,7 +642,7 @@ os_get_date_string:
 	mov ah, cl			; Year
 	call .add_2digits
 
-	mov al, 0			; Terminate date string
+	clr al				; Terminate date string
 	stosb
 
 	popa

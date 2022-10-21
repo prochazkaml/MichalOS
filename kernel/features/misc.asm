@@ -15,7 +15,7 @@ os_pause:
 
 	mov [.orig_req_delay], ax	; Save it
 
-	mov ah, 0
+	clr ah
 	call os_int_1Ah				; Get tick count	
 
 	mov [.prev_tick_count], dx	; Save it for later comparison
@@ -119,7 +119,7 @@ os_fatal_error:
 	call os_move_cursor
 	
 	mov ax, 0A2Ah					; Write a 43-character long asterisk-type line
-	mov bh, 0
+	clr bh
 	mov cx, 43
 	int 10h
 	

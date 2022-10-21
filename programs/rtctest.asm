@@ -6,9 +6,9 @@ start:
 	call .draw_background
 
 	mov ax, .exit_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	call os_clear_screen	
 .test:
@@ -16,7 +16,7 @@ start:
 	cmp al, "Q"
 	je .exit
 
-	mov cl, 0
+	clr cl
 	
 .loop:
 	mov al, cl

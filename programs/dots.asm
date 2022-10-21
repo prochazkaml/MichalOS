@@ -11,7 +11,7 @@ start:
 	int 10h
 	
 .loop:
-	mov ax, 0
+	clr ax
 	mov bx, 255
 	call os_get_random
 	mov al, cl
@@ -19,7 +19,7 @@ start:
 	mov cx, [.x_pos]
 	mov dx, [.y_pos]
 	
-	mov bh, 0
+	clr bh
 	call os_put_pixel
 	
 	inc word [.x_pos]

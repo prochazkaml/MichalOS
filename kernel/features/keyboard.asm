@@ -11,7 +11,7 @@ os_wait_for_key:
 	pusha
 	
 .try_again:
-	mov bh, 0
+	clr bh
 	call .screen_power
 
 	; Reset the screensaver tick
@@ -25,7 +25,7 @@ os_wait_for_key:
 	mov al, [0082h]				; Save the current screen state, for later
 	mov [.gfx_state], al
 	mov ah, 03h
-	mov bh, 0
+	clr bh
 	int 10h
 	mov [.orig_crsr], cx		; Get the shape of the cursor
 	
@@ -185,7 +185,7 @@ special_keys:
 	call os_move_cursor
 	
 	mov ax, 0E17h
-	mov bh, 0
+	clr bh
 	cmp byte [0083h], 0
 	je .no_crossed_spkr
 	
@@ -198,7 +198,7 @@ special_keys:
 	
 .no_display_spkr:
 	popa
-	mov ax, 0
+	clr ax
 	ret
 	
 ; ==================================================================

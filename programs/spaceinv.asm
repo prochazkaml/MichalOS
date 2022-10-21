@@ -230,7 +230,7 @@ clear_screen:
 	mov ax, 0F02h
 	out dx, ax
 	
-	mov di, 0
+	clr di
 	mov ax, 0A000h
 	mov es, ax
 
@@ -445,13 +445,11 @@ get_random_piece:
 update_screen:
 	pushad
 	
-	mov dx, 0
+	clr dx
 	call os_move_cursor
 	
-	mov ah, 09h
-	mov al, ' '
-	mov bl, 15
-	mov bh, 0
+	mov ax, 0920h
+	mov16 bx, 15, 0
 	mov cx, 20
 	int 10h							; First, clear the score counter
 	

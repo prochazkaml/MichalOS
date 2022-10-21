@@ -68,7 +68,7 @@ start:
 	mov ax, .filename_input
 	call os_input_dialog
 
-	mov cx, 0				; Create an empty file
+	clr cx			; Create an empty file
 	mov bx, 4096
 	mov ax, .filename_input
 	call os_write_file
@@ -83,8 +83,8 @@ start:
 	call .draw_background
 
 	mov ax, .delete_confirm_msg		; Confirm delete operation
-	mov bx, 0
-	mov cx, 0
+	clr bx
+	clr cx
 	mov dx, 1
 	call os_dialog_box
 
@@ -135,9 +135,9 @@ start:
 
 .rename_fail:
 	mov ax, .err_file_exists
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	jmp start
 
@@ -263,18 +263,18 @@ start:
 
 .disk_error:
 	mov ax, .dk_error
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	
 	jmp start
 	
 .file_exists:
 	mov ax, .err_file_exists
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	
 	jmp start

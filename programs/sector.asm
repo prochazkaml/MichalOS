@@ -6,8 +6,7 @@ start:
 	mov [.drive], al
 	
 	call .draw_background
-	mov dl, 0
-	mov dh, 4
+	mov16 dx, 0, 4
 	call os_move_cursor
 	mov si, .hexchars
 	call os_print_string
@@ -20,39 +19,35 @@ start:
 .draw_loop:
 	call .bardraw
 	
-	mov dl, 4
-	mov dh, 6
+	mov16 dx, 4, 6
 	call os_move_cursor
 	mov si, DISK_BUFFER
 	cmp byte [.halfnum], 0
 	je .zerohalf
 	add si, 256
+	
 .zerohalf:
 	pusha
 	call .datadraw
 	popa
-	mov dl, 53
-	mov dh, 6
+	mov16 dx, 53, 6
 	call os_move_cursor
 	call .asciidraw
 	
-	mov dl, 0				; Print the input label
-	mov dh, 2
+	mov16 dx, 0, 2	; Print the input label
 	call os_move_cursor
 	mov si, .input_label
 	call os_print_string
 	
-	mov ah, 09h				; Clear the screen for the next input
-	mov al, ' '
-	mov bh, 0
+	mov ax, 0920h			; Clear the screen for the next input
+	clr bh
 	mov bl, [57000]
 	mov cx, 60
 	int 10h
 	
 	call .sectordraw
 
-	mov dl, 2				; Print the input label
-	mov dh, 2
+	mov16 dx, 2, 2			; Print the input label
 	call os_move_cursor
 	call os_show_cursor		; Get a command from the user
 	mov ax, .input_buffer
@@ -77,8 +72,7 @@ start:
 	jmp .draw_loop
 	
 .sectordraw:
-	mov dl, 40
-	mov dh, 2
+	mov16 dx, 40, 2
 	call os_move_cursor
 	mov ax, [.sectornum]
 	call os_int_to_string
@@ -92,9 +86,7 @@ start:
 	jge .asciichar
 	mov al, '.'
 .asciichar:
-	mov ah, 0Eh
-	mov bh, 0
-	int 10h
+	call os_putchar
 	
 	call os_get_cursor_pos
 	cmp dl, 69
@@ -149,8 +141,7 @@ start:
 	mov [.sectornum], ax
 	call os_convert_l2hts		; Entered number -> HTS
 	mov bx, DISK_BUFFER		; Read the sector
-	mov ah, 2
-	mov al, 1
+	mov16 ax, 1, 2
 	mov dl, [.drive]
 	stc
 	int 13h
@@ -161,7 +152,7 @@ start:
 	mov ax, .msg1
 	mov bx, .msg2
 	mov cx, .msg2
-	mov dx, 0
+	clr dx
 	call os_dialog_box
 	call .draw_background
 	jmp .draw_loop
@@ -178,8 +169,7 @@ start:
 	ret
 
 .bardraw:
-	mov dl, 0
-	mov dh, 6
+	mov16 dx, 0, 6
 	call os_move_cursor
 	mov al, [.halfnum]
 	test al, al

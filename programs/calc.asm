@@ -206,7 +206,7 @@ start:
 	mov bx, .footer_msg
 	mov cx, 256
 	call os_draw_background
-	mov ch, 0
+	clr ch
 	ret
 	
 .exit:

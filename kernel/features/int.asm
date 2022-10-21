@@ -82,7 +82,7 @@ os_return_app_timer:
 	pusha
 	mov byte [timer_application_attached], 0
 	
-	mov cx, 0
+	clr cx
 	call os_set_timer_speed
 	
 	mov cl, 1Ch					; RTC handler

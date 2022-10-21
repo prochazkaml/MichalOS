@@ -14,7 +14,7 @@ checkvendor:				; CPU vendor
 	jmp checkfamily
 	
 vendor:
-	mov eax, 0
+	clr eax
 	cpuid
 	
 	mov [p1], ebx
@@ -60,46 +60,46 @@ steppingid:
 	mov eax, 1
 	cpuid
 	
-	mov edx, 0
+	clr edx
 	mov ecx, 16
 	div ecx
 	
 	mov [p1], edx
 	
 model:
-	mov edx, 0
+	clr edx
 	mov ecx, 16
 	div ecx
 	
 	mov [p2], edx
 	
 family:
-	mov edx, 0
+	clr edx
 	mov ecx, 16
 	div ecx
 	
 	mov [p3], edx
 	
 cputype:
-	mov edx, 0
+	clr edx
 	mov ecx, 4
 	div ecx
 	
 	mov [p4], edx
 	
-	mov edx, 0				; Skip the next 2 bits, they are reserved
+	clr edx			; Skip the next 2 bits, they are reserved
 	mov ecx, 4
 	div ecx
 	
 extmodel:
-	mov edx, 0
+	clr edx
 	mov ecx, 4
 	div ecx
 	
 	mov [p5], edx
 	
 extfamily:
-	mov edx, 0
+	clr edx
 	mov ecx, 4
 	div ecx
 	

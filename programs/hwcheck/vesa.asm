@@ -24,7 +24,7 @@ vesa:				; CPU vendor
 	mov si, .msg2
 	call os_print_string
 	
-	mov eax, 0
+	clr eax
 	mov ax, [buffer + 12h]
 	shl eax, 6
 	call os_32int_to_string

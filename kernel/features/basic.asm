@@ -274,7 +274,7 @@ mainloop:
 
 clear_ram:
 	pusha
-	mov al, 0
+	clr al
 
 	mov di, variables
 	mov cx, 52
@@ -700,7 +700,7 @@ assign:
 
 
 .is_timer:
-	mov ah, 0
+	clr ah
 	call os_int_1Ah
 	mov bx, dx
 
@@ -723,7 +723,7 @@ assign:
 .is_version:
 	mov al, 255
 	
-	mov bh, 0
+	clr bh
 	mov bl, al
 	mov al, [.tmp]
 	call set_var
@@ -1007,7 +1007,7 @@ do_curscol:
 	cmp ax, VARIABLE
 	jne .error
 
-	mov ah, 0
+	clr ah
 	mov byte al, [token]
 	push ax
 
@@ -1015,7 +1015,7 @@ do_curscol:
 	xor bx, bx
 	mov byte bh, [work_page]
 	int 10h
-	mov bh, 0
+	clr bh
 	mov bl, ah			; Get colour for higher byte; ignore lower byte (char)
 
 	pop ax
@@ -1125,7 +1125,7 @@ do_do:
 	je .loop_max
 	mov word di, do_loop_store
 	mov byte al, [loop_in]
-	mov ah, 0
+	clr ah
 	add di, ax
 	mov word ax, [prog]
 	sub ax, 3
@@ -1168,7 +1168,7 @@ do_else:
 
 do_end:
 	mov ah, 5				; Restore active page
-	mov al, 0
+	clr al
 	int 10h
 
 	mov byte [work_page], 0
@@ -1188,7 +1188,7 @@ do_files:
 	mov si, ax
 
 	call os_get_cursor_pos			; move cursor to start of line
-	mov dl, 0
+	clr dl
 	call os_move_cursor
 	
 	mov ah, 9				; print character function
@@ -1443,7 +1443,7 @@ do_gosub:
 	add di, ax
 	mov al, ':'
 	stosb
-	mov al, 0
+	clr al
 	stosb	
 
 
@@ -1528,7 +1528,7 @@ do_goto:
 	add di, ax
 	mov al, ':'
 	stosb
-	mov al, 0
+	clr al
 	stosb	
 
 	mov word ax, [load_point]
@@ -1824,7 +1824,7 @@ do_ink:
 	jmp mainloop
 
 .first_is_var:
-	mov ax, 0
+	clr ax
 	mov byte al, [token]
 	call get_var
 	mov byte [ink_colour], al
@@ -1835,7 +1835,7 @@ do_ink:
 ; INPUT
 
 do_input:
-	mov al, 0				; Clear string from previous usage
+	clr al					; Clear string from previous usage
 	mov di, .tmpstring
 	mov cx, 128
 	rep stosb
@@ -2174,7 +2174,7 @@ do_loop:
 	jne .error
 
 .second_is_char:
-	mov ah, 0
+	clr ah
 	mov al, [token]
 	jmp .check_true
 	
@@ -2222,7 +2222,7 @@ do_loop:
 .loop_back:	
 	mov word si, do_loop_store
 	mov byte al, [loop_in]
-	mov ah, 0
+	clr ah
 	add si, ax
 	lodsw
 	mov word [prog], ax
@@ -2813,7 +2813,7 @@ do_print:
 .quote_newline:
 	cmp dh, 24
 	je .move_cur_quote
-	mov dl, 0
+	clr dl
 	inc dh
 	jmp .move_cur_quote
 
@@ -2890,7 +2890,7 @@ do_print:
 	jmp .newline_or_not
 
 .end_line:
-	mov dl, 0
+	clr dl
 	inc dh
 	cmp dh, 25
 	jl .move_cur
@@ -3016,7 +3016,7 @@ do_read:
 	add di, ax
 	mov al, ':'
 	stosb
-	mov al, 0
+	clr al
 	stosb
 
 	call get_token				; Now get the offset variable
@@ -3638,7 +3638,7 @@ do_string:
 	jmp .got_number	
 
 .third_is_variable:
-	mov ah, 0
+	clr ah
 	mov al, [token]
 	call get_var
 	jmp .got_number
@@ -3667,7 +3667,7 @@ do_string:
 	mov word si, [.string_loc]	; Move to string location
 	add si, dx			; Add offset
 	lodsb				; Load data
-	mov ah, 0
+	clr ah
 	mov bx, ax			; Set data in numerical variable
 	mov byte al, [.tmp]
 	call set_var
@@ -3761,7 +3761,7 @@ do_waitkey:
 ; Get value of variable character specified in AL (eg 'A')
 
 get_var:
-	mov ah, 0
+	clr ah
 	sub al, 65
 	mov si, variables
 	add si, ax
@@ -3775,7 +3775,7 @@ get_var:
 ; with number specified in BX
 
 set_var:
-	mov ah, 0
+	clr ah
 	sub al, 65				; Remove ASCII codes before 'A'
 
 	mov di, variables			; Find position in table (of words)
@@ -3842,7 +3842,7 @@ get_number_token:
 	jmp .loop
 
 .done:
-	mov al, 0			; Zero-terminate the token
+	clr al				; Zero-terminate the token
 	stosb
 
 	mov ax, NUMBER			; Pass back the token type
@@ -3887,7 +3887,7 @@ get_quote_token:
 	jmp .loop
 
 .done:
-	mov al, 0			; Zero-terminate the token
+	clr al				; Zero-terminate the token
 	stosb
 	inc word [prog]			; Move past final quote
 
@@ -3924,7 +3924,7 @@ get_string_token:
 	inc word [prog]
 	jmp .loop
 .done:
-	mov al, 0			; Zero-terminate the token
+	clr al				; Zero-terminate the token
 	stosb
 
 	mov ax, token

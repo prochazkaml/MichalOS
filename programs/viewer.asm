@@ -47,10 +47,10 @@ start:
 	
 	popa
 					; Otherwise show error dialog
-	mov dx, 0			; One button for dialog box
+	clr dx		; One button for dialog box
 	mov ax, err_string
 	mov bx, err_string2
-	mov cx, 0
+	clr cx
 	call os_dialog_box
 
 	jmp start			; And retry
@@ -66,13 +66,12 @@ start:
 	mov ax, gs
 	mov es, ax
 	mov ax, bx
-	mov cx, 0			; Load PCX at GS:0000h
+	clr cx		; Load PCX at GS:0000h
 	call os_load_file
 
 	mov byte [0082h], 1
 
-	mov ah, 0			; Switch to graphics mode
-	mov al, 13h
+	mov16 ax, 13h, 0	; Switch to graphics mode
 	int 10h
 
 	mov ax, 0A000h		; ES = video memory
@@ -82,7 +81,7 @@ start:
 	mov ds, ax
 	
 	mov si, 80h			; Move source to start of image data (First 80h bytes is header)
-	mov di, 0			; Start our loop at top of video RAM
+	clr di		; Start our loop at top of video RAM
 
 .decode:
 	mov cx, 1
@@ -99,7 +98,7 @@ start:
 
 
 	mov dx, 3c8h		; Palette index register
-	mov al, 0			; Start at colour 0
+	clr al		; Start at colour 0
 	out dx, al			; Tell VGA controller that...
 	inc dx				; ...3c9h = palette data register
 
@@ -118,7 +117,7 @@ start:
 	mov byte [0082h], 0
 	
 	mov ax, 3			; Back to text mode
-	mov bx, 0
+	clr bx
 	int 10h
 	mov ax, 1003h		; No blinking text!
 	int 10h
@@ -142,9 +141,9 @@ start:
 .not_enough_ram:
 	popa
 	mov ax, no_ram
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	
 	jmp start

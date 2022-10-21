@@ -46,7 +46,7 @@ os_put_chars:
 os_print_string:
 	pusha
 
-	mov bl, 0
+	clr bl
 	clr cx
 
 	jmp os_put_chars.no_pusha
@@ -86,7 +86,7 @@ os_format_string:
 	pusha
 
 	mov ah, 09h			; int 09h
-	mov bh, 0
+	clr bh
 	mov cx, 1
 	call os_get_cursor_pos
 	
@@ -107,7 +107,7 @@ os_format_string:
 	jmp .repeat			; And move on to next char
 	
 .cr:
-	mov dl, 0
+	clr dl
 	call os_move_cursor
 	jmp .repeat
 
@@ -145,7 +145,7 @@ os_move_cursor:
 	pusha
 
 .no_pusha:
-	mov bh, 0
+	clr bh
 	mov ah, 2
 	int 10h				; BIOS interrupt to move cursor
 
@@ -160,7 +160,7 @@ os_move_cursor:
 os_get_cursor_pos:
 	pusha
 
-	mov bh, 0
+	clr bh
 	mov ah, 3
 	int 10h				; BIOS interrupt to get cursor position
 
@@ -212,7 +212,7 @@ os_draw_block:
 	call os_move_cursor		; Move to block starting position
 
 	mov16 ax, ' ', 09h			; Draw colour section
-	mov bh, 0
+	clr bh
 	mov cx, si
 	int 10h
 
@@ -275,7 +275,7 @@ os_file_selector:
 	mov si, bx
 	mov bl, [si]
 	inc si
-	mov cl, 0
+	clr cl
 	
 .filter_loop:
 	call os_string_copy
@@ -296,7 +296,7 @@ os_file_selector:
 
 	mov si, disk_buffer			; Raw directory buffer
 	mov di, 64512				; Buffer for indexes
-	mov cx, 0					; Number of found files
+	clr cx						; Number of found files
 
 .index_loop:
 	cmp si, 64512			; Are we done looping through the directory?
@@ -703,7 +703,7 @@ os_list_dialog:
 	.nofilesmsg	db "There are no items to select.", 0
 	
 .count_entries:	
-	mov cl, 0			; Count the number of entries in the list
+	clr cl				; Count the number of entries in the list
 	
 .count_inc:
 	inc cl
@@ -991,7 +991,7 @@ os_list_dialog:
 	mov al, [.skip_num]
 	add al, dh
 	sub al, 5
-	mov ah, 0
+	clr ah
 	ret
 
 .file_draw_list:
@@ -1050,7 +1050,7 @@ os_draw_background:
 .fill_bg:	
 	mov ax, 0920h			; Draw colour section
 	mov cx, 1840
-	mov bh, 0
+	clr bh
 	int 10h
 
 .bg_drawn:
@@ -1170,7 +1170,7 @@ os_dump_registers:
 
 os_input_dialog:
 	pusha
-	mov ch, 0
+	clr ch
 	jmp int_input_dialog
 
 ; ------------------------------------------------------------------
@@ -1286,7 +1286,7 @@ os_dialog_box:
 	jmp .exit
 
 .draw_left:
-	mov cl, 0
+	clr cl
 	mov bl, 11110000b
 	mov bh, [57001]
 
@@ -1403,7 +1403,7 @@ os_input_string:
 	pusha
 
 .no_pusha:
-	mov ch, 0
+	clr ch
 	jmp int_input_string
 
 ; ------------------------------------------------------------------
@@ -1495,7 +1495,7 @@ int_input_string:
 	jmp .more
 
 .done:
-	mov al, 0
+	clr al
 	stosb
 
 	popa
@@ -1593,7 +1593,7 @@ os_print_footer:
 	call os_move_cursor
 	
 	mov ah, 08h
-	mov bh, 0
+	clr bh
 	int 10h
 	
 	stosb
@@ -1702,7 +1702,7 @@ os_draw_icon:
 	inc dh
 	call os_move_cursor
 	
-	mov cl, 0
+	clr cl
 	inc ch
 	cmp ch, ah
 	jne .loop
@@ -1728,7 +1728,7 @@ os_option_menu:
 	call os_move_cursor
 	
 	mov ah, 08h
-	mov bh, 0
+	clr bh
 	int 10h				; Get the character's attribute (X = 0, Y = 1)
 	
 	and ah, 0F0h		; Keep only the background, set foreground to 0
@@ -1748,7 +1748,7 @@ os_option_menu:
 
 	call os_hide_cursor
 
-	mov cl, 0			; Count the number of entries in the list
+	clr cl				; Count the number of entries in the list
 	mov si, ax
 
 .count_inc:
@@ -1862,7 +1862,7 @@ os_option_menu:
 	ret
 
 .esc_pressed:
-	mov ax, 0
+	clr ax
 	jmp .keyexit
 
 .left_pressed:

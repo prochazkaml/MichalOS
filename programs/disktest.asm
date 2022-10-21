@@ -11,10 +11,9 @@ start:
 	cmp dx, 256
 	je .exit
 	mov cx, 1				; Load first disk sector into RAM
-	mov dh, 0
+	clr dh
 	mov bx, disk_buffer
-	mov ah, 2
-	mov al, 1
+	mov16 ax, 1, 2
 	stc
 	int 13h					; BIOS load sector call
 	jc .loop

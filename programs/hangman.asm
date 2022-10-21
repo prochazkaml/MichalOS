@@ -23,17 +23,17 @@ start:
 	; First, reset values in case user is playing multiple games
 
 	mov di, real_string			; Full city name
-	mov al, 0
+	clr al
 	mov cx, 50
 	rep stosb
 
 	mov di, work_string			; String that starts as '_' characters
-	mov al, 0
+	clr al
 	mov cx, 50
 	rep stosb
 
 	mov di, tried_chars			; Chars the user has tried, but aren't in the real string
-	mov al, 0
+	clr al
 	mov cx, 255
 	rep stosb
 
@@ -46,7 +46,7 @@ start:
 	mov cx, 01100000b
 	call os_draw_background
 
-	mov ax, 0
+	clr ax
 	mov bx, 255
 	call os_get_random			; Get a random number
 
@@ -82,8 +82,8 @@ skip_finished:
 
 	mov ax, hint_msg_1			; Tell player about the hint
 	mov bx, hint_msg_2
-	mov cx, 0
-	mov dx, 0
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	call os_hide_cursor
@@ -121,8 +121,8 @@ main_loop:
 
 	mov bl, al				; Store character temporarily
 
-	mov cx, 0				; Counter into string
-	mov dl, 0				; Flag whether char was found
+	clr cx			; Counter into string
+	clr dl			; Flag whether char was found
 	mov si, real_string
 find_loop:
 	lodsb
@@ -229,7 +229,7 @@ update_tried_chars:
 	jnz .nothing_to_add			; Skip next bit if char was already in list
 
 	mov si, tried_chars
-	mov ax, 0
+	clr ax
 	mov byte al, [tried_chars_pos]		; Move into the list
 	add si, ax
 	mov byte [si], bl

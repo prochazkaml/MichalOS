@@ -260,7 +260,7 @@ tick:
 	out     0x43, al        ; deliver a pulse that many
 	mov     al, ah          ; microseconds long
 	out     0x42, al
-	mov al, 0
+	clr al
 	out     0x42, al
 
 .no_play:

@@ -106,7 +106,7 @@ start_poly_mmf:
 	jmp .play_loop
 	
 .int_handler:
-	mov cl, 0			; Channel
+	clr cl		; Channel
 
 	cmp byte [.paused], 0
 	jne .skip_play

@@ -6,7 +6,7 @@
 
 start:
 	call .draw_background
-	mov ax, 0					; Set up the serial port
+	clr ax				; Set up the serial port
 	call os_serial_port_enable
 	
 	call os_get_via_serial		; Is the other computer waiting for connection?
@@ -40,9 +40,9 @@ start:
 	
 .request_confirm:
 	mov ax, .connection_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	
 	jmp .exit
@@ -56,7 +56,7 @@ start:
 	ret
 	
 .exit:
-	mov al, 0
+	clr al
 	call os_send_via_serial
 	ret
 	

@@ -462,7 +462,7 @@ start:
 	cmp al, 0A0h
 	jne .no_adjust
 	
-	mov al, 0
+	clr al
 	stc
 	ret
 	
@@ -478,7 +478,7 @@ start:
 	cmp al, 060h
 	jne .no_adjust
 	
-	mov al, 0
+	clr al
 	stc
 	ret
 	

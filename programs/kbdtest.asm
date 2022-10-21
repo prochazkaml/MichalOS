@@ -12,9 +12,9 @@ start:
 	
 	pusha
 	mov ax, .exit_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	call os_clear_screen
 	popa
@@ -40,7 +40,7 @@ start:
 	push ax
 	
 	mov bx, 100h
-	mov dx, 0
+	clr dx
 	div bx
 	call os_int_to_string
 	mov si, ax
@@ -61,7 +61,7 @@ start:
 	jmp .test4
 	
 .test1:
-	mov ah, 0
+	clr ah
 	int 16h
 	cmp al, "Q"
 	je start
@@ -69,7 +69,7 @@ start:
 	push ax
 	
 	mov bx, 100h
-	mov dx, 0
+	clr dx
 	div bx
 	call os_int_to_string
 	mov si, ax
@@ -95,7 +95,7 @@ start:
 	
 	jz .2nokey			; If no key, skip to end
 
-	mov ax, 0			; Otherwise get it from buffer
+	clr ax		; Otherwise get it from buffer
 	int 16h
 
 .2nokey:
@@ -105,7 +105,7 @@ start:
 	push ax
 	
 	mov bx, 100h
-	mov dx, 0
+	clr dx
 	div bx
 	call os_int_to_string
 	mov si, ax
@@ -135,7 +135,7 @@ start:
 	int 16h
 	jz .3nokey			; If no key, skip to end
 
-	mov ax, 0			; Otherwise get it from buffer
+	clr ax		; Otherwise get it from buffer
 	int 16h
 
 .3nokey:

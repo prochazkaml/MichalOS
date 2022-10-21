@@ -139,7 +139,7 @@ polypiano:
 	jmp .pianoloop
 	
 .execstop:
-	mov cl, 0
+	clr cl
 	
 .stoploop:
 	call os_adlib_noteoff

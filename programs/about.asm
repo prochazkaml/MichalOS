@@ -58,7 +58,7 @@ start:
 	ret
 	
 .license:
-	mov cl, 0
+	clr cl
 
 	call .draw_license
 

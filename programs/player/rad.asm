@@ -245,7 +245,7 @@ adliberror:
 	mov byte [0085h], 1
 	mov ax, start.adlib_msg1
 	mov bx, start.adlib_msg2
-	mov cx, 0
+	clr cx
 	mov dx, 1
 	call os_dialog_box
 	mov byte [0085h], 0

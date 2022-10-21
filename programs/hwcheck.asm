@@ -5,7 +5,7 @@
 	%INCLUDE "michalos.inc"
 
 start:
-	mov eax, 0				; Get the maximum parameter for basic CPUID
+	clr eax			; Get the maximum parameter for basic CPUID
 	cpuid
 	mov [basicid], eax
 	
@@ -14,7 +14,7 @@ start:
 	mov [extendedid], eax
 	
 main_loop:
-	mov al, 0
+	clr al
 	mov cx, 64
 	mov di, p1
 	rep stosb
@@ -46,8 +46,7 @@ background:
 	mov bx, footermsg
 	mov cx, 11110000b
 	call os_draw_background
-	mov dl, 0
-	mov dh, 2
+	mov16 dx, 0, 2
 	call os_move_cursor
 	popa
 	ret	

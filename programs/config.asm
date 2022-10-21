@@ -91,9 +91,9 @@ start:
 	mov byte [fs:DESKTOP_BACKGROUND], 0
 	
 	mov ax, .changedone
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	jmp .look
 
@@ -128,17 +128,17 @@ start:
 	jc .write_error2
 	
 	mov ax, .changedone
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	jmp .look
 
 .write_error2:
 	mov ax, .errmsg1
 	mov bx, .errmsg2
-	mov cx, 0
-	mov dx, 0
+	clr cx
+	clr dx
 	call os_dialog_box
 	jmp .look
 	
@@ -146,7 +146,7 @@ start:
 	mov ax, .imghelp1
 	mov bx, .imghelp2
 	mov cx, .imghelp3
-	mov dx, 0
+	clr dx
 	call os_dialog_box
 	jmp .look
 	
@@ -212,9 +212,9 @@ start:
 	
 .screensaver_error:
 	mov ax, .scrnsaveerr
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	jmp .screensaver_settings
@@ -248,7 +248,7 @@ start:
 	mov ax, 3
 	int 10h
 	mov ax, 1003h			; Set text output with certain attributes
-	mov bx, 0				; to be bright, and not blinking
+	clr bx			; to be bright, and not blinking
 	int 10h
 	jmp .look
 	
@@ -418,9 +418,9 @@ start:
 	call .draw_background
 
 	mov ax, .permerrmsg1
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	jmp .password
@@ -433,7 +433,7 @@ start:
 
 .reset_password:
 	mov di, 57003	
-	mov al, 0
+	clr al
 .reset_password_loop:
 	stosb
 	cmp di, 57036
@@ -442,7 +442,7 @@ start:
 
 .reset_name:
 	mov di, 57036	
-	mov al, 0
+	clr al
 .reset_name_loop:
 	stosb
 	cmp di, 57069
@@ -467,17 +467,17 @@ start:
 	call os_write_file
 	jc .write_error
 	mov ax, .changedone
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	ret
 	
 .write_error:
 	mov ax, .errmsg1
 	mov bx, .errmsg2
-	mov cx, 0
-	mov dx, 0
+	clr cx
+	clr dx
 	call os_dialog_box
 	ret
 

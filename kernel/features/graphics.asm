@@ -38,7 +38,7 @@ os_set_pixel:
 	mov dx, cx
 	mov cx, ax
 	mov al, bl
-	mov bh, 0
+	clr bh
 	call os_put_pixel
 	popa
 	ret
@@ -293,7 +293,7 @@ os_draw_rectangle:
 	xchg dx, di		; If not, exchange them
 .y_good:
 	mov [.x1], cx
-	mov bh, 0
+	clr bh
 .x_loop:
 	call os_put_pixel
 	inc cx
@@ -387,7 +387,7 @@ os_clear_graphics:
 	mov es, ax
 
 	mov al, bl
-	mov di, 0
+	clr di
 	mov cx, 64000
 	rep stosb
 

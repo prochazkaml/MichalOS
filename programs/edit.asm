@@ -22,9 +22,9 @@ start:
 	
 .error:
 	mov ax, file_load_fail_msg		; If fail, show message and exit
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	call os_clear_screen
@@ -34,7 +34,7 @@ start:
 	mov si, untitled
 	mov di, userfile
 	call os_string_copy
-	mov bx, 0
+	clr bx
 	jmp file_load_success
 	
 file_chosen:
@@ -68,7 +68,7 @@ file_chosen:
 	mov dx, 1
 	mov ax, wrong_ext_msg
 	mov bx, wrong_ext_msg2
-	mov cx, 0
+	clr cx
 	call os_dialog_box
 	mov byte [0085h], 0
 
@@ -77,7 +77,7 @@ file_chosen:
 	
 	mov byte [0E0h], 0
 	
-	mov si, 0
+	clr si
 	jmp start
 
 
@@ -109,7 +109,7 @@ file_load_success:
 	mov word [last_byte], bx		; Store position of final data byte
 
 
-	mov cx, 0				; Lines to skip when rendering (scroll marker)
+	clr cx			; Lines to skip when rendering (scroll marker)
 	mov word [skiplines], 0
 
 	mov byte [cursor_x], 0			; Initial cursor position will be start of text
@@ -122,19 +122,16 @@ file_load_success:
 render_text:
 	call update_screen
 
-	mov dl, 0
-	mov dh, 1
+	mov16 dx, 0, 1
 	call os_move_cursor
 	
 	mov ah, 09h
 	mov al, ' '
-	mov bl, 240
-	mov bh, 0
+	mov16 bx, 240, 0
 	mov cx, 1840
 	int 10h	
 	
-	mov dh, 2				; Move cursor to near top
-	mov dl, 0
+	mov16 dx, 0, 2				; Move cursor to near top
 	call os_move_cursor
 
 
@@ -163,7 +160,7 @@ display_loop:					; Now we're ready to display the text
 	jne skip_return
 
 	call os_get_cursor_pos
-	mov dl, 0				; Set DL = 0 (column = 0)
+	clr dl			; Set DL = 0 (column = 0)
 	call os_move_cursor
 
 skip_return:
@@ -681,7 +678,7 @@ text_entry:
 	call os_clear_screen
 
 	mov ax, 4096
-	mov si, 0
+	clr si
 	mov word bx, [filesize]
 
 	call os_run_basic
@@ -692,8 +689,7 @@ text_entry:
 	call os_wait_for_key
 	call os_show_cursor
 	
-	mov al, 0
-	mov [0082h], al
+	mov byte [0082h], 0
 	
 	call setup_screen
 	
@@ -702,9 +698,9 @@ text_entry:
 
 .not_big_enough:
 	mov ax, .fail1_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	popa
@@ -810,7 +806,7 @@ load_file:
 	mov dx, 1
 	mov ax, wrong_ext_msg
 	mov bx, wrong_ext_msg2
-	mov cx, 0
+	clr cx
 	call os_dialog_box
 	mov byte [0085h], 0
 
@@ -840,9 +836,9 @@ save_file:
 	jc .failure				; If we couldn't save file...
 
 	mov ax, file_save_succeed_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	popa
@@ -851,8 +847,8 @@ save_file:
 .no_delete:
 	mov ax, .delete_failed
 	mov bx, file_save_fail_msg2
-	mov cx, 0
-	mov dx, 0
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	popa
@@ -861,8 +857,8 @@ save_file:
 .failure:
 	mov ax, file_save_fail_msg1
 	mov bx, file_save_fail_msg2
-	mov cx, 0
-	mov dx, 0
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	popa
@@ -892,9 +888,9 @@ save_new_file:
 
 	call os_string_copy
 	mov ax, file_save_succeed_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	popa
@@ -902,10 +898,10 @@ save_new_file:
 
 
 .failure:
-	mov ax, 0
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr ax
+	clr bx
+	clr cx
+	clr dx
 
 	cmp byte [0086h], 0
 	je .failure0
@@ -963,14 +959,14 @@ save_new_file:
 new_file:
 	mov ax, confirm_msg
 	mov bx, confirm_msg1
-	mov cx, 0
+	clr cx
 	mov dx, 1
 	call os_dialog_box
 	cmp ax, 1
 	je .do_nothing
 
 	mov di, 4096			; Clear the entire text buffer
-	mov al, 0
+	clr al
 	mov cx, 28672
 	rep stosb
 
@@ -981,7 +977,7 @@ new_file:
 	inc bx
 	mov word [last_byte], bx
 
-	mov cx, 0			; Reset other values
+	clr cx		; Reset other values
 	mov word [skiplines], 0
 
 	mov byte [cursor_x], 0
@@ -1016,8 +1012,8 @@ new_file:
 .failure:
 	mov ax, file_save_fail_msg1
 	mov bx, file_save_fail_msg2
-	mov cx, 0
-	mov dx, 0
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	jmp .retry_filename
@@ -1045,8 +1041,7 @@ setup_screen:
 	mov cx, BLACK_ON_WHITE
 	call os_draw_background
 
-	mov dl, 24
-	mov dh, 0
+	mov16 dx, 24, 0
 	call os_move_cursor
 	mov si, userfile
 	call os_print_string
@@ -1063,8 +1058,7 @@ update_screen:
 	mov di, 23
 	call os_draw_block
 	
-	mov dl, 24
-	mov dh, 0
+	mov16 dx, 24, 0
 	call os_move_cursor
 	mov si, userfile
 	call os_print_string
@@ -1078,15 +1072,12 @@ update_screen:
 	mov ax, userfile
 	call os_string_length
 	
-	mov dl, 24
+	mov16 dx, 24, 0
 	add dl, al
-	mov dh, 0
 	call os_move_cursor
 	
-	mov ah, 09h
-	mov al, 20h
-	mov bh, 00h
-	mov bl, 70h
+	mov ax, 0920h
+	mov16 bx, 70h, 00h
 	mov cx, 18h
 	int 10h
 	
@@ -1105,8 +1096,7 @@ showbytepos:
 	call os_int_to_string
 	mov si, ax
 
-	mov dh, 0
-	mov dl, 60
+	mov16 dl, 60, 0
 	call os_move_cursor
 
 	call os_print_string

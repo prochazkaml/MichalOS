@@ -13,10 +13,10 @@ start:
 	push es
 	mov ax, 0B800h
 	mov es, ax
-	mov di, 0
+	clr di
 	
 .loop:
-	mov ax, 0
+	clr ax
 	mov bx, 255
 	call os_get_random
 	
@@ -26,7 +26,7 @@ start:
 	cmp di, 16000
 	jne .no_reset
 
-	mov di, 0
+	clr di
 	
 .no_reset:
 	call os_check_for_key

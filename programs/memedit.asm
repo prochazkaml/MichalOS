@@ -7,11 +7,10 @@
 start:
 	call .draw_background
 	
-	mov dl, 11
-	mov dh, 4
+	mov16 dx, 11, 4
 	call os_move_cursor
 	
-	mov al, 0
+	clr al
 
 .hexcharsloop1:
 	call os_print_2hex
@@ -22,7 +21,7 @@ start:
 	jl .hexcharsloop1
 	
 	call os_print_space
-	mov al, 0
+	clr al
 	
 .hexcharsloop2:
 	call os_print_1hex
@@ -204,8 +203,7 @@ start:
 	
 	call .asciidraw
 	
-	mov dl, 0				; Print the input label
-	mov dh, 2
+	mov16 dx, 0, 2	; Print the input label
 	call os_move_cursor
 	cmp byte [.data_mode], 0
 	je .normal_label
@@ -220,15 +218,13 @@ start:
 	call os_print_string
 	
 .finish_label:
-	mov ah, 09h				; Clear the screen for the next input
-	mov al, ' '
-	mov bh, 0
+	mov ax, 0920h				; Clear the screen for the next input
+	clr bh
 	mov bl, [57000]
 	mov cx, 60
 	int 10h
 	
-	mov dl, 40
-	mov dh, 2
+	mov16 dx, 40, 2
 	call os_move_cursor
 	
 	mov ax, [.segment]
@@ -240,8 +236,7 @@ start:
 	mov ax, [.offset]
 	call os_print_4hex
 
-	mov dl, 2
-	mov dh, 2
+	mov16 dx, 2, 2
 	call os_move_cursor
 	call os_show_cursor		; Get a command from the user
 	mov ax, .input_buffer
@@ -255,8 +250,7 @@ start:
 .asciidraw:
 	pusha
 	
-	mov dl, 60
-	mov dh, 6
+	mov16 dx, 60, 6
 	call os_move_cursor
 
 	push es
@@ -275,9 +269,7 @@ start:
 	mov al, '.'
 	
 .asciichar:
-	mov ah, 0Eh
-	mov bh, 0
-	int 10h
+	call os_putchar
 	
 	call os_get_cursor_pos
 	cmp dl, 76
@@ -298,8 +290,7 @@ start:
 .datadraw:
 	pusha
 
-	mov dl, 11
-	mov dh, 6
+	mov16 dx, 11, 6
 	call os_move_cursor
 	
 	push es
@@ -346,8 +337,7 @@ start:
 	ret
 
 .bardraw:
-	mov dl, 0
-	mov dh, 6
+	mov16 dx, 0, 6
 	call os_move_cursor
 	
 	mov ax, [.offset]
@@ -356,7 +346,7 @@ start:
 
 	mov bx, [.segment]
 	
-	mov cl, 0
+	clr cl
 
 	mov si, .semicolon
 
@@ -381,9 +371,9 @@ start:
 	
 .error:
 	mov ax, .error_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	jmp start
 	

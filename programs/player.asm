@@ -94,10 +94,10 @@ start:
 	je start_rad
 	popa
 					; Otherwise show error dialog
-	mov dx, 0			; One button for dialog box
+	clr dx		; One button for dialog box
 	mov ax, .err_string
 	mov bx, .err_string2
-	mov cx, 0
+	clr cx
 	call os_dialog_box
 
 	cmp byte [terminalflag], 1				; Were we passed a filename and errored?

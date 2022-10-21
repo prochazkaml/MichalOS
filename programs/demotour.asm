@@ -203,7 +203,7 @@ os_demotour:
 	mov ax, .t6l0
 	mov bx, .t6l1
 	mov cx, .t6l2
-	mov dx, 0
+	clr dx
 	call os_dialog_box
 	
 	jmp .exit
@@ -235,7 +235,7 @@ os_demotour:
 	ret
 	
 .disable_password:
-	mov al, 0
+	clr al
 	mov [57002], al
 	ret
 	
@@ -259,7 +259,7 @@ os_demotour:
 
 .reset_password:
 	mov di, 57003	
-	mov al, 0
+	clr al
 .reset_password_loop:
 	stosb
 	cmp di, 57036
@@ -268,7 +268,7 @@ os_demotour:
 
 .reset_name:
 	mov di, 57036	
-	mov al, 0
+	clr al
 .reset_name_loop:
 	stosb
 	cmp di, 57069
@@ -296,15 +296,15 @@ os_demotour:
 	mov ax, .donemsg1
 	mov bx, .donemsg2
 	mov cx, .donemsg3
-	mov dx, 0
+	clr dx
 	call os_dialog_box
 	ret
 	
 .write_error:
 	mov ax, .errmsg1
 	mov bx, .errmsg2
-	mov cx, 0
-	mov dx, 0
+	clr cx
+	clr dx
 	call os_dialog_box
 	ret
 	

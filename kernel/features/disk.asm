@@ -116,7 +116,7 @@ os_get_file_list:
 	
 	mov word [.file_list_tmp], ax
 
-	mov eax, 0			; Needed for some older BIOSes
+	clr eax				; Needed for some older BIOSes
 
 	call int_reset_floppy		; Just in case disk was changed
 
@@ -149,7 +149,7 @@ os_get_file_list:
 .show_dir_init:
 	popa
 
-	mov ax, 0
+	clr ax
 	mov si, disk_buffer		; Data reader from start of filenames
 
 	mov word di, [.file_list_tmp]	; Name destination buffer
@@ -381,7 +381,7 @@ os_load_file:
 .root_problem:
 	pop es
 	popa
-	mov bx, 0			; If file not found or major disk error,
+	clr bx			; If file not found or major disk error,
 
 	stc				; return with size = 0 and carry set
 	ret
@@ -820,7 +820,7 @@ os_write_file:
 .failure:
 	popa
 	pusha
-	mov si, 0
+	clr si
 	call os_print_footer
 	popa
 	mov es, [.old_segment]
@@ -1293,7 +1293,7 @@ int_filename_convert:
 
 	mov di, .dest_string
 
-	mov cx, 0
+	clr cx
 .copy_loop:
 	lodsb
 	cmp al, '.'
@@ -1382,7 +1382,7 @@ int_get_root_entry:
 	mov word [.filename], ax
 
 	mov cx, 224			; Search all (224) entries
-	mov ax, 0			; Searching at offset 0
+	clr ax				; Searching at offset 0
 
 .to_next_root_entry:
 	xchg cx, dx			; We use CX in the inner loop...
@@ -1590,7 +1590,7 @@ int_write_root_dir:
 int_reset_floppy:
 	push ax
 	push dx
-	mov ax, 0
+	clr ax
 ; ******************************************************************
 	mov dl, [bootdev]
 ; ******************************************************************
@@ -1611,15 +1611,15 @@ os_convert_l2hts:
 
 	mov bx, ax			; Save logical sector
 
-	mov dx, 0			; First the sector
+	clr dx				; First the sector
 	div word [SecsPerTrack]		; Sectors per track
 	add dl, 01h			; Physical sectors start at 1
 	mov cl, dl			; Sectors belong in CL for int 13h
 	mov ax, bx
 
-	mov dx, 0			; Now calculate the head
+	clr dx				; Now calculate the head
 	div word [SecsPerTrack]		; Sectors per track
-	mov dx, 0
+	clr dx
 	div word [Sides]		; Floppy sides
 	mov dh, dl			; Head/side
 	mov ch, al			; Track

@@ -28,7 +28,7 @@ start:
 
 get_cmd:				; Main processing loop
 	mov di, 3072			; Clear input buffer each time
-	mov al, 0
+	clr al
 	mov cx, 256
 	rep stosb
 
@@ -177,7 +177,7 @@ execute_bin:
 	
 bas_file:
 	mov ax, command
-	mov bx, 0
+	clr bx
 	mov cx, 4096
 	call os_load_file
 	jc total_fail
@@ -205,7 +205,7 @@ no_extension:
 	mov byte [si+4], 0
 
 	mov ax, command
-	mov bx, 0
+	clr bx
 	mov cx, 4096
 	call os_load_file
 	jc try_bas_ext
@@ -285,7 +285,7 @@ print_ver:
 ; ------------------------------------------------------------------
 
 la_directory:
-	mov cx, 0
+	clr cx
 
 	mov ax, 16384		; Get comma-separated list of filenames
 	call os_get_file_list
@@ -300,14 +300,14 @@ la_directory:
 	cmp al, ','
 	jne .no_comma
 	
-	mov al, 0
+	clr al
 	jmp .mod_loop
 	
 .no_comma:
 	test al, al
 	jnz .mod_loop
 	
-	mov al, 0
+	clr al
 	stosb
 	mov al, 4
 	stosb
@@ -432,7 +432,7 @@ la_directory:
 	call os_print_string
 	popa
 	
-	mov al, 0
+	clr al
 	call os_find_char_in_string
 	add si, ax
 	
@@ -446,8 +446,7 @@ la_directory:
 	
 	call os_get_cursor_pos
 	pusha
-	mov dh, 24
-	mov dl, 0
+	mov16 dx, 0, 24
 	call os_move_cursor
 	mov si, wait_string
 	call os_print_string
@@ -460,7 +459,7 @@ la_directory:
 	int 10h	
 	popa
 	call os_move_cursor
-	mov cx, 0
+	clr cx
 	jmp .repeat
 	
 .done:
@@ -476,7 +475,7 @@ list_directory:
 	mov ah, 0Eh			; BIOS teletype function
 
 	call os_get_cursor_pos
-	mov dl, 0
+	clr dl
 	
 .repeat:
 	lodsb				; Start printing filenames
@@ -489,7 +488,7 @@ list_directory:
 	add dl, 16
 	cmp dl, 80
 	jl .newline
-	mov dl, 0
+	clr dl
 	inc dh
 	cmp dh, 25
 	je .scroll
@@ -545,7 +544,7 @@ cat_file:
 	jne .not_newline
 
 	call os_get_cursor_pos
-	mov dl, 0
+	clr dl
 	call os_move_cursor
 
 .not_newline:

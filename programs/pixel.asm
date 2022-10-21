@@ -103,7 +103,7 @@ start:
 	
 .new:
 	mov di, buffer
-	mov al, 0
+	clr al
 	mov cx, 256
 	rep stosb
 	mov si, buffer
@@ -136,10 +136,10 @@ start:
 	
 	popa
 					; Otherwise show error dialog
-	mov dx, 0			; One button for dialog box
+	clr dx		; One button for dialog box
 	mov ax, .err_string
 	mov bx, .err_string2
-	mov cx, 0
+	clr cx
 	call os_dialog_box
 	jmp .open
 	
@@ -169,18 +169,18 @@ start:
 	jc .save_error
 	
 	mov ax, .save_ok_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	
 	jmp start
 
 .save_error:
 	mov ax, .save_error_msg
-	mov bx, 0
-	mov cx, 0
-	mov dx, 0
+	clr bx
+	clr cx
+	clr dx
 	call os_dialog_box
 	jmp start
 	
@@ -230,8 +230,8 @@ start:
 .get_buffer:
 	push ax
 	push bx
-	mov ah, 0
-	mov bh, 0
+	clr ah
+	clr bh
 	mov al, [.cursor_x]
 	and al, 0Fh
 	mov bl, [.cursor_y]
@@ -257,30 +257,24 @@ start:
 	ret
 	
 .draw_box_16:
-	mov al, 0C4h
 	mov cx, 32
-	mov dl, 2
-	mov dh, 2
-	mov ah, 09h
-	mov bh, 0
-	mov bl, 7
+	mov16 ax, 0C4h, 09h
+	mov16 dx, 2, 2
+	mov16 bx, 7, 0
 	call os_move_cursor
 	int 10h				; Clear the upper cursor area
 	
-	mov al, 0C4h
 	mov cx, 32
-	mov dl, 2
-	mov dh, 19
-	mov ah, 09h
-	mov bh, 0
-	mov bl, 7
+	mov16 ax, 0C4h, 09h
+	mov16 dx, 2, 19
+	mov16 bx, 7, 0
 	call os_move_cursor
 	int 10h				; Clear the bottom cursor area
 	
 	mov cx, 1
 	mov al, 0B3h
-	mov dl, 1
-	mov dh, 3
+	mov16 dx, 1, 3
+
 .clear_left:
 	call os_move_cursor
 	int 10h				; Clear the left cursor area
@@ -290,8 +284,8 @@ start:
 	jl .clear_left
 	
 	mov al, 0B3h
-	mov dl, 34
-	mov dh, 3
+	mov16 dx, 34, 3
+
 .clear_right:
 	call os_move_cursor
 	int 10h				; Clear the right cursor area
@@ -332,18 +326,15 @@ start:
 
 	mov cx, 1			; Draw the corners
 	mov al, 0DAh
-	mov dl, 1
-	mov dh, 2
+	mov16 dx, 1, 2
 	call os_move_cursor
 	int 10h
 	mov al, 0C0h
-	mov dl, 1
 	mov dh, 19
 	call os_move_cursor
 	int 10h
 	mov al, 0BFh
-	mov dl, 34
-	mov dh, 2
+	mov16 dx, 34, 2
 	call os_move_cursor
 	int 10h
 	mov al, 0D9h
@@ -354,7 +345,7 @@ start:
 	mov16 ax, 32, 09h	; int 10h function + Full character
 	mov cx, 2			; Print 2 characters
 	mov16 dx, 2, 3		; Sprite position
-	mov bh, 0			; Video page
+	clr bh		; Video page
 	mov si, buffer		; Buffer location
 .draw_loop:
 	call .getcolor		; Get the color
@@ -381,14 +372,12 @@ start:
 	mov al, ']'
 	call os_putchar
 
-	mov dl, 29
-	mov dh, 0
+	mov16 dx, 29, 0
 	call os_move_cursor
 	mov si, .load_file
 	call os_print_string
 	
-	mov dl, 40
-	mov dh, 3
+	mov16 dx, 40, 3
 	call os_move_cursor
 	mov si, .mode_msg
 	call os_print_string
@@ -420,8 +409,8 @@ start:
 	mov bx, .footer_msg
 	mov cx, 7
 	call os_draw_background
-	mov dl, 40
-	mov dh, 5
+
+	mov16 dx, 40, 5
 	call os_move_cursor
 	mov si, .help0
 	call os_print_string

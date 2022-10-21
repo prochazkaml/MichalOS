@@ -33,14 +33,14 @@ start:
 	
 	mov [level_pointer], ax
 	mov si, ax
-	mov bx, 0
+	clr bx
 	
 .clear_loop:
 	mov al, [si + bx]
 	cmp al, 10
 	jl .dont_clear
 	
-	mov al, 0
+	clr al
 	mov [si + bx], al
 	
 .dont_clear:
@@ -139,7 +139,7 @@ check_board:
 
 .rule_loop:
 	mov di, tmp_num_table
-	mov al, 0
+	clr al
 	mov cx, 10
 	rep stosb
 	
@@ -185,7 +185,7 @@ check_board:
 	
 	mov si, tmp_num_table + 1
 	mov cx, 9
-	mov bl, 0
+	clr bl
 
 .checkloop:
 	lodsb
@@ -271,7 +271,7 @@ game_fail:
 	clr dx
 	call os_dialog_box
 
-	mov al, 0
+	clr al
 	mov dx, [cursor_x]	; Load the entire word
 	call sub_set_board_number
 
@@ -283,8 +283,8 @@ game_fail:
 check_free_spaces:
 	pusha
 	mov si, [level_pointer]
-	mov bx, 0
-	mov cx, 0
+	clr bx
+	clr cx
 	
 .loop:
 	lodsb
@@ -316,11 +316,10 @@ check_free_spaces:
 	
 draw_board:
 	pusha
-	mov dl, 27
-	mov dh, 5
+	mov16 dx, 27, 5
 	call os_move_cursor
 
-	mov bx, 0
+	clr bx
 	call sub_draw_line
 	inc dh
 	call os_move_cursor
@@ -331,7 +330,7 @@ draw_board:
 
 	mov si, [level_pointer]
 
-	mov cx, 0
+	clr cx
 	
 .loop:
 	lodsb
@@ -368,13 +367,13 @@ draw_board:
 	call os_print_string
 	popa
 	
-	mov cl, 0
+	clr cl
 
 	inc ch
 	cmp ch, 3
 	jne .no_x_spacer
 	
-	mov ch, 0
+	clr ch
 	inc dh
 	call os_move_cursor
 	
@@ -382,7 +381,7 @@ draw_board:
 	cmp bl, 3
 	jne .no_y_spacer
 	
-	mov bl, 0
+	clr bl
 
 	inc bh
 	call sub_draw_line
@@ -480,18 +479,18 @@ sub_draw_line:		; In: BH = line number (0-3)
 	add si, bx
 	
 	lodsb
-	call sub_putchar
+	call os_putchar
 	
 	mov dx, 3
 	mov cx, 7
 	
 .loop:
 	mov al, 0C4h
-	call sub_putchar
+	call os_putchar
 	loop .loop
 	
 	lodsb
-	call sub_putchar
+	call os_putchar
 	
 	mov cx, 7
 	dec dx
@@ -505,14 +504,6 @@ sub_draw_line:		; In: BH = line number (0-3)
 	.chars_center2	db 0C3h, 0C5h, 0C5h, 0B4h
 	.chars_bottom	db 0C0h, 0C1h, 0C1h, 0D9h
 
-sub_putchar:
-	pusha
-	mov ah, 0Eh
-	mov bh, 0
-	int 10h
-	popa
-	ret
-	
 draw_background:
 	mov ax, .title_msg
 	mov bx, .footer_msg

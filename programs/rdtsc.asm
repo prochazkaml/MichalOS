@@ -7,8 +7,8 @@
 start:
 	mov ax, .msg1
 	mov bx, .msg2
-	mov cx, 0
-	mov dx, 0
+	clr cx
+	clr dx
 	call os_dialog_box
 
 	mov byte [0082h], 1

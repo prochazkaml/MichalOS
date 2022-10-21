@@ -81,7 +81,7 @@ os_start_adlib:
 	cmp byte [57070], 1
 	jge .pcspk
 	
-	mov ax, 0
+	clr ax
 	
 .loop:
 	call int_adlib_regwrite
@@ -134,7 +134,7 @@ os_stop_adlib:
 	
 	call os_return_app_timer
 
-	mov ah, 0
+	clr ah
 	
 .loop:
 	movzx bx, ah
@@ -156,7 +156,7 @@ os_stop_adlib:
 	and al, 0xfc
 	out 0x61, al
 
-	mov cx, 0
+	clr cx
 	call os_set_timer_speed
 	
 	; Reset the RTC handler
@@ -168,7 +168,7 @@ os_stop_adlib:
 	; Turn off all of the channels
 	mov cx, 18		; Not only nuke pwm_freq, but also pwm_cntr!
 	mov di, pwm_freq
-	mov ax, 0
+	clr ax
 	rep stosw
 	
 	popa
@@ -314,7 +314,7 @@ int_adlib_regwrite:
 	pop bx
 
 	push bx						; Apply the frequency multiplier
-	mov bh, 0
+	clr bh
 	mov bl, [adlib_fmul_registers + bx]
 	mov bl, [fs:ADLIB_BUFFER + bx]
 	and bl, 0Fh
@@ -422,14 +422,14 @@ pwm_handler:
 	out 0x43, al
 	mov al, [pwm_val]
 	out 0x42, al
-	mov al, 0
+	clr al
 	out 0x42, al
 
 	; Calculate the next value
 	mov cx, 9
 	mov si, pwm_freq
 	mov di, pwm_cntr - 2
-	mov bl, 0
+	clr bl
 	
 	mov dl, [pwm_channel_amplitude]
 	
@@ -518,7 +518,7 @@ os_adlib_calcfreq:
 	mov [.channel], cl
 	
 	movzx eax, ax
-	mov cl, 0		; Block number
+	clr cl			; Block number
 	
 	push eax
 

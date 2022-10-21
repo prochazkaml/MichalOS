@@ -263,7 +263,7 @@ os_main:
 
 	mov di, cs
 
-	mov cl, 00h					; Divide by 0 error handler
+	clr cl						; Divide by 0 error handler
 	mov si, os_compat_int00
 	call os_modify_int_handler
 
@@ -294,14 +294,14 @@ os_main:
 	call os_seed_random
 
 	mov di, 100h
-	mov al, 0
+	clr al
 	mov cx, 7EFFh
 	rep stosb
 
 	call os_reset_font
 
 	mov ax, 1003h				; Set text output with certain attributes
-	mov bl, 0					; to be bright, and not blinking
+	clr bl						; to be bright, and not blinking
 	int 10h
 	
 	mov ax, 0305h
@@ -538,7 +538,7 @@ launch_program:
 	sub cx, bx
 	mov di, 100h
 	add di, bx
-	mov al, 0
+	clr al
 	rep stosb
 	popa
 	
@@ -575,7 +575,7 @@ launch_basic:
 	sub cx, bx
 	mov di, 100h
 	add di, bx
-	mov al, 0
+	clr al
 	rep stosb
 	popa
 
@@ -636,7 +636,7 @@ start_program:				; BX = program name
 	pusha
 	mov cx, 7EFDh
 	mov di, 100h
-	mov al, 0
+	clr al
 	rep stosb
 	popa
 	

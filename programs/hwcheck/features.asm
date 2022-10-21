@@ -32,8 +32,7 @@ features_loop2:
 features_output:
 	mov di, 24000
 	mov cx, feature00
-	mov dl, 0
-	mov dh, 1
+	mov16 dx, 0, 1
 	
 features_loop_output:
 	call os_move_cursor

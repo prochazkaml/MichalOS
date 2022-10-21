@@ -20,11 +20,11 @@ section .text
 	; in:
 	;	si = number of 55.56 ms to wait
 	sleep:
-			mov ah, 0
+			clr ah
 			int 1Ah
 			mov bx, dx
 		.wait:
-			mov ah, 0
+			clr ah
 			int 1Ah
 			sub dx, bx
 			cmp dx, si
@@ -33,9 +33,8 @@ section .text
 
 	hide_cursor:
 			mov ah, 02h
-			mov bh, 0
-			mov dh, 25
-			mov dl, 0
+			clr bh
+			mov16 dx, 0, 25
 			int 10h
 			ret
 
@@ -49,7 +48,7 @@ section .text
 			ret
 
 	buffer_clear:
-			mov bx, 0
+			clr bx
 		.next:	
 			mov byte [buffer + bx], ' '
 			inc bx
@@ -108,7 +107,7 @@ section .text
 			mov ax, 0b800h
 			mov es, ax
 			mov di, buffer
-			mov si, 0
+			clr si
 		.next:
 			mov bl, [di]
 			cmp bl, 8
@@ -135,7 +134,7 @@ section .text
 			call buffer_render
 			mov si, 18
 			call sleep
-			mov si, 0
+			clr si
 		.next:
 			mov bx, [.title + si]
 			mov byte [buffer + bx], 219
@@ -201,7 +200,7 @@ section .text
 
 	print_score:
 			mov si, .text
-			mov di, 0
+			clr di
 			call buffer_print_string
 			mov ax, [score]
 			mov di, 13
@@ -278,16 +277,16 @@ section .text
 		.end:
 			; update previous snake body with direction information
 			mov bl, [snake_direction]
-			mov ch, 0
+			clr ch
 			mov cl, [snake_head_previous_x]
 			mov dl, [snake_head_previous_y]
 			call buffer_write
 			ret
 
 	check_snake_new_position:
-			mov ch, 0
+			clr ch
 			mov cl, [snake_head_x]
-			mov dh, 0
+			clr dh
 			mov dl, [snake_head_y]
 			call buffer_read
 			cmp bl, 8
@@ -301,9 +300,9 @@ section .text
 			mov byte [is_game_over], al 
 		.write_new_head:
 			mov bl, 1
-			mov ch, 0
+			clr ch
 			mov cl, [snake_head_x]
-			mov ch, 0
+			clr ch
 			mov dl, [snake_head_y]
 			call buffer_write
 			ret
@@ -323,9 +322,9 @@ section .text
 			mov byte [snake_tail_previous_y], al
 			mov al, [snake_tail_x]
 			mov byte [snake_tail_previous_x], al
-			mov ch, 0
+			clr ch
 			mov cl, [snake_tail_x]
-			mov dh, 0
+			clr dh
 			mov dl, [snake_tail_y]
 			call buffer_read
 			cmp bl, 8 ; up
@@ -350,9 +349,9 @@ section .text
 			inc word [snake_tail_x]
 		.end:
 			mov bl, ' '
-			mov ch, 0
+			clr ch
 			mov cl, [snake_tail_previous_x]
-			mov ch, 0
+			clr ch
 			mov dl, [snake_tail_previous_y]
 			call buffer_write
 		ret
@@ -369,7 +368,7 @@ section .text
 	create_food:
 		.try_again:
 			; ref.: http://webpages.charter.net/danrollins/techhelp/0245.HTM
-			mov ah, 0
+			clr ah
 			int 1Ah ; cx = hi dx = low
 			mov ax, dx
 			and ax, 0fffh
@@ -388,7 +387,7 @@ section .text
 			ret
 
 	reset:
-			mov ax, 0
+			clr ax
 			mov word [score], ax
 			mov byte [is_game_over], al
 			mov al, 8
@@ -426,7 +425,7 @@ section .text
 			ret
 
 	draw_border:
-			mov di, 0
+			clr di
 		.next_x:
 			mov byte [buffer + di], 255
 			mov byte [buffer + 80 + di], 196
@@ -434,7 +433,7 @@ section .text
 			inc di
 			cmp di, 80
 			jnz .next_x
-			mov di, 0
+			clr di
 		.next_y:
 			mov byte [buffer + 80 + di], 179
 			mov byte [buffer + 159 + di], 179
