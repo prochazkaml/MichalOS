@@ -11,10 +11,7 @@ start:
 	clr dx
 	call os_dialog_box
 
-	mov byte [0082h], 1
-
-	mov ax, 13h
-	int 10h
+	call os_init_graphics_mode
 	
 	clr bx
 
@@ -28,8 +25,7 @@ start:
 	cmp al, 27
 	jne .loop
 		
-	mov ax, 3
-	int 10h
+	call os_init_text_mode
 	ret
 	
 	.msg1	db "Press any key to change the color.", 0

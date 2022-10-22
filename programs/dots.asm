@@ -5,22 +5,18 @@
 	%INCLUDE "michalos.inc"
 
 start:
-	mov byte [0082h], 1
-
-	mov ax, 13h
-	int 10h
+	call os_init_graphics_mode
 	
 .loop:
 	clr ax
 	mov bx, 255
 	call os_get_random
-	mov al, cl
+	mov bl, cl
 	
 	mov cx, [.x_pos]
 	mov dx, [.y_pos]
 	
-	clr bh
-	call os_put_pixel
+	call os_set_pixel
 	
 	inc word [.x_pos]
 	cmp word [.x_pos], 320
@@ -39,8 +35,7 @@ start:
 	cmp al, 27
 	jne .loop
 	
-	mov ax, 3
-	int 10h
+	call os_init_text_mode
 	ret
 	
 	.color	db 0

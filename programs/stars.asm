@@ -20,10 +20,7 @@ start:
 
 	; Initialize graphics mode
 
-	mov byte [0082h], 1
-
-	mov ax, 13h
-	int 10h
+	call os_init_graphics_mode
 
 .loop:
 	push gs
@@ -78,7 +75,7 @@ start:
 	movsx eax, byte [si + 1]
 	mov ebx, 1280
 	imul ebx
-	
+
 	movsx ebx, word [.yoffset]
 	sal ebx, 8
 	sub eax, ebx
@@ -176,8 +173,7 @@ start:
 	cmp al, 27
 	jne .loop
 	
-	mov ax, 3
-	int 10h
+	call os_init_text_mode
 	ret
 
 .move_up:

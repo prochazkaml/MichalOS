@@ -69,10 +69,7 @@ start:
 	clr cx		; Load PCX at GS:0000h
 	call os_load_file
 
-	mov byte [0082h], 1
-
-	mov16 ax, 13h, 0	; Switch to graphics mode
-	int 10h
+	call os_init_graphics_mode
 
 	mov ax, 0A000h		; ES = video memory
 	mov es, ax
@@ -113,22 +110,7 @@ start:
 	pop ds
 
 	call os_wait_for_key
-
-	mov byte [0082h], 0
-	
-	mov ax, 3			; Back to text mode
-	clr bx
-	int 10h
-	mov ax, 1003h		; No blinking text!
-	int 10h
-	mov al, 09h					; Set bright attribute for CGA
-	mov dx, 03D8h
-	out dx, al
-
-	
-	call os_reset_font
-	
-	call os_clear_screen
+	call os_init_text_mode
 	jmp start
 
 .draw_background:
