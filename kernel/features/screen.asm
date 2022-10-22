@@ -1507,14 +1507,31 @@ os_color_selector:
 	mov ax, .colorlist			; Call os_list_dialog with colors
 	mov bx, .colormsg0
 	mov cx, .colormsg1
+
+	mov word [0089h], 37
+	mov word [os_list_dialog.callback], .callback
 	call os_list_dialog
+	pushf
+	mov word [os_list_dialog.callback], 0
+	mov word [0089h], 76
 	
 	dec al						; Output from os_list_dialog starts with 1, so decrement it
 	mov bx, sp
-	mov [ss:bx + 14], al
+	mov [ss:bx + 16], al
+	popf
 	popa
 	ret
-	
+
+.callback:
+	dec al
+	mov bl, al			; Selected color
+	shl bl, 4
+	mov16 dx, 41, 2		; Start X/Y position
+	mov si, 37			; Width
+	mov di, 23			; Finish Y position
+	call os_draw_block	; Draw option selector window	
+	ret
+
 	.colorlist	db 'Black,Blue,Green,Cyan,Red,Magenta,Brown,Light Gray,Dark Gray,Light Blue,Light Green,Light Cyan,Light Red,Pink,Yellow,White', 0
 	.colormsg0	db 'Choose a color...' ; termination not necessary here
 	.colormsg1	db 0
