@@ -3,7 +3,10 @@
 ;              FASM.EXE sorryass.asm
 ;---------------------------------------------------
 
+    %INCLUDE "michalos.inc"
+
 donkey:
+    mov byte [0082h], 1
     mov [ogstack], sp
 
     ;set up video:
