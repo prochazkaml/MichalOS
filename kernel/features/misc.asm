@@ -99,12 +99,12 @@ os_fatal_error:
 	call os_draw_background
 	
 	mov si, bomblogo
-	mov di, 100h
+	mov di, disk_buffer
 	call os_decompress_zx7
 
 	mov dx, 2 * 256
 	call os_move_cursor
-	mov si, 100h
+	mov si, disk_buffer
 	call os_draw_icon
 	
 	mov dx, 2 * 256 + 35
