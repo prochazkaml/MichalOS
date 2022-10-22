@@ -172,8 +172,6 @@ start:
 
 	cmp al, 27
 	jne .loop
-	
-	call os_init_text_mode
 	ret
 
 .move_up:

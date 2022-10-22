@@ -40,8 +40,6 @@ start:
 	call os_check_for_key
 	cmp al, 27
 	jne .loop
-	
-	call os_init_text_mode
 	ret
 	
 	.color	db 0

@@ -79,8 +79,6 @@ start:
 .no_switch:
 	cmp al, 27
 	jne .loop
-	
-	call os_init_text_mode
 	ret
 	
 	.color	db 0

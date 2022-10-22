@@ -298,17 +298,11 @@ os_main:
 	mov cx, 7EFFh
 	rep stosb
 
-	call os_reset_font
-
-	mov ax, 1003h				; Set text output with certain attributes
-	clr bl						; to be bright, and not blinking
-	int 10h
+	call os_init_text_mode
 	
 	mov ax, 0305h
 	mov bx, 0104h
 	int 16h
-	
-	mov byte [0082h], 0
 	
 	mov ax, system_cfg			; Try to load SYSTEM.CFG
 	mov cx, 57000
@@ -689,18 +683,11 @@ finish:
 	cmp al, 3
 	je .skip_gfx
 	
-	mov ax, 3
-	int 10h
+	call os_init_text_mode
 
 .skip_gfx:
-	mov ax, 1003h			; Set text output with certain attributes
-	clr bx					; to be bright, and not blinking
-	int 10h
-
 	mov byte [0082h], 0
 	mov byte [0085h], 0
-	
-	call os_reset_font
 	popa
 	
 	cmp byte [7FFFh], 1
