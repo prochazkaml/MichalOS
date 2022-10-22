@@ -125,12 +125,18 @@ start:
 	xor dx, dx
 	call os_dialog_box
 	
+	call sub_draw_screen
+
 	call os_color_selector
-	mov [current_attrib], al
+	jc .loop
+	mov bl, al
 	
 	call os_color_selector
+	jc .loop
 	shl al, 4
-	add [current_attrib], al
+	add bl, al
+	
+	mov [current_attrib], bl
 	jmp .loop
 	
 	.color_msg	db 'First you will pick a foreground color', 0
@@ -143,10 +149,14 @@ start:
 	xor dx, dx
 	call os_dialog_box
 	
+	call sub_draw_screen
+
 	call os_color_selector
+	jc .loop
 	mov bl, al
 	
 	call os_color_selector
+	jc .loop
 	shl al, 4
 	add bl, al
 	

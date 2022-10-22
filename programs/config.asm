@@ -255,6 +255,7 @@ start:
 	jmp .look
 	
 .menu_change:
+	call .draw_background
 	call os_color_selector
 	jc .look
 	cmp al, 14
@@ -267,6 +268,7 @@ start:
 	jmp .look
 	
 .bg_change:
+	call .draw_background
 	call os_color_selector
 	jc .look
 	cmp al, 9
@@ -279,6 +281,7 @@ start:
 	jmp .look
 
 .window_change:
+	call .draw_background
 	call os_color_selector
 	jc .look
 	cmp al, 9
