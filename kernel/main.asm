@@ -769,7 +769,7 @@ systemfilemissing:
 	debug4_name				db 'RTCTEST', 0
 	debug5_name				db 'SECTOR', 0
 	debug6_name				db 'MEMEDIT', 0
-	debug7_name				db 'BOXES', 0
+	debug7_name				db 'SHAPES', 0
 	debug8_name				db 'DOTS', 0
 	debug9_name				db 'DEADPIXL', 0
 	debug11_name			db 'CHECK', 0
@@ -803,7 +803,7 @@ systemfilemissing:
 	
 	menuoptions				db 'Programs,Games,Log out,Reboot,Power off', 0
 	gameoptions				db 'Cosmic Flight,InkSpill,Space Inventors,aSMtris,Sudoku,Deep Sea Fisher,MikeTron,Muncher,Hangman,Snake', 0
-	debugoptions			db 'Font editor,Disk detection test,Keyboard tester,Serial communication tester,RTC clock tester,Disk Sector inspector,Memory editor,Boxes,Dots,Dead pixel tester,Disk sector checker,TSC register tester,Simple test app', 0
+	debugoptions			db 'Font editor,Disk detection test,Keyboard tester,Serial communication tester,RTC clock tester,Disk Sector inspector,Memory editor,Shapes test,Dots,Dead pixel tester,Disk sector checker,TSC register tester,Simple test app', 0
 	progoptions				db 'File manager,Text editor,Image viewer,Calculator,Clock,Terminal,Settings,ASCII art editor,Pixel art editor,Music player,Hardware checker,About MichalOS,Other stuff...', 0
 	
 ; ------------------------------------------------------------------
