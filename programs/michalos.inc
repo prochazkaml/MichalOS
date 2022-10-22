@@ -194,17 +194,4 @@ os_init_graphics_mode	equ 8102h
 os_init_text_mode		equ 814Dh
 os_fast_set_pixel		equ 8150h
 
-; Mouse functions
-
-os_mouse_locate			equ 8159h	;										OUT: CX = Mouse X, DX = Mouse Y
-os_mouse_move			equ 815Ch	; IN: CX = Mouse X, DX = Mouse Y
-os_mouse_range			equ 8165h	; IN: AX/BX/CX/DX = X1/Y1/X2/Y2
-os_mouse_wait			equ 8168h	; (Nothing used)
-os_mouse_anyclick		equ 816Bh	;										OUT: CF set if any button is pressed, AL = button data - bitfield
-os_mouse_scale			equ 8177h	; IN: DL/DH = mouse X/Y scale
-os_mouse_reset_scroll	equ 815Fh
-os_mouse_read_scroll	equ 8162h
-os_mouse_reset			equ 816Eh
-os_mouse_read_int		equ 8171h
-
 ; -----------------------------------------------------------------
