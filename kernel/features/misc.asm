@@ -91,22 +91,20 @@ os_fatal_error:
 	mov ds, ax
 	mov es, ax
 
-	mov ax, 3
-	int 10h
-	
-	mov ax, 1003h				; Set text output with certain attributes
-	xor bx, bx					; to be bright, and not blinking
-	int 10h	
+	call os_init_text_mode
 
 	mov ax, .title_msg
 	mov bx, .footer_msg
 	mov cx, 01001111b
 	call os_draw_background
-	call os_reset_font
 	
+	mov si, bomblogo
+	mov di, 100h
+	call os_decompress_zx7
+
 	mov dx, 2 * 256
 	call os_move_cursor
-	mov si, bomblogo
+	mov si, 100h
 	call os_draw_icon
 	
 	mov dx, 2 * 256 + 35
@@ -120,7 +118,7 @@ os_fatal_error:
 	
 	mov ax, 0A2Ah					; Write a 43-character long asterisk-type line
 	clr bh
-	mov cx, 43
+	mov cx, 42
 	int 10h
 	
 	mov dx, 5 * 256 + 35
