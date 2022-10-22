@@ -184,13 +184,14 @@ os_get_os_name			equ 8141h
 
 ; Graphics functions
 
-os_put_pixel			equ 80FFh	; IN: AL = color, BH = page, CX = X res, DX = Y res
-os_get_pixel			equ 8102h	; IN: BH = page, CX = X res, DX = Y res	OUT: AL = color
+os_set_pixel			equ 80FFh	; IN: BL = color, CX = X res, DX = Y res
 os_draw_rectangle		equ 811Dh	; IN: CX/DX/SI/DI = X1/Y1/X2/Y2, BL = color, CF = set if filled
 os_draw_line			equ 80EDh
 os_draw_polygon			equ 80F0h
 os_draw_circle			equ 80F3h
 os_clear_graphics		equ 80F6h
+os_init_graphics_mode	equ 8102h
+os_init_text_mode		equ 814Dh
 
 ; Mouse functions
 

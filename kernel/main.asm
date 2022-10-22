@@ -162,8 +162,8 @@ os_call_vectors:
 	jmp os_clear_graphics		; 80F6h
 	jmp os_get_file_datetime	; 80F9h
 	jmp os_string_encrypt		; 80FCh
-	jmp os_put_pixel			; 80FFh
-	jmp os_get_pixel			; 8102h
+	jmp os_set_pixel			; 80FFh
+	jmp os_init_graphics_mode	; 8102h
 	jmp os_draw_icon			; 8105h
 	jmp os_stop_adlib			; 8108h
 	jmp os_adlib_noteoff		; 810Bh
@@ -188,7 +188,7 @@ os_call_vectors:
 	jmp os_temp_box				; 8144h
 	jmp os_adlib_unmute			; 8147h
 	jmp os_read_root			; 814Ah
-	jmp os_illegal_call			; 814Dh ; FREE!!!!!!!!!!!!!!!!!!!
+	jmp os_init_text_mode		; 814Dh
 	jmp os_illegal_call			; 8150h ; FREE!!!!!!!!!!!!!!!!!!!
 	jmp os_illegal_call			; 8153h ; FREE!!!!!!!!!!!!!!!!!!!
 	jmp os_convert_l2hts		; 8156h

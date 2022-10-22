@@ -1,46 +1,81 @@
 ; ==================================================================
 ; MichalOS Graphics functions
+; Some graphics routines have been borrowed from TachyonOS
 ; ==================================================================
 
-; Puts a pixel on the screen.
-; IN: AL = Color; BH = Page; CX = X position; DX = Y position
-; OUT: nothing
-os_put_pixel:
+; Initializes graphics mode.
+; IN: None
+; OUT: None, registers preserved
+os_init_graphics_mode:
 	pusha
-	mov ah, 0Ch
+	mov byte [0082h], 1
+
+	mov ax, 13h
 	int 10h
+
+	mov bl, 0
+	call os_clear_graphics
 	popa
 	ret
-	
-; Gets a pixel from the screen.
-; IN: BH = Page; CX = X position; DX = Y position
-; OUT: AL = Color
-os_get_pixel:
+
+; Deinitializes graphics mode.
+; IN: None
+; OUT: None, registers preserved
+os_init_text_mode:
 	pusha
-	mov ah, 0Dh
+	mov byte [0082h], 0
+	
+	mov ax, 3			; Back to text mode
+	clr bx
 	int 10h
-	mov [.tmp_byte], al
+	mov ax, 1003h		; No blinking text!
+	int 10h
+	mov al, 09h					; Set bright attribute for CGA
+	mov dx, 03D8h
+	out dx, al
+
+	call os_reset_font	
+	call os_clear_screen
 	popa
-	mov al, [.tmp_byte]
 	ret
-	
-	.tmp_byte	db 0
-	
-; ==================================================================
-; TachyonOS -- The TachyonOS Operating System kernel
-; Copyright (C) 2013 TachyonOS Developers -- see doc/LICENCE.TXT
-;
-; GRAPHICS ROUTINES
-; ==================================================================
-	
+
+; Sets a pixel on the screen to a given value.
+; IN: CX = X coordinate, DX = Y coordinate, BL = color
+; OUT: None, registers preserved
 os_set_pixel:
 	pusha
-	mov dx, cx
-	mov cx, ax
-	mov al, bl
-	clr bh
-	call os_put_pixel
+	push es
+
+	mov ax, 0A000h
+	mov es, ax
+
+	mov ax, dx
+	call int_set_pixel
+
+	pop es
 	popa
+	ret
+
+; Sets a pixel on the screen to a given value.
+; IN: ES = destination memory segment, CX = X coordinate, AX = Y coordinate, BL = color
+; OUT: None, registers preserved
+int_set_pixel:
+	cmp cx, 320
+	ja .exit
+
+	cmp ax, 200
+	ja .exit
+
+	pusha
+
+	mov dx, 320
+	mul dx
+	add ax, cx
+	mov di, ax
+	mov [es:di], bl
+	popa
+
+.exit:
 	ret
 	
 ; Implementation of Bresenham's line algorithm. Translated from an implementation in C (http://www.edepot.com/linebresenham.html)
@@ -56,7 +91,11 @@ os_draw_line:
 	
 	popa				; Restore and save parameters
 	pusha
-	
+	push es
+
+	mov ax, 0A000h
+	mov es, ax
+
 	mov [.x1], cx			; Save points
 	mov [.x], cx
 	mov [.y1], dx
@@ -124,10 +163,10 @@ os_draw_line:
 	cmp ax, bx
 	je .done
 	
-	mov ax, [.x]
-	mov cx, [.y]
+	mov cx, [.x]
+	mov ax, [.y]
 	mov bl, [.colour]
-	call os_set_pixel
+	call int_set_pixel
 	
 	xor si, si
 	mov di, [.balance]
@@ -175,10 +214,10 @@ os_draw_line:
 	cmp ax, bx
 	je .done
 	
-	mov ax, [.x]
-	mov cx, [.y]
+	mov cx, [.x]
+	mov ax, [.y]
 	mov bl, [.colour]
-	call os_set_pixel
+	call int_set_pixel
 	
 	xor si, si
 	mov di, [.balance]
@@ -209,11 +248,12 @@ os_draw_line:
 	jmp .yloop
 	
 .done:
-	mov ax, [.x]
-	mov cx, [.y]
+	mov cx, [.x]
+	mov ax, [.y]
 	mov bl, [.colour]
-	call os_set_pixel
+	call int_set_pixel
 	
+	pop es
 	popa
 	ret
 	
@@ -282,30 +322,39 @@ os_draw_rectangle:
 	jmp .finished_fill
 		
 .fill_shape:
-	mov al, bl
+	push es
+
+	mov ax, 0A000h
+	mov es, ax
+
+	mov ax, dx
 
 	cmp cx, si		; Is X1 smaller than X2?
 	jl .x_good
 	xchg cx, si		; If not, exchange them
+
 .x_good:
-	cmp dx, di		; Is Y1 smaller than Y2?
+	cmp ax, di		; Is Y1 smaller than Y2?
 	jl .y_good
-	xchg dx, di		; If not, exchange them
+	xchg ax, di		; If not, exchange them
+
 .y_good:
 	mov [.x1], cx
-	clr bh
+
 .x_loop:
-	call os_put_pixel
+	call int_set_pixel
 	inc cx
 	
 	cmp cx, si
 	jl .x_loop
 	
-	inc dx
+	inc ax
 	mov cx, [.x1]
 	
-	cmp dx, di
+	cmp ax, di
 	jl .x_loop
+
+	pop es
 		
 .finished_fill:
 	popa
@@ -497,7 +546,8 @@ os_draw_circle:
 	pusha
 	add ax, [.x0]
 	add bx, [.y0]
-	mov cx, bx
+	mov cx, ax
+	mov dx, bx
 	mov bl, [.colour]
 	call os_set_pixel
 	popa
