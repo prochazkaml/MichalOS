@@ -21,6 +21,8 @@ start:
 	jmp get_cmd
 	
 .no_return:
+	call os_get_os_name
+	call os_print_string
 	mov si, version_msg
 	call os_print_string
 	mov si, help_msg
@@ -769,7 +771,7 @@ exit:
 	success_msg			db 'Operation successfully finished', 13, 10, 0
 	exists_msg			db 'File already exists!', 13, 10, 0
 
-	version_msg		db 'MichalOS 3.0 Terminal', 13, 10, 0
+	version_msg		db ' Terminal', 13, 10, 0
 	help_msg		db 'For more information type "HELP".', 13, 10, 0
 	
 	exit_string		db 'EXIT', 0
