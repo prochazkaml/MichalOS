@@ -192,6 +192,7 @@ os_draw_circle			equ 80F3h
 os_clear_graphics		equ 80F6h
 os_init_graphics_mode	equ 8102h
 os_init_text_mode		equ 814Dh
+os_fast_set_pixel		equ 8150h
 
 ; Mouse functions
 

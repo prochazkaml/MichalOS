@@ -50,7 +50,7 @@ os_set_pixel:
 	mov es, ax
 
 	mov ax, dx
-	call int_set_pixel
+	call os_fast_set_pixel
 
 	pop es
 	popa
@@ -59,7 +59,7 @@ os_set_pixel:
 ; Sets a pixel on the screen to a given value.
 ; IN: ES = destination memory segment, CX = X coordinate, AX = Y coordinate, BL = color
 ; OUT: None, registers preserved
-int_set_pixel:
+os_fast_set_pixel:
 	cmp cx, 320
 	ja .exit
 
@@ -166,7 +166,7 @@ os_draw_line:
 	mov cx, [.x]
 	mov ax, [.y]
 	mov bl, [.colour]
-	call int_set_pixel
+	call os_fast_set_pixel
 	
 	xor si, si
 	mov di, [.balance]
@@ -217,7 +217,7 @@ os_draw_line:
 	mov cx, [.x]
 	mov ax, [.y]
 	mov bl, [.colour]
-	call int_set_pixel
+	call os_fast_set_pixel
 	
 	xor si, si
 	mov di, [.balance]
@@ -251,7 +251,7 @@ os_draw_line:
 	mov cx, [.x]
 	mov ax, [.y]
 	mov bl, [.colour]
-	call int_set_pixel
+	call os_fast_set_pixel
 	
 	pop es
 	popa
@@ -342,7 +342,7 @@ os_draw_rectangle:
 	mov [.x1], cx
 
 .x_loop:
-	call int_set_pixel
+	call os_fast_set_pixel
 	inc cx
 	
 	cmp cx, si

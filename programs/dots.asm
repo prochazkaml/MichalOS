@@ -7,28 +7,34 @@
 start:
 	call os_init_graphics_mode
 	
+	mov ax, 0A000h
+	mov es, ax
+
+	clr si
+	clr di
+
 .loop:
 	clr ax
 	mov bx, 255
 	call os_get_random
 	mov bl, cl
 	
-	mov cx, [.x_pos]
-	mov dx, [.y_pos]
+	mov cx, si
+	mov ax, di
 	
-	call os_set_pixel
+	call os_fast_set_pixel
 	
-	inc word [.x_pos]
-	cmp word [.x_pos], 320
+	inc si
+	cmp si, 320
 	jne .no_inc_y
 	
-	mov word [.x_pos], 0
-	inc word [.y_pos]
+	clr si
+	inc di
 	
-	cmp word [.y_pos], 200
+	cmp di, 200
 	jne .no_inc_y
-	
-	mov word [.y_pos], 0
+
+	clr di
 	
 .no_inc_y:
 	call os_check_for_key
