@@ -50,7 +50,18 @@ start:
 	mov ebx, 1280
 	imul ebx
 	
+	movsx ebx, word [.xoffset]
+	sal ebx, 8
+	sub eax, ebx
+	
 	movzx ebx, word [si + 2]
+	clr edx
+	bt eax, 31
+	jnc .no_negative_x
+
+	dec edx
+
+.no_negative_x:
 	idiv ebx
 	
 	; Is the star out of range?
@@ -68,6 +79,18 @@ start:
 	mov ebx, 1280
 	imul ebx
 	
+	movsx ebx, word [.yoffset]
+	sal ebx, 8
+	sub eax, ebx
+	
+	movzx ebx, word [si + 2]
+	clr edx
+	bt eax, 31
+	jnc .no_negative_y
+
+	dec edx
+
+.no_negative_y:
 	movzx ebx, word [si + 2]
 	idiv ebx
 
@@ -138,12 +161,43 @@ start:
 
 	call os_check_for_key
 
+	cmp ah, 72
+	je .move_up
+	
+	cmp ah, 75
+	je .move_left
+	
+	cmp ah, 77
+	je .move_right
+	
+	cmp ah, 80
+	je .move_down
+
 	cmp al, 27
 	jne .loop
 	
 	mov ax, 3
 	int 10h
 	ret
+
+.move_up:
+	dec word [.yoffset]
+	jmp .loop
+
+.move_down:
+	inc word [.yoffset]
+	jmp .loop
+
+.move_left:
+	dec word [.xoffset]
+	jmp .loop
+
+.move_right:
+	inc word [.xoffset]
+	jmp .loop
+
+	.xoffset	dw 0
+	.yoffset	dw 0
 
 ; DI = address of star entry (4 bytes)
 .generate_new_star:
