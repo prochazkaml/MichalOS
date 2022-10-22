@@ -15,7 +15,7 @@ A 16-bit keyboard controlled operating system based on MikeOS 4.5, aimed to be m
 
 - Intel 80386 or higher, Pentium recommended
 - At least 80 kB RAM, 256 kB recommended
-- An EGA video card, VGA recommended
+- A VGA video card
 - A keyboard
 
 ## Screenshots
