@@ -128,9 +128,6 @@ youlost:
     xor   ax,ax           ;wait for keypress
     int   16h
 die:
-    mov   ax,3
-    int   10h
-
     mov sp, [ogstack]
     ret
 
