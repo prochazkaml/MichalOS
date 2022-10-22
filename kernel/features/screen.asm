@@ -1185,6 +1185,18 @@ os_password_dialog:
 
 int_input_dialog:
 	pusha
+
+	mov dl, [0088h]
+	mov [.og_value], dl
+
+	cmp dl, 50			; If there is no limit set, set it now
+	jb .no_adjust
+
+	mov dl, 50
+
+.no_adjust:
+	mov [0088h], dl
+
 	push bx				; Save message to show
 
 	mov bl, [57001]		; Color from RAM
@@ -1212,7 +1224,18 @@ int_input_dialog:
 	call os_move_cursor
 
 	popa
+
+	push .retptr		; Don't worry too much about this
+	pusha
 	jmp int_input_string
+
+.retptr:
+	mov dl, [.og_value]
+	mov [0088h], dl
+	popa
+	ret
+
+	.og_value		db 0
 
 ; ------------------------------------------------------------------
 ; os_dialog_box -- Print dialog box in middle of screen, with button(s)
