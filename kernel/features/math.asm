@@ -7,18 +7,7 @@
 ; IN: every register; OUT: Nothing (registers preserved)
 
 os_seed_random:
-	pusha
-
-	mov ah, 02h
-	int 1Ah
-	
-	mov ax, [os_random_seed]
-
-	add ax, cx
-	sub ax, dx
-	
-	mov [os_random_seed], ax	; Store the data
-	popa
+	mov word [os_random_seed], 0x7384
 	ret
 
 
@@ -52,7 +41,6 @@ os_get_random:
 .generate_random:
 	push dx
 
-	call os_seed_random
 	mov ax, [os_random_seed]
 	mov dx, 0x7383			; The magic number (random.org)
 	mul dx				; DX:AX = AX * DX

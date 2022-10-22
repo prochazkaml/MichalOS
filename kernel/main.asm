@@ -81,7 +81,7 @@ os_call_vectors:
 	jmp os_print_string			; 8003h
 	jmp os_move_cursor			; 8006h
 	jmp os_clear_screen			; 8009h
-	jmp os_illegal_call			; 800Ch
+	jmp os_illegal_call			; 800Ch ; FREE!!!!!!!!!!!!!!!!!!!
 	jmp os_print_newline		; 800Fh
 	jmp os_wait_for_key			; 8012h
 	jmp os_check_for_key		; 8015h
@@ -184,7 +184,7 @@ os_call_vectors:
 	jmp os_math_root			; 8138h
 	jmp os_input_password		; 813Bh
 	jmp os_get_int_handler		; 813Eh
-	jmp os_get_os_name			; 8141h ; FREE!!!!!!!!!!!!!!!!!!!
+	jmp os_get_os_name			; 8141h
 	jmp os_temp_box				; 8144h
 	jmp os_adlib_unmute			; 8147h
 	jmp os_read_root			; 814Ah
