@@ -109,9 +109,6 @@ start:
 	mov di, .filename_tmp1
 	call os_string_copy
 
-.retry_rename:
-	call .draw_background
-
 	mov bx, .filename_msg			; Get second filename
 	mov ax, .filename_input
 	call os_input_dialog
@@ -157,13 +154,13 @@ start:
 	mov ax, .filename_input
 	call os_input_dialog
 
-	call os_file_exists
-	jnc .file_exists
-	
 	mov si, ax
 	mov di, .filename_tmp2
 	call os_string_copy
 
+	call os_file_exists
+	jnc .file_exists
+	
 	mov ax, .filename_tmp1
 	mov bx, .filename_tmp2
 
