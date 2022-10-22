@@ -57,16 +57,21 @@ build/kernel.sys: kernel/main.asm kernel/features/*.asm | build
 
 # Assembles all programs.
 # Note: % means file name prefix, $@ means output file and $< means source file.
-build/%.app: programs/gitignore/%.asm programs/gitignore/%/*.asm programs/michalos.inc | build
+build/%.app: build/%.app.bin
+	misc/zx7/app_zx7 $< $@
+
+.PRECIOUS: build/%.app.bin
+
+build/%.app.bin: programs/gitignore/%.asm programs/gitignore/%/*.asm programs/michalos.inc | build
 	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< 
 	
-build/%.app: programs/gitignore/%.asm programs/michalos.inc | build
+build/%.app.bin: programs/gitignore/%.asm programs/michalos.inc | build
 	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< 
 	
-build/%.app: programs/%.asm programs/%/*.asm programs/michalos.inc | build
+build/%.app.bin: programs/%.asm programs/%/*.asm programs/michalos.inc | build
 	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< 
 	
-build/%.app: programs/%.asm programs/michalos.inc | build
+build/%.app.bin: programs/%.asm programs/michalos.inc | build
 	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< 
 	
 # Assembles all songs.

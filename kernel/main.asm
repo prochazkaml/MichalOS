@@ -57,7 +57,7 @@
 ;      - 0089h = Width of os_list_dialog (word)
 ;      - 00E0h - 00EFh - parameters for an app (eg. a file to open when an app launches)
 ;      - 00F0h - 00FFh - temporary buffer for storing apps' filenames
-;   - 0100h - 7FFEh = Application
+;   - 0100h - 7FFDh = Application
 ;   - 7FFEh - Application return flag
 ;      - 0 = return to the desktop after an application quits
 ;      - 1 = launch another application (00F0h-00FFh) after an application quits
@@ -382,9 +382,14 @@ enterpressed:
 	call os_string_compare
 	jnc .try
 	
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;end LOGO!
-	
+	jmp checkformenu
+
+refresh_screen:
+	call os_init_text_mode
+
 checkformenu:
+	mov byte [0082h], 0
+	
 	call os_hide_cursor
 	call background
 
@@ -394,6 +399,8 @@ checkformenuloop:
 	je option_screen		; Open the menu
 	cmp al, 'a'					; a pressed?
 	je load_fileman		; Open the file manager
+	cmp al, 'r'					; r pressed?
+	je refresh_screen		; Re-initialize the screen
 	jmp checkformenuloop
 	
 	greetingmsg			db 'Greetings, ', 0
@@ -401,10 +408,8 @@ checkformenuloop:
 	passentermsg		db 'Enter your password: ', 0
 
 	os_init_msg			db 'MichalOS Desktop', 0
-	os_version_msg		db '[Space] Open the main menu [A] Open the file manager', 0
+	os_version_msg		db '[Space] Open the main menu [A] Open the file manager [R] Reinitialize display', 0
 
-; TODO: THE FOLLOWING CODE NEEDS TO BE REWRITTEN
-	
 option_screen:
 	call menu_background
 
@@ -457,9 +462,9 @@ app_selector:
 	mov bx, app_prefix
 	mov cx, 00F0h
 	call os_string_join
-	
-	mov bx, cx
-	jmp start_program
+
+	mov ax, cx
+	jmp launch_program
 	
 debug_stuff:
 	call menu_background
@@ -484,9 +489,8 @@ debug_stuff:
 	mov cx, 00F0h
 	call os_string_join
 	
-	mov bx, cx
-	jmp start_program
-	
+	mov ax, cx
+	jmp launch_program
 	
 game_selector:
 	call menu_background
@@ -504,77 +508,38 @@ game_selector:
 	lodsw
 	
 launch_program:
-	mov byte [32767], 0
+	mov byte [7FFFh], 0
 
 	pusha
 	mov si, ax
-	mov bx, si
-	mov ax, si
 	call os_string_length
-	mov si, bx
-	add si, ax				; SI now points to end of filename...
-	dec si
-	dec si
-	dec si					; ...and now to start of extension!
-	mov di, app_ext
+	add si, ax				; SI now points to end of filename
 	mov cx, 3
+	sub si, cx
+	mov di, app_ext
 	rep cmpsb				; Are final 3 chars 'APP'?
 	jne launch_basic		; If not, try 'BAS'
 	popa
 	
-	mov cx, 100h			; Where to load the program file
-	call os_load_file		; Load filename pointed to by AX
+	call load_program_file
+	call run_binary_program
 
-	jc checkformenu
-	
-	pusha
-	mov cx, 7EFDh
-	sub cx, bx
-	mov di, 100h
-	add di, bx
-	clr al
-	rep stosb
-	popa
-	
-	call os_show_cursor
-	
-	jmp execute_bin_program
+	jmp checkformenu
 
 launch_basic:
-	popa
-	
-	pusha
 	mov si, ax
-	mov bx, si
-	mov ax, si
 	call os_string_length
-	mov si, bx
-	add si, ax				; SI now points to end of filename...
-	dec si
-	dec si
-	dec si					; ...and now to start of extension!
-	mov di, bas_ext
+	add si, ax				; SI now points to end of filename
 	mov cx, 3
+	sub si, cx
+	mov di, bas_ext
 	rep cmpsb				; Are final 3 chars 'BAS'?
 	jne program_error		; If not, error out
 	popa
 
-	mov cx, 100h			; Where to load the program file
-	call os_load_file		; Load filename pointed to by AX
-
-	jc checkformenu
-	
-	pusha
-	mov cx, 7EFDh
-	sub cx, bx
-	mov di, 100h
-	add di, bx
-	clr al
-	rep stosb
-	popa
-
+	call load_program_file
 	call os_show_cursor
-	
+
 	mov ax, 100h
 	clr si
 	call os_run_basic
@@ -583,67 +548,24 @@ launch_basic:
 	call os_print_string
 	call os_wait_for_key
 
-	call os_clear_screen
-	
-	mov byte [0082h], 0
-	
 	jmp checkformenu
-	
-program_error:
-	popa
-	call background
-	mov ax, prog_msg
-	clr bx
-	clr cx
-	clr dx
-	call os_dialog_box
-	jmp checkformenu
-	
-load_fileman:
-	push ds
-	mov ds, [driversgmt]
-	mov si, FILE_MANAGER
-	mov di, 0100h
-	mov cx, 1000h
-	rep movsb
-	pop ds
-	jmp execute_bin_program
-	
-load_demotour:
-	mov byte [0083h], 1
-	mov ax, demotour_name
-	mov cx, 100h
-	call os_load_file
-	call os_clear_registers
-	call 100h
-	jmp logoinput
-	
-load_command:
-	mov ax, cmd_name
-	mov bx, app_prefix
-	mov cx, 00F0h
-	call os_string_join
-	mov bx, cx
-	jmp start_program
-	
-start_program:				; BX = program name
-	pusha
-	mov cx, 7EFDh
-	mov di, 100h
-	clr al
-	rep stosb
-	popa
-	
-	mov ax, bx
+
+load_program_file:
 	mov cx, 100h			; Where to load the program file
 	call os_load_file		; Load filename pointed to by AX
 
 	jc systemfilemissing
-	
-	call os_show_cursor
 
-	jmp execute_bin_program
-	
+	pusha
+	mov cx, 7EFDh
+	sub cx, bx
+	mov di, 100h
+	add di, bx
+	clr al
+	rep stosb
+	popa
+	ret
+
 return_to_app:
 	mov ax, 00F0h
 	mov cx, 100h			; Where to load the program file
@@ -651,10 +573,26 @@ return_to_app:
 
 	jc systemfilemissing	
 
-execute_bin_program:
-	call os_clear_screen	; Clear the screen before running
+run_binary_program:
+	; Detect binary header version
+	
+	cmp byte [100h], 0xC3	; Old headerless binaries
+	jne start_binary
 
-	mov byte [0082h], 0
+	cmp dword [101h], 'MiOS'; File magic
+	jne start_binary
+
+	; MichalOS version 1 executable was loaded
+
+	mov cx, [106h]			; File size
+	mov si, 108h
+
+	bt word [105h], 0		; Was it compressed?
+	jnc load_binary_no_compression
+	jc load_binary_decompress
+
+start_binary:
+	call os_clear_screen	; Clear the screen before running
 	
 	mov byte [app_running], 1
 
@@ -670,13 +608,11 @@ finish:
 	call os_stop_adlib		; Reset everything (in case the app crashed or something)
 	call os_speaker_off
 
-	push ax
+	pusha
 	mov ax, cs
 	mov ds, ax
 	mov es, ax
-	pop ax
-	
-	pusha
+
 	mov ah, 0Fh				; Get the current video mode
 	int 10h
 	
@@ -695,11 +631,53 @@ finish:
 	
 	cmp byte [7FFEh], 1
 	je return_to_app
-	
-	jmp checkformenu		; When finished, go back to the program list
+	ret
 
+load_binary_no_compression:
+	mov di, 100h
+	rep movsb
+	jmp start_binary
+
+load_binary_decompress:
+	mov di, 7FFEh
+	sub di, cx
+
+	push di
+	rep movsb
+	pop si
+
+	mov di, 100h
+	call os_decompress_zx7
+
+	jmp start_binary
+
+program_error:
+	popa
+	call background
+	mov ax, prog_msg
+	clr bx
+	clr cx
+	clr dx
+	call os_dialog_box
+	jmp checkformenu
 	
-; TODO: THE CODE ABOVE NEEDS TO BE REWRITTEN
+load_fileman:
+	push ds
+	mov ds, [driversgmt]
+	mov si, FILE_MANAGER
+	mov di, 0100h
+	mov cx, 1000h
+	rep movsb
+	pop ds
+	call run_binary_program
+	jmp checkformenu
+	
+load_demotour:
+	mov byte [0083h], 1
+	mov ax, demotour_name
+	call load_program_file
+	call run_binary_program
+	jmp logoinput
 	
 background:
 	pusha
