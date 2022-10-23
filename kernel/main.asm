@@ -202,19 +202,10 @@ os_main:
 	shl ax, 6					; Convert kB to segments
 
 	cli
-
 	sub ax, 65536 / 16			; Set the stack to the top of the memory
 	mov ss, ax
 	mov sp, 0FFFEh
-
-;	xor ax, ax
-;	mov ss, ax					; Set stack segment and pointer
-;	mov sp, 0FFFEh
-
 	sti
-
-	cld							; The default direction for string operations
-								; will be 'up' - incrementing address in RAM
 
 	mov ax, cs					; Set all segments to match where kernel is loaded
 	mov ds, ax			
@@ -223,15 +214,20 @@ os_main:
 	add ax, 1000h
 	mov gs, ax
 	
-	mov byte [0000h], 0xC3
-	mov [0084h], dl
 	mov [bootdev], dl			; Save boot device number
-	mov byte [0088h], 255
-	mov word [0089h], 76
-	mov byte [00E0h], 0
-
 	mov [Sides], bx
 	mov [SecsPerTrack], cx
+
+	mov cx, 0x8000
+	mov di, 0
+	clr al
+	rep stosb
+
+	mov [0084h], dl
+	mov byte [0000h], 0xC3
+	mov byte [0088h], 255
+	mov word [0089h], 76
+;	mov byte [00E0h], 0
 
 	clr ax
 	call os_serial_port_enable
@@ -527,6 +523,8 @@ launch_program:
 	jmp checkformenu
 
 launch_basic:
+	popa
+	pusha
 	mov si, ax
 	call os_string_length
 	add si, ax				; SI now points to end of filename
