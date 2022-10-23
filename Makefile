@@ -55,7 +55,7 @@ build/boot.bin: boot/boot.asm | build
 	nasm -O2 -w+all -f bin -o $@ -l build/boot.lst boot/boot.asm
 
 # Kernel target
-build/kernel.sys: kernel/main.asm kernel/features/*.asm | build
+build/kernel.sys: kernel/main.asm kernel/features/*.asm .git/refs/heads/master | build
 	nasm -O2 -w+all -f bin -I kernel/ -o $@ -l build/kernel.lst kernel/main.asm \
 	-dVERMIN="'`expr $$(git rev-list --all --count) - $(VERCOMMIT)`'" \
 	-dVERMAJ="'$(VER)'"
@@ -67,19 +67,19 @@ build/%.app: build/%.app.bin
 
 .PRECIOUS: build/%.app.bin
 
-build/%.app.bin: programs/gitignore/%.asm programs/gitignore/%/*.asm programs/michalos.inc | build
+build/%.app.bin: programs/gitignore/%.asm programs/gitignore/%/*.asm programs/michalos.inc .git/refs/heads/master | build
 	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< \
 	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
-build/%.app.bin: programs/gitignore/%.asm programs/michalos.inc | build
+build/%.app.bin: programs/gitignore/%.asm programs/michalos.inc .git/refs/heads/master | build
 	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< \
 	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
-build/%.app.bin: programs/%.asm programs/%/*.asm programs/michalos.inc | build
+build/%.app.bin: programs/%.asm programs/%/*.asm programs/michalos.inc .git/refs/heads/master | build
 	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< \
 	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
-build/%.app.bin: programs/%.asm programs/michalos.inc | build
+build/%.app.bin: programs/%.asm programs/michalos.inc .git/refs/heads/master | build
 	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< \
 	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
