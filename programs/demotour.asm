@@ -352,8 +352,8 @@ os_demotour:
 	
 	.changedone			db 'Changes have been saved.', 0
 		
-	.box0msg1			db 'Thanks for trying out MichalOS!', 0
-	.box0msg2			db 'If you are unfamiliar with the system,', 0
+	.box0msg1			db 'Thank you for trying out MichalOS!', 0
+	.box0msg2			db 'If you are not familiar with the system,', 0
 	.box0msg3			db 'press B to start the tutorial. Otherwise', 0
 	.box0msg4			db 'press A to skip straight to the setup.', 0
 	
@@ -362,14 +362,14 @@ os_demotour:
 						db ' MichalOS was designed to be a quick, efficient and easy-to-use', 13, 10
 						db ' keyboard controlled operating system.', 13, 10
 						db 10
-						db ' Now you will be taught how to use this system. It is quite easy', 13, 10
-						db ' to understand, because the UI mainly consists of these 4 elements:', 13, 10
+						db ' Now, you will be taught how to use this system. It is quite easy', 13, 10
+						db ' to understand, as the UI mainly consists of these 4 elements:', 13, 10
 						db '  ', 1Ah, ' an information dialog', 13, 10
 						db '  ', 1Ah, ' a 2-button dialog', 13, 10
 						db '  ', 1Ah, ' a text input dialog', 13, 10
 						db '  ', 1Ah, ' a list dialog', 13, 10
 						db 10
-						db ' This operating system is mainly controlled by these keys:', 13, 10
+						db ' The UI of MichalOS is mainly controlled with the following keys:', 13, 10
 						db 32, 32, 17, ' ', 16, ': Move the cursor (left/right)', 13, 10
 						db 32, 32, 30, ' ', 31, ': Move the cursor (up/down)', 13, 10
 						db '  Enter: Select/Choose', 13, 10
@@ -377,8 +377,8 @@ os_demotour:
 						db 10
 						db ' If an application uses any other keys, they will be shown in the bottom panel.', 0
 	
-	.tsl0				db ' In MichalOS, there also are some handy shortcuts, which can be', 13, 10
-						db ' used by holding down the Alt key and pressing a function key:', 13, 10
+	.tsl0				db ' Throughout the entire OS, you may also use the following shortcuts, which can', 13, 10
+						db ' be used by holding down the Alt key and then pressing a function key:', 13, 10
 						db 10
 						db '  ', 1Ah, ' Alt + F2: Mute the PC speaker', 13, 10
 						db '  ', 1Ah, ' Alt + F3: Unmute the PC speaker', 13, 10
@@ -389,14 +389,14 @@ os_demotour:
 	
 	.t2l0				db 'This is a 2-button dialog.', 0
 	.t2l1				db 'Choose a button with the arrow keys,', 0
-	.t2l2				db 'and then press Enter.', 0
+	.t2l2				db 'and then press Enter to confirm.', 0
 	
 	.t2cancel			db 'Now try to choose Cancel.', 0
 	.t2ok				db 'Now try to choose OK.', 0
 	
-	.t3l0				db 'Now you will see a text input dialog.', 0
-	.t3l1				db 'When you see it, type what it wants', 0
-	.t3l2				db 'and then press Enter.', 0
+	.t3l0				db 'You will now see a text input dialog.', 0
+	.t3l1				db 'When you see it, type what it asks', 0
+	.t3l2				db 'you to and then press Enter.', 0
 	
 	.t3output1			db 'Greetings, ', 0
 	.t3output2			db '!', 0
@@ -405,7 +405,7 @@ os_demotour:
 	.t4l1				db 'and use the Enter key to select it. The Tab key returns to the top.', 0
 	.t4list				db "1. Choose me!,2. No - choose me!,3. It doesn't matter...,4. I'm also an option!", 0
 	
-	.t5l0				db 'Now we will have to go through some', 0
+	.t5l0				db 'We will now have to go through some', 0
 	.t5l1				db 'basic setup.', 0
 	
 	.t6l0				db 'MichalOS Setup has finished.', 0
