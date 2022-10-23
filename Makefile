@@ -15,6 +15,9 @@ DRO := $(patsubst files/src/%.dro,build/%.drz,$(sort $(wildcard files/src/*.dro)
 # This selects all files to copy to the final image.
 FILES := $(PROGRAMS) $(MMF) $(DRO) $(wildcard files/*.*) $(wildcard files/gitignore/*.*)
 
+VER := 3.0
+VERCOMMIT := 0
+
 build:
 	mkdir -p $@
 
@@ -53,7 +56,9 @@ build/boot.bin: boot/boot.asm | build
 
 # Kernel target
 build/kernel.sys: kernel/main.asm kernel/features/*.asm | build
-	nasm -O2 -w+all -f bin -I kernel/ -o $@ -l build/kernel.lst kernel/main.asm
+	nasm -O2 -w+all -f bin -I kernel/ -o $@ -l build/kernel.lst kernel/main.asm \
+	-dVERMIN="'`expr $$(git rev-list --all --count) - $(VERCOMMIT)`'" \
+	-dVERMAJ="'$(VER)'"
 
 # Assembles all programs.
 # Note: % means file name prefix, $@ means output file and $< means source file.
@@ -63,16 +68,20 @@ build/%.app: build/%.app.bin
 .PRECIOUS: build/%.app.bin
 
 build/%.app.bin: programs/gitignore/%.asm programs/gitignore/%/*.asm programs/michalos.inc | build
-	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< 
+	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< \
+	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
 build/%.app.bin: programs/gitignore/%.asm programs/michalos.inc | build
-	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< 
+	nasm -O2 -w+all -f bin -I programs/ -I programs/gitignore/ -o $@ -l $@.lst $< \
+	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
 build/%.app.bin: programs/%.asm programs/%/*.asm programs/michalos.inc | build
-	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< 
+	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< \
+	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
 build/%.app.bin: programs/%.asm programs/michalos.inc | build
-	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< 
+	nasm -O2 -w+all -f bin -I programs/ -o $@ -l $@.lst $< \
+	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
 # Assembles all songs.
 build/%.mmf: files/src/%.mus files/src/notelist.txt | build

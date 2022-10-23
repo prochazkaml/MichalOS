@@ -17,6 +17,8 @@ start:
 	call os_move_cursor
 	call os_get_os_name
 	call os_print_string
+	mov si, .commitver
+	call os_print_string
 	
 	mov16 dx, 0, 12
 	call os_move_cursor
@@ -122,6 +124,8 @@ start:
 	.footer_msg				db '[Space] Visit the hall of fame [L] View the license', 0
 	.footer_msg_hall		db '[Space] Go back [L] View the license', 0
 	.footer_msg_lic			db '[Space] Visit the hall of fame [L] Go back [Up/Down] Scroll', 0
+
+	.commitver				db ' ', GIT, 0
 
 	.licensetext:			incbin "../misc/LICENSE"
 							db 0

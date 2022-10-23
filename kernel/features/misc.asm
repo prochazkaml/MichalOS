@@ -76,7 +76,7 @@ os_get_os_name:
 	mov si, osname
 	ret
 
-	osname	db 'MichalOS 3.0', 0
+	osname	db 'MichalOS ', VERMAJ, '.', VERMIN, 0
 
 ; ------------------------------------------------------------------
 ; os_fatal_error -- Display error message and halt execution
