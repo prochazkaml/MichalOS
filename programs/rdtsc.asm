@@ -11,8 +11,6 @@ start:
 	clr dx
 	call os_dialog_box
 
-	mov byte [0082h], 1
-	
 	call os_clear_screen
 
 	mov si, .handler

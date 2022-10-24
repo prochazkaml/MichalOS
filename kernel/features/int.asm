@@ -163,15 +163,15 @@ os_compat_int1C:
 	mov ds, ax
 	mov es, ax
 	
-	cmp byte [0082h], 1
-	je .no_update
-	
 	cmp word [screensaver_timer], 0
 	je .no_update_screensaver
 	
 	dec word [screensaver_timer]
 	
 .no_update_screensaver:
+	cmp byte [0082h], 1
+	je .no_update
+	
 	mov ah, 02h			; Get the time
 	call os_int_1Ah
 	cmp cx, [.tmp_time]

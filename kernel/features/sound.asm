@@ -129,11 +129,11 @@ os_start_adlib:
 
 os_stop_adlib:
 	pusha
+	call os_return_app_timer
+
 	cmp byte [57070], 1
 	jge .pcspk
 	
-	call os_return_app_timer
-
 	clr ah
 	
 .loop:
@@ -156,15 +156,6 @@ os_stop_adlib:
 	and al, 0xfc
 	out 0x61, al
 
-	clr cx
-	call os_set_timer_speed
-	
-	; Reset the RTC handler
-	mov cl, 1Ch
-	mov si, os_compat_int1C
-	mov di, cs
-	call os_modify_int_handler
-	
 	; Turn off all of the channels
 	mov cx, 18		; Not only nuke pwm_freq, but also pwm_cntr!
 	mov di, pwm_freq

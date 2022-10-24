@@ -8,7 +8,6 @@
 	%include "michalos.inc"
 
 section .text
-		mov byte [0082h], 1
 		mov [startstack], sp
 		call hide_cursor
 	start:

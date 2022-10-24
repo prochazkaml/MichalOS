@@ -26,7 +26,6 @@
 	game_begun			db 0
 	
 start:
-	mov byte [0082h], 1
 	mov ax, 000Dh
 	int 10h
 

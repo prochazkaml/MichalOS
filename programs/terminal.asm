@@ -11,8 +11,6 @@ start:
 	mov di, 00F0h
 	call os_string_copy
 	
-	mov byte [0082h], 1
-	
 	cmp byte [7FFEh], 0
 	je .no_return
 	

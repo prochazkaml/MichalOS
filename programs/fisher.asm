@@ -38,8 +38,7 @@
 
         %include "michalos.inc" ;MikeOS Include file
 
-start:  mov byte [0082h], 1
-		call init               ;initialize game
+start:  call init               ;initialize game
 
         ;game loop
 

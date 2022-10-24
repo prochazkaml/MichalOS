@@ -384,8 +384,6 @@ refresh_screen:
 	call os_init_text_mode
 
 checkformenu:
-	mov byte [0082h], 0
-	
 	call os_hide_cursor
 	call background
 
@@ -604,6 +602,7 @@ finish:
 	mov byte [app_running], 0
 	
 	call os_stop_adlib		; Reset everything (in case the app crashed or something)
+	call os_return_app_timer
 	call os_speaker_off
 
 	pusha
@@ -620,7 +619,6 @@ finish:
 	call os_init_text_mode
 
 .skip_gfx:
-	mov byte [0082h], 0
 	mov byte [0085h], 0
 	popa
 	

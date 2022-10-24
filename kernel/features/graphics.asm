@@ -23,8 +23,6 @@ os_init_graphics_mode:
 ; OUT: None, registers preserved
 os_init_text_mode:
 	pusha
-	mov byte [0082h], 0
-	
 	mov ax, 3			; Back to text mode
 	clr bx
 	int 10h

@@ -130,6 +130,8 @@ os_clear_screen:
 	mov16 dx, 79, 24	; Bottom-right
 	int 10h
 
+	mov byte [0082h], 1	; Assume that an application clearing 
+						; the screen doesn't want to refresh time		
 	popa
 	ret
 
@@ -1065,7 +1067,10 @@ os_draw_background:
 	call os_print_string
 
 	call os_print_clock
-		
+
+	mov byte [0082h], 0	; Assume that an application drawing 
+						; the background wants to refresh time		
+
 	mov16 dx, 0, 1		; Ready for app text
 	jmp os_move_cursor.no_pusha
 

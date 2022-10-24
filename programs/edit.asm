@@ -689,8 +689,6 @@ text_entry:
 	call os_wait_for_key
 	call os_show_cursor
 	
-	mov byte [0082h], 0
-	
 	call setup_screen
 	
 	popa
