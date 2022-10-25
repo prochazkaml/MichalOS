@@ -116,7 +116,6 @@ option_screen:
 	call menu_background
 
 	mov ax, menuoptions
-	mov bx, 13
 	call os_option_menu
 
 	jc checkformenu
@@ -140,7 +139,6 @@ app_selector:
 	call menu_background
 
 	mov ax, progoptions
-	mov bx, 20
 	call os_option_menu
 
 	jc option_screen
@@ -172,7 +170,6 @@ debug_stuff:
 	call menu_background
 
 	mov ax, debugoptions
-	mov bx, 31
 	call os_option_menu
 	
 	jc app_selector
@@ -198,7 +195,6 @@ game_selector:
 	call menu_background
 
 	mov ax, gameoptions
-	mov bx, 19
 	call os_option_menu
 
 	jc option_screen

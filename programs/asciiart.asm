@@ -77,7 +77,6 @@ start:
 
 .file_menu:
 	mov ax, .file_list
-	mov bx, 14
 	call os_option_menu
 	
 	jc .loop

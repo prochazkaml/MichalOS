@@ -81,7 +81,6 @@ start:
 	
 .file_menu:
 	mov ax, .file_list
-	mov bx, 18
 	call os_option_menu
 	
 	jc start

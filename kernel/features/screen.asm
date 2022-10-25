@@ -1025,22 +1025,21 @@ os_list_dialog:
 	
 ; ------------------------------------------------------------------
 ; os_select_list -- Draws a list of entries (defined by a callback) to select from.
-; IN: AX = width/height, BL = color, BH = 1 if allow history, CX = number of entries, DX = X/Y pos,
+; IN: AX = width/height, BL = color, CX = number of entries, DX = X/Y pos,
 ;     SI = callback (if C clear = accepts an entry ID in CX, returns a string in SI,
 ;     if C set = accepts key input in AX & entry ID in CX; not required to preserve regs),
-;     DI = callback parameter (will be always passed in DI to the callback)
+;     DI = pointer to a history struct (word .num_of_entries, word .skip_num, byte .cursor) or 0 if none
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_select_list:
 	pusha
 
-.no_pusha
+.no_pusha:
 	call os_hide_cursor
 
 	; Initialize vars
 
 	mov [.callback], si
-	mov [.callbackparam], di
 	mov [.xpos], dx
 	mov [.width], ax
 	
@@ -1049,18 +1048,24 @@ os_select_list:
 	add ah, dh
 	mov [.endypos], ah
 
-	; If history is enabled, check if it matches the previous list
-
-	cmp [.num_of_entries], cx
-	je .keep_history
-
-	cmp bh, 1
-	je .keep_history
-
 	mov word [.skip_num], 0
 	mov byte [.cursor], dh
 
-.keep_history:
+	; If history is enabled, check if it matches the data
+
+	test di, di
+	jz .no_history
+
+	cmp [di], cx
+	jne .no_history
+
+	mov ax, [di + 2]
+	mov [.skip_num], ax
+
+	mov al, [di + 4]
+	mov [.cursor], al
+
+.no_history:
 	mov dh, [.cursor]
 
 	mov [.num_of_entries], cx
@@ -1150,7 +1155,6 @@ os_select_list:
 	movzx cx, dh
 	sub cl, [.ypos]
 	add cx, [.skip_num]
-	mov di, [.callbackparam]
 	popf
 
 	call [.callback]
@@ -1239,7 +1243,6 @@ os_select_list:
 	.cursor			db 0	; Only for keeping the history
 
 	.callback		dw 0
-	.callbackparam	dw 0
 	.xpos			db 0
 	.ypos			db 0
 	.endypos		db 0
@@ -2059,8 +2062,8 @@ os_option_menu:
 
 	mov16 dx, 1, 1
 	mov ah, cl
-	mov bl, 11110000b
-	mov bh, 0
+	mov bl, [57072]
+	clr di
 	jmp os_select_list.no_pusha
 
 os_print_clock:

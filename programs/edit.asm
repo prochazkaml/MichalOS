@@ -548,7 +548,6 @@ text_entry:
 
 .f1_pressed:
 	mov ax, chooselist
-	mov bx, 14
 	call os_option_menu
 	
 	jc .nothing_to_do
