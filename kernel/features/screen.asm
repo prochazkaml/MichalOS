@@ -1136,6 +1136,10 @@ os_select_list:
 	je .go_up
 	cmp ah, 50h				; Down pressed?
 	je .go_down
+	cmp ah, 47h				; Home pressed?
+	je .home_pressed
+	cmp ah, 4Fh				; End pressed?
+	je .end_pressed
 	cmp al, 13				; Enter pressed?
 	je .option_selected
 	cmp al, 27				; Esc pressed?
