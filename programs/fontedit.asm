@@ -102,7 +102,6 @@ start:
 	
 .file_menu:
 	mov ax, .file_list
-	mov bx, 27
 	call os_option_menu
 	
 	jc .redraw_entire
