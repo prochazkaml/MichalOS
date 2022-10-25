@@ -1024,6 +1024,229 @@ os_list_dialog:
 	.callback		dw 0
 	
 ; ------------------------------------------------------------------
+; os_select_list -- Draws a list of entries (defined by a callback) to select from.
+; IN: AX = width/height, BL = color, BH = 1 if allow history, CX = number of entries, DX = X/Y pos,
+;     SI = callback (if C clear = accepts an entry ID in CX, returns a string in SI,
+;     if C set = accepts key input in AX & entry ID in CX; not required to preserve regs),
+;     DI = callback parameter (will be always passed in DI to the callback)
+; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
+
+os_select_list:
+	pusha
+
+.no_pusha
+	call os_hide_cursor
+
+	; Initialize vars
+
+	mov [.callback], si
+	mov [.callbackparam], di
+	mov [.xpos], dx
+	mov [.width], ax
+	
+	add dx, 101h	; Increment both X and Y
+
+	add ah, dh
+	mov [.endypos], ah
+
+	; If history is enabled, check if it matches the previous list
+
+	cmp [.num_of_entries], cx
+	je .keep_history
+
+	cmp bh, 1
+	je .keep_history
+
+	mov word [.skip_num], 0
+	mov byte [.cursor], dh
+
+.keep_history:
+	mov dh, [.cursor]
+
+	mov [.num_of_entries], cx
+
+.redraw:
+	; Draw the BG
+
+	pusha
+	mov dx, [.xpos]
+	mov al, [.width]
+	add al, 4
+	movzx si, al
+	mov al, [.endypos]
+	inc al
+	movzx di, al
+	call os_draw_block
+	popa
+
+	; Draw the selected entry BG
+
+	pusha
+	ror bl, 4				; Invert the selection color
+	mov al, [.width]
+	add al, 2
+	movzx si, al
+	movzx di, dh
+	inc di
+	call os_draw_block
+	popa
+
+	; Draw the list
+
+	pusha
+	mov dh, [.ypos]
+	inc dl
+	movzx cx, [.height]
+	mov ax, [.skip_num]
+
+.entry_draw_loop:
+	inc ax
+	inc dh
+
+	cmp ax, [.num_of_entries]
+	jg .no_draw
+
+	call os_move_cursor
+	pusha
+	clc
+	call .call_callback
+	popa
+
+.no_draw:
+	loop .entry_draw_loop
+	popa
+
+.another_key:
+	call os_wait_for_key	; Move / select option
+	cmp al, 'j'
+	je .go_down
+	cmp al, 'k'
+	je .go_up
+	cmp al, 'l'
+	je .option_selected
+	cmp al, 'h'
+	je .esc_pressed
+
+	cmp ah, 48h				; Up pressed?
+	je .go_up
+	cmp ah, 50h				; Down pressed?
+	je .go_down
+	cmp al, 13				; Enter pressed?
+	je .option_selected
+	cmp al, 27				; Esc pressed?
+	je .esc_pressed
+
+	pusha
+	stc
+	call .call_callback
+	popa
+
+	jmp .another_key		; If not, wait for another key
+
+.call_callback:
+	; Calculate the current entry ID
+
+	pushf
+	movzx cx, dh
+	sub cl, [.ypos]
+	add cx, [.skip_num]
+	mov di, [.callbackparam]
+	popf
+
+	call [.callback]
+	ret
+
+.go_up:
+	dec dh					; Move the cursor up
+	cmp dh, [.ypos]			; Have we reached the top?
+	jg .redraw
+
+	cmp word [.skip_num], 0	; Are we at the top of the list?
+	je .end_pressed
+
+	dec word [.skip_num]	; If not, then just move the selection window up
+	inc dh
+	jmp .redraw
+
+.end_pressed:
+	mov ax, [.num_of_entries]
+	movzx cx, byte [.height]
+	cmp ax, cx				; Is the dialog smaller than its allowed number of entries?
+	jg .transpose_skip_num	; If so, then shift the skip num
+
+	add al, [.ypos]			; Set the cursor position to the last visible value
+	mov dh, al
+	jmp .redraw
+
+.transpose_skip_num:
+	sub ax, cx
+	mov [.skip_num], ax
+
+	mov dh, [.height]		; Scroll the list all the way down
+	add dh, [.ypos]
+
+	jmp .redraw
+
+.go_down:
+	inc dh					; Move the cursor down
+	cmp dh, [.endypos]		; Have we reached the bottom?
+	jl .redraw
+
+	mov ax, [.skip_num]		; Check if the list is scrolled all the way down
+	movzx cx, byte [.height]
+	add ax, cx
+
+	cmp ax, [.num_of_entries]
+	jge .home_pressed
+
+	inc word [.skip_num]	; If not, then scroll the list down
+	dec dh
+	jmp .redraw
+
+.home_pressed:
+	mov word [.skip_num], 0
+	mov dh, [.ypos]
+	inc dh
+	jmp .redraw
+
+.option_selected:
+	call .dialog_end
+	
+	sub dh, [.ypos]		; Options start from 1
+	shr dx, 8
+	add dx, [.skip_num]	; Add any lines skipped from scrolling
+
+	mov bx, sp
+	mov [ss:bx + 14], dx
+
+	popa
+	clc					; Clear carry as Esc wasn't pressed
+	ret
+
+.esc_pressed:
+	call .dialog_end
+	popa
+	stc					; Set carry for Esc
+	ret
+
+.dialog_end:
+	call os_show_cursor
+	mov [.cursor], dh
+	ret
+
+	.num_of_entries	dw 0
+	.skip_num		dw 0
+	.cursor			db 0	; Only for keeping the history
+
+	.callback		dw 0
+	.callbackparam	dw 0
+	.xpos			db 0
+	.ypos			db 0
+	.endypos		db 0
+	.width			db 0
+	.height			db 0
+
+; ------------------------------------------------------------------
 ; os_draw_background -- Clear screen with white top and bottom bars
 ; containing text, and a coloured middle section.
 ; IN: AX/BX = top/bottom string locations, CX = colour (256 if the app wants to display the default background)
@@ -1805,12 +2028,11 @@ os_draw_icon:
 	
 ; ------------------------------------------------------------------
 ; os_option_menu -- Show a menu with a list of options
-; IN: AX = comma-separated list of strings to show (zero-terminated), BX = menu width
+; IN: AX = comma-separated list of strings to show (zero-terminated)
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc, left or right pressed
 
 os_option_menu:
 	pusha
-
 	cmp byte [57071], 0	; "Blur" the background if requested
 	je .skip
 	
@@ -1833,173 +2055,13 @@ os_option_menu:
 	pusha
 
 .skip:
-	mov [.width], bx
+	call os_string_callback_tokenizer
 
-	push ax				; Store string list for now
-
-	call os_hide_cursor
-
-	clr cl				; Count the number of entries in the list
-	mov si, ax
-
-.count_inc:
-	inc cl
-
-.count_loop:
-	lodsb
-
-	cmp al, ','
-	je .count_inc
-
-	test al, al
-	jnz .count_loop
-
-.done_count:
-	mov byte [.num_of_entries], cl
-
-	pop si				; SI = location of option list string (pushed earlier)
-	mov word [.list_string], si
-
-	; Now that we've drawn the list, highlight the currently selected
-	; entry and let the user move up and down using the cursor keys
-
-	mov16 dx, 25, 2			; Set up starting position for selector
-
-	call os_move_cursor
-
-.more_select:
-	pusha
-	mov bl, [57072]		; Black on white for option list box
 	mov16 dx, 1, 1
-
-	mov si, [.width]
-	movzx di, byte [.num_of_entries]
-	add di, 3
-	call os_draw_block
-	popa
-
-	pusha
-	mov dl, 2
-	mov bl, 00001111b		; White on black for the selection
-	mov si, [.width]
-	sub si, 2
-	movzx di, dh
-	inc di
-	call os_draw_block
-	popa
-
-	mov word si, [.list_string]
-	call .draw_list
-
-.another_key:
-	call os_wait_for_key		; Move / select option
-	cmp al, 'j'
-	je .go_down
-	cmp al, 'k'
-	je .go_up
-	cmp al, 'l'
-	je .option_selected
-	cmp al, 'h'
-	je .esc_pressed
-
-	cmp ah, 48h			; Up pressed?
-	je .go_up
-	cmp ah, 50h			; Down pressed?
-	je .go_down
-	cmp al, 13			; Enter pressed?
-	je .option_selected
-	cmp al, 27			; Esc pressed?
-	je .esc_pressed
-	cmp ah, 75			; Left pressed?
-	je .left_pressed
-	cmp ah, 77			; Right pressed?
-	je .right_pressed
-	jmp .another_key		; If not, wait for another key
-
-.go_up:
-	cmp dh, 2			; Already at top?
-	jg .no_hit_top
-
-	mov dh, [.num_of_entries]
-	add dh, 2
-
-.no_hit_top:
-	dec dh				; Row to select (increasing down)
-	jmp .more_select
-
-.go_down:				; Already at bottom of list?
-	mov bl, [.num_of_entries]
-	inc bl
-	cmp dh, bl
-	jl .no_hit_bottom
-
-	mov dh, 1
-
-.no_hit_bottom:
-	inc dh
-	jmp .more_select
-
-.option_selected:
-	call os_show_cursor
-
-	sub dh, 2 - 1		; Options start from 1
-	shr dx, 8
-
-	mov bx, sp
-	mov [ss:bx + 14], dx
-	
-	popa
-	clc				; Clear carry as Esc wasn't pressed
-	ret
-
-.esc_pressed:
-	clr ax
-	jmp .keyexit
-
-.left_pressed:
-	mov ax, 1
-	jmp .keyexit
-
-.right_pressed:
-	mov ax, 2
-
-.keyexit:
-	call os_show_cursor
-
-	mov bx, sp
-	mov [ss:bx + 14], ax
-
-	popa
-	stc
-	ret
-
-.draw_list:
-	pusha
-
-	mov16 dx, 3, 2			; Get into position for option list text
-	call os_move_cursor
-
-.more:
-	lodsb				; Get next character in file name, increment pointer
-
-	test al, al			; End of string?
-	jz int_popa_ret
-
-	cmp al, ','			; Next option? (String is comma-separated)
-	je .newline
-
-	call os_putchar
-	jmp .more
-
-.newline:
-	mov dl, 3			; Go back to starting X position
-	inc dh				; But jump down a line
-	call os_move_cursor
-	jmp .more
-
-	.num_of_entries			db 0
-	.list_string			dw 0
-	.width					dw 0
+	mov ah, cl
+	mov bl, 11110000b
+	mov bh, 0
+	jmp os_select_list.no_pusha
 
 os_print_clock:
 	pusha

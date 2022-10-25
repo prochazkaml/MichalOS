@@ -706,6 +706,113 @@ os_string_tokenize:
 	ret
 
 ; ------------------------------------------------------------------
+; os_string_callback_tokenizer -- Prints a token from string, requests are done by callback
+; IN: AX = comma-separated string
+; OUT: AL = AH = max length of any token, CX = number of entries in the list,
+;      SI = callback location (if C clear, accepts CX as entry ID, prints out result)
+
+os_string_callback_tokenizer:
+	push bx
+	mov [.strbaseptr], ax
+	mov [.strcurptr], ax
+	mov word [.curentryid], 0
+
+	mov si, ax
+	clr cx
+
+	cmp byte [si], 0	; Check if the list contains any entries
+	je .no_entries
+
+	inc cx				; Automatically assume there is at least 1 entry in the list
+	clr ah				; For storing the max length
+	clr bl				; For storing the current length
+
+.entry_loop:
+	lodsb
+
+	inc bl				; Increment the current width
+	cmp bl, ah			; Save it if it is the largest so far
+	jle .no_expand
+
+	mov ah, bl
+
+.no_expand:
+	test al, al			; End of string?
+	jz .no_entries
+
+	cmp al, ','			; End of entry?
+	jne .entry_loop
+
+	clr bl				; Reset the width counter
+	inc cx				; Increment the entry counter
+	jmp .entry_loop
+
+.no_entries:
+	pop bx
+	dec ah				; Terminator character was counted as well, so get rid of it
+	mov al, ah
+	mov si, .callback
+	ret
+
+.callback:
+	jc .cb_exit
+
+	dec cx
+	
+	mov si, [.strcurptr]
+
+	; Check if we're able to simply advance forward or if we have to rewind to the start
+	
+	cmp cx, [.curentryid]
+	jge .advance
+
+	mov word [.curentryid], 0
+	mov si, [.strbaseptr]
+
+.advance:
+	sub cx, [.curentryid]	; Subtract the IDs that we've already processed
+	
+	test cx, cx				; Do we already have the thing we want?
+	jz .print_loop
+
+	; If not, then find it
+
+.search_loop:
+	lodsb
+
+	test al, al				; This should not happen
+	jz .cb_exit
+
+	cmp al, ','
+	jne .search_loop
+
+	inc word [.curentryid]
+	loop .search_loop
+
+.print_loop:
+	lodsb
+
+	test al, al
+	jz .cb_save_exit
+
+	cmp al, ','
+	je .cb_save_exit
+
+	call os_putchar
+	jmp .print_loop
+
+.cb_save_exit:
+	inc word [.curentryid]
+	mov [.strcurptr], si	
+
+.cb_exit:
+	ret
+
+.strbaseptr		dw 0
+.strcurptr		dw 0
+.curentryid		dw 0
+
+; ------------------------------------------------------------------
 ; os_32int_to_string -- Converts an unsigned 32-bit integer into a string.
 ; IN: EAX = unsigned int
 ; OUT: AX = string location
