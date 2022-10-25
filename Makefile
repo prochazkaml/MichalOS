@@ -12,6 +12,9 @@ PROGRAMS := \
 MMF := $(patsubst files/src/%.mus,build/%.mmf,$(sort $(wildcard files/src/*.mus)))
 DRO := $(patsubst files/src/%.dro,build/%.drz,$(sort $(wildcard files/src/*.dro)))
 
+# This selects all compressed kernel assets to be built and compressed
+CKA := $(patsubst kernel/compressed/%.asm,build/%.zx7,$(sort $(wildcard kernel/compressed/*.asm)))
+
 # This selects all files to copy to the final image.
 FILES := $(PROGRAMS) $(MMF) $(DRO) $(wildcard files/*.*) $(wildcard files/gitignore/*.*)
 
@@ -54,9 +57,14 @@ bignoboot: build/images/michalos288.flp
 build/boot.bin: boot/boot.asm | build
 	nasm -O2 -w+all -f bin -o $@ -l build/boot.lst boot/boot.asm
 
+# Compressed kernel asset target
+build/%.zx7: kernel/compressed/%.asm | build
+	nasm $< -o $@.raw
+	misc/zx7/raw_zx7 $@.raw $@
+
 # Kernel target
-build/kernel.sys: kernel/main.asm kernel/features/*.asm .git/refs/heads/master | build
-	nasm -O2 -w+all -f bin -I kernel/ -o $@ -l build/kernel.lst kernel/main.asm \
+build/kernel.sys: kernel/main.asm kernel/features/*.asm .git/refs/heads/master $(CKA) | build
+	nasm -O2 -w+all -f bin -I kernel/ -I build/ -o $@ -l build/kernel.lst kernel/main.asm \
 	-dVERMIN="'`expr $$(git rev-list --all --count) - $(VERCOMMIT)`'" \
 	-dVERMAJ="'$(VER)'"
 

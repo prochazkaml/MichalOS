@@ -182,6 +182,7 @@ os_int_1Ah				equ 810Eh
 os_set_timer_speed		equ 807Eh
 os_decompress_zx7		equ 8114h
 os_get_os_name			equ 8141h
+os_reboot				equ 8159h
 
 ; Graphics functions
 
