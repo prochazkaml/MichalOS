@@ -278,11 +278,17 @@ start:
 	mov al, [.century]
 	call os_bcd_to_int
 	clr ah
-	call os_print_int
-	
+	mov cx, ax
+
 	mov al, [.year]
 	call os_bcd_to_int
 	clr ah
+
+	xchg ax, cx
+	mov bl, 100
+	mul bl
+	add ax, cx
+	
 	call os_print_int
 	
 	mov si, .spacer
