@@ -57,8 +57,8 @@ start_poly_mmf:
 	inc ah
 	cmp ah, 0C9h
 	jne .feedbackloop
-	
-	mov si, .playmsg1
+
+	mov si, .playmsg
 	mov bx, start_dro.playmsg2
 	call create_player_box
 
@@ -193,8 +193,6 @@ start_poly_mmf:
 	
 	ret
 	
-	.playmsg1	db 'Now playing: <duo>', 0
-	
 	.pointer	dw .track0
 	.sdelay		db 0
 	.delay		db 1
@@ -210,6 +208,11 @@ start_poly_mmf:
 	.playreq	db 0
 	.filesize	dw 0
 	
+	.playmsg	db 'Now playing: '
+	.playmsg2	times 32 db 0 
+
+	.playmsgcct	db '/', 0
+
 	.song_delay		equ buffer + 2
 	.song_delay_2	equ buffer2 + 2
 	.track0			equ buffer + 3

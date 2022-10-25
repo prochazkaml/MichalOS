@@ -126,6 +126,10 @@ start:
 	mov byte [0087h], 0
 	jc start
 
+	mov si, ax
+	mov di, start_poly_mmf.playmsg2
+	call os_string_copy
+
 	mov cx, buffer
 	call os_load_file
 	
@@ -142,6 +146,17 @@ start:
 	call os_file_selector		; Get the second filename
 	mov byte [0087h], 0
 	jc start
+
+	pusha
+	mov cx, ax
+
+	mov bx, start_poly_mmf.playmsgcct
+	mov ax, start_poly_mmf.playmsg2
+	call os_string_add
+
+	mov bx, cx
+	call os_string_add
+	popa
 
 	mov cx, buffer2
 	call os_load_file
