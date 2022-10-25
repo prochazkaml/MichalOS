@@ -89,7 +89,7 @@ os_return_app_timer:
 ; OUT: Nothing, registers preserved
 
 os_set_timer_speed:
-	pushad
+	pusha
 	
 .no_pusha:
 	mov [current_timer_speed], cx
@@ -101,6 +101,7 @@ os_set_timer_speed:
 	mov al, ch
 	out 40h, al
 
+	pushad
 	clr edx
 	mov eax, 105000000*60/88	; Ticks per minute
 
@@ -111,8 +112,9 @@ os_set_timer_speed:
 	div ecx
 
 	mov [current_timer_freq], eax
-
 	popad
+
+	popa
 	ret
 	
 ; -----------------------------------------------------------------
