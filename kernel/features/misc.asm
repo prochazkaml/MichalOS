@@ -3,6 +3,18 @@
 ; ==================================================================
 
 ; ------------------------------------------------------------------
+; os_run_zx7_module -- Decompresses a kernel module and runs it
+; IN: SI = compressed data
+; OUT: Whatever the module returns
+
+os_run_zx7_module:
+	pusha
+	mov di, 100h
+	call os_decompress_zx7
+	popa
+	jmp 100h
+
+; ------------------------------------------------------------------
 ; os_clear_registers -- Clear all registers
 ; IN: None
 ; OUT: Cleared registers
@@ -40,9 +52,7 @@ os_get_os_name:
 
 os_fatal_error:
 	mov si, .sub_fatalerr_data
-	mov di, 100h
-	call os_decompress_zx7
-	jmp 100h
+	jmp os_run_zx7_module
 
 .sub_fatalerr_data:
 	incbin "sub_fatalerr.zx7"

@@ -7,9 +7,7 @@ os_reboot:
 
 os_shutdown:
 	mov si, .sub_shutdown_data
-	mov di, 100h
-	call os_decompress_zx7
-	jmp 100h
+	jmp os_run_zx7_module
 
 .sub_shutdown_data:
 	incbin "sub_shutdown.zx7"

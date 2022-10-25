@@ -319,9 +319,7 @@ no_load_demotour:
 
 start_desktop:
 	mov si, desktop_data		; Start the desktop!
-	mov di, 100h
-	call os_decompress_zx7
-	call 100h
+	call os_run_zx7_module
 
 	; Possible return values: AX = 0 for starting the file manager, AX = (valid ptr) for starting an application
 
@@ -502,8 +500,6 @@ systemfilemissing:
 
 	driversgmt				dw 0000h
 	
-	prog_msg				db 'This file is not an application!', 0
-
 	noprogerror				db 'System file not found', 0
 	
 	app_ext					db 'APP', 0
