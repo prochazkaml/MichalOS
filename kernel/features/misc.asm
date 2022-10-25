@@ -3,54 +3,6 @@
 ; ==================================================================
 
 ; ------------------------------------------------------------------
-; os_pause -- Delay execution for specified 110ms chunks
-; IN: AX = amount of ticks to wait
-; OUT: None, registers preserved
-
-os_pause:
-	pusha
-	test ax, ax
-	jz .time_up			; If delay = 0 then bail out
-
-	mov word [.counter_var], 0		; Zero the counter variable
-
-	mov [.orig_req_delay], ax	; Save it
-
-	clr ah
-	call os_int_1Ah				; Get tick count	
-
-	mov [.prev_tick_count], dx	; Save it for later comparison
-
-.checkloop:
-	mov ah,0
-	call os_int_1Ah				; Get tick count again
-
-	cmp [.prev_tick_count], dx	; Compare with previous tick count
-
-	jne .up_date			; If it's changed check it
-	jmp .checkloop			; Otherwise wait some more
-
-.time_up:
-	popa
-	ret
-
-.up_date:
-	inc word [.counter_var]		; Inc counter_var
-	mov ax, [.counter_var]
-	
-	cmp ax, [.orig_req_delay]	; Is counter_var = required delay?
-	jge .time_up			; Yes, so bail out
-
-	mov [.prev_tick_count], dx	; No, so update .prev_tick_count 
-
-	jmp .checkloop			; And go wait some more
-
-
-	.orig_req_delay		dw	0
-	.counter_var		dw	0
-	.prev_tick_count	dw	0
-
-; ------------------------------------------------------------------
 ; os_clear_registers -- Clear all registers
 ; IN: None
 ; OUT: Cleared registers

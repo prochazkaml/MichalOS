@@ -66,6 +66,19 @@ os_get_int_handler:
 	.tmp_word	dw 0
 	.tmp_sgmt	dw 0
 	
+; ------------------------------------------------------------------
+; os_pause -- Delay execution for a specified number of ticks (18.2 Hz by default)
+; IN: AX = amount of ticks to wait
+; OUT: None, registers preserved
+
+os_pause:
+	mov [pause_timer], ax
+
+.wait_loop:
+	cmp word [pause_timer], 0
+	jne .wait_loop
+	ret
+
 ; -----------------------------------------------------------------
 ; os_attach_app_timer -- Attach a timer interrupt to an application and sets the timer speed
 ; Formula: speed = (105000000 / 88) / frequency
@@ -177,6 +190,12 @@ os_compat_int1C:
 	dec word [screensaver_timer]
 	
 .no_update_screensaver:
+	cmp word [pause_timer], 0
+	je .no_update_pause_timer
+	
+	dec word [pause_timer]
+	
+.no_update_pause_timer:
 	cmp byte [0082h], 1
 	je .no_update
 	
@@ -214,5 +233,6 @@ os_compat_int1C:
 	current_timer_speed			dw 0
 	
 	screensaver_timer			dw 0
+	pause_timer					dw 0
 
 ; ==================================================================
