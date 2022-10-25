@@ -8,6 +8,12 @@
 	%DEFINE MAX_DEPTH 360
 
 start:
+	; Set up speed limiting interrupt
+
+	mov si, .int_handler
+	mov cx, 19886
+	call os_attach_app_timer
+
 	; Generate the stars
 
 	mov cx, STARCOUNT
@@ -23,6 +29,15 @@ start:
 	call os_init_graphics_mode
 
 .loop:
+	cmp byte [.drawframe], 1
+	je .draw
+	
+	hlt
+	jmp .loop
+
+.draw:
+	mov byte [.drawframe], 0
+
 	push gs
 	pop es
 
@@ -222,6 +237,12 @@ start:
 
 	popa
 	ret
+
+.int_handler:
+	mov byte [.drawframe], 1
+	ret
+
+	.drawframe	db 1
 
 starlist:
 
