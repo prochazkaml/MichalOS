@@ -112,6 +112,7 @@ start:
 							db '  https://www.prochazka.ml/', 0
 	
 	.hoftext				db '  Special thanks to: (in alphabetical order)', 13, 10
+							db '    Einar Saukas for the ZX7 compression method & decompression routine', 13, 10
 							db '    fanzyflani for porting the Reality AdLib Tracker to NASM', 13, 10
 							db '    Ivan Ivanov for discovering and helping with fixing bugs', 13, 10
 							db '    Jasper Ziller for making the Fisher game', 13, 10
@@ -121,6 +122,7 @@ start:
 							db '    REALITY for releasing the Reality AdLib Tracker source code back in 1995', 13, 10
 							db '    Sebastian Mihai for creating & releasing the source code of aSMtris', 13, 10
 							db '    Shoaib Jamal for making the MichalOS website', 13, 10
+							db '    VileR for porting the original DONKEY.BAS to assembly', 13, 10
 							db '    ZeroKelvinKeyboard for creating TachyonOS & writing apps for MikeOS', 13, 10, 0
 
 	.footer_msg				db '[Space] Visit the hall of fame [L] View the license', 0
