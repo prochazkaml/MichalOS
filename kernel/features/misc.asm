@@ -39,93 +39,13 @@ os_get_os_name:
 ; OUT: None, as it does not return
 
 os_fatal_error:
-	mov [.ax], ax			; Store string location for now, ...
-	call os_clear_screen
-	
-.main_screen:
-	mov ax, cs
-	mov ds, ax
-	mov es, ax
-
-	call os_init_text_mode
-
-	mov ax, .title_msg
-	mov bx, .footer_msg
-	mov cx, 01001111b
-	call os_draw_background
-	
-	mov si, bomblogo
-	mov di, disk_buffer
+	mov si, .sub_fatalerr_data
+	mov di, 100h
 	call os_decompress_zx7
+	jmp 100h
 
-	mov dx, 2 * 256
-	call os_move_cursor
-	mov si, disk_buffer
-	call os_draw_icon
-	
-	mov dx, 2 * 256 + 35
-	call os_move_cursor
-	
-	mov si, .msg0
-	call os_print_string
-	
-	mov dx, 3 * 256 + 35
-	call os_move_cursor
-	
-	mov ax, 0A2Ah					; Write a 43-character long asterisk-type line
-	clr bh
-	mov cx, 42
-	int 10h
-	
-	mov dx, 5 * 256 + 35
-	call os_move_cursor
-	mov si, .msg3
-	call os_print_string
-
-	mov si, [.ax]
-	call os_print_string
-
-	call os_hide_cursor
-	
-	pop bx
-	pop ax
-	
-	mov16 dx, 35, 7
-	call os_move_cursor
-	
-	mov si, .msg
-	call os_print_string
-	
-	call os_print_4hex
-	
-	mov al, ':'
-	call os_putchar
-	
-	mov ax, bx
-	call os_print_4hex
-	
-	mov16 dx, 35, 8
-	call os_move_cursor
-	
-	mov si, .msg1
-	call os_print_string
-	
-	mov ax, sp
-	call os_print_4hex
-	
-	cli
-	hlt
-	
-	.msg 			db 'Crash location: ', 0
-	.msg1			db 'Stack pointer: ', 0
-	
-	.title_msg		db 'MichalOS Fatal Error'
-	.footer_msg		db 0
-	
-	.msg0			db 'MichalOS has encountered a critical error.', 0
-	.msg3			db 'Error: ', 0
-
-	.ax				dw 0
+.sub_fatalerr_data:
+	incbin "sub_fatalerr.zx7"
 
 ; ------------------------------------------------------------------
 ; os_get_memory -- Gets the amount of system RAM.
