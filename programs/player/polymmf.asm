@@ -62,7 +62,42 @@ start_poly_mmf:
 	mov bx, start_dro.playmsg2
 	call create_player_box
 
+	mov al, [.song_delay]
+	mov [.sdelay], al
+
+	mov al, [.song_delay_2]
+	mov [.sdelay_2], al
+
+	mov word [.pointer], .track0	; Reset the values when we press Esc
+	mov byte [.delay], 1
+	
+	mov word [.pointer_2], .track0_2
+	mov byte [.delay_2], 1
+
+	mov word [.counter], 0
+	mov byte [.paused], 0
+	mov byte [.song_end], 0
+
+	mov byte [.playreq], 0
+
 .play_loop:
+	cmp byte [.playreq], 1
+	jne .no_play
+
+	mov byte [.playreq], 0
+
+	cmp byte [.paused], 0
+	jne .no_play
+
+	clr cl		; Channel
+	mov di, .pointer
+	call .parse_channel
+
+	inc cl
+	mov di, .pointer_2
+	call .parse_channel
+	
+.no_play:
 	mov dx, 0C26h
 	call os_move_cursor
 	
@@ -87,84 +122,60 @@ start_poly_mmf:
 	cmp byte [.song_end], 1
 	jne .play_loop
 
-.exit:
-	call os_stop_adlib
+.parse_channel:
+	dec byte [di + 3]	; Delay value
+	jnz .no_parse_channel
+	
+	mov al, [di + 2] 	; Global song delay value
+	mov [di + 3], al
+	
+	test cl, cl
+	jnz .no_inc_ctr
 
-	mov word [.pointer], .track0	; Reset the values when we press Esc
-	mov byte [.delay], 1
-	
-	mov word [.pointer_2], .track0_2
-	mov byte [.delay_2], 1
-
-	mov word [.counter], 0
-	mov byte [.paused], 0
-	mov byte [.song_end], 0
-	ret
-	
-.pause:
-	xor byte [.paused], 1
-	jmp .play_loop
-	
-.int_handler:
-	clr cl		; Channel
-
-	cmp byte [.paused], 0
-	jne .skip_play
-	
-	dec byte [.delay]
-	jnz .int_handler_2
-	
-	mov al, [.song_delay]
-	mov [.delay], al
-	
 	inc word [.counter]
 
-	mov si, [.pointer]
+.no_inc_ctr:
+	mov si, [di]		; Current pointer
 	lodsw
-	mov [.pointer], si
+	mov [di], si
 	
 	test ax, ax
 	jz .notone
 	
 	cmp ax, 1
-	je .end
+	je .mark_end
 	
 	call os_adlib_calcfreq
 
-.int_handler_2:
-	mov cl, 1			; Channel
-
-	dec byte [.delay_2]
-	jnz .skip_play
-	
-	mov al, [.song_delay_2]
-	mov [.delay_2], al
-	
-	mov si, [.pointer_2]
-	lodsw
-	mov [.pointer_2], si
-	
-	test ax, ax
-	jz .notone_2
-	
-	cmp ax, 1
-	je .end
-	
-	call os_adlib_calcfreq
-	
-.skip_play:
+.no_parse_channel:
 	ret
-	
+
 .notone:
 	call os_adlib_noteoff
-	jmp .int_handler_2
-	
-.notone_2:
-	call os_adlib_noteoff
+	ret
+
+.mark_end:
+	mov byte [.song_end], 1
+	ret
+
+.exit:
+	call os_stop_adlib
 	ret
 	
-.end:
-	mov byte [.song_end], 1
+.pause:
+	xor byte [.paused], 1
+
+	call os_adlib_mute
+
+	cmp byte [.paused], 1
+	je .play_loop
+
+	call os_adlib_unmute
+
+	jmp .play_loop
+	
+.int_handler:
+	mov byte [.playreq], 1
 	ret
 	
 .adliberror:
@@ -185,15 +196,18 @@ start_poly_mmf:
 	.playmsg1	db 'Now playing: <duo>', 0
 	
 	.pointer	dw .track0
+	.sdelay		db 0
 	.delay		db 1
 
 	.pointer_2	dw .track0_2
+	.sdelay_2	db 0
 	.delay_2	db 1
 
 	.counter	dw 0
 	.paused		db 0
 	.song_end	db 0
 
+	.playreq	db 0
 	.filesize	dw 0
 	
 	.song_delay		equ buffer + 2
