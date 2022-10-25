@@ -183,6 +183,7 @@ os_set_timer_speed		equ 807Eh
 os_decompress_zx7		equ 8114h
 os_get_os_name			equ 8141h
 os_reboot				equ 8159h
+os_shutdown				equ 815Ch
 
 ; Graphics functions
 
