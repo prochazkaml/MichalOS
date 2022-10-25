@@ -1597,6 +1597,8 @@ do_if:
 	je .greater
 	cmp al, '<'
 	je .less
+	cmp al, '!'
+	je .not_equals
 
 	mov bl, err_syntax			; If not one of the above, error out
 	jmp error
@@ -1639,8 +1641,60 @@ do_if:
 
 	jmp .finish_line			; Otherwise skip the rest of the line
 
+.not_equals:
+	mov byte al, [token + 1]
+	cmp al, '='
+	jne .error
+
+	call get_token
+
+	cmp ax, CHAR
+	je .not_equals_char
+
+	cmp ax, VARIABLE
+	je .not_equals_var
+
+	cmp ax, NUMBER
+	je .not_equals_number
+
+	mov si, err_syntax
+	jmp error
+
+.not_equals_char:
+	mov ax, 0
+	mov byte al, [token]
+
+	cmp ax, dx
+	jne near .on_to_then
+
+	jmp .finish_line
+
+.not_equals_var:
+	mov ax, 0
+	mov byte al, [token]
+
+	call get_var
+
+	cmp ax, dx
+	jne near .on_to_then
+
+	jmp .finish_line
+
+.not_equals_number:
+	mov si, token
+	call os_string_to_int
+
+	cmp ax, dx
+	jne near .on_to_then
+
+	jmp .finish_line
+
 
 .greater:
+	mov byte al, [token + 1]	; Greater than or equal?
+	cmp al, '='
+	je .greater_equal
+
 	call get_token				; Greater than a variable or number?
 	mov byte al, [token]
 	call is_letter
@@ -1664,7 +1718,35 @@ do_if:
 
 	jmp .finish_line
 
+.greater_equal:
+	call get_token				; Greater than a variable or number?
+	mov byte al, [token]
+	call is_letter
+	jc .greater_equal_var
+
+	mov si, token				; Must be a number here...
+	call os_string_to_int
+
+	cmp ax, dx
+	jle .on_to_then
+
+	jmp .finish_line
+
+.greater_equal_var:					; Variable in this case
+	movzx ax, byte [token]
+
+	call get_var
+
+	cmp ax, dx				; Make the comparison!
+	jle .on_to_then
+
+	jmp .finish_line
+
 .less:
+	mov byte al, [token + 1]	; Less than or equal?
+	cmp al, '='
+	je .less_equal
+
 	call get_token
 	mov byte al, [token]
 	call is_letter
@@ -1688,6 +1770,29 @@ do_if:
 
 	jmp .finish_line
 
+.less_equal:
+	call get_token
+	mov byte al, [token]
+	call is_letter
+	jc .less_equal_var
+
+	mov si, token
+	call os_string_to_int
+
+	cmp ax, dx
+	jge .on_to_then
+
+	jmp .finish_line
+
+.less_equal_var:
+	movzx ax, byte [token]
+
+	call get_var
+
+	cmp ax, dx
+	jge .on_to_then
+
+	jmp .finish_line
 
 
 .string_var:
