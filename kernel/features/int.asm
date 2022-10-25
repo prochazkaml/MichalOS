@@ -10,26 +10,16 @@
 os_modify_int_handler:
 	pusha
 
+.no_pusha:
 	cli
 
-	push es
-	
-	mov es, [driversgmt]
-	
-	movzx bx, cl			; Move supplied int into BX
-
+	movzx bx, cl		; Move supplied int into BX
 	shl bx, 2			; Multiply by four to get position
 	
-	mov [es:bx], si		; First store offset
-
-	add bx, 2
-	
-	mov [es:bx], di		; Then segment of our handler
-
-	pop es
+	mov [fs:bx], si		; First store offset
+	mov [fs:bx + 2], di	; Then segment of our handler
 	
 	sti
-
 	popa
 	ret
 
@@ -39,33 +29,17 @@ os_modify_int_handler:
 ; OUT: DI:SI = handler location
 
 os_get_int_handler:
-	pusha
+	push bx
 
-	push ds
-	
-	mov ds, [driversgmt]
-	
 	movzx bx, cl			; Move supplied int into BX
-
 	shl bx, 2			; Multiply by four to get position
 	
-	mov si, [ds:bx]		; First store offset
-	add bx, 2
+	mov si, [fs:bx]		; First store offset
+	mov di, [fs:bx + 2]	; Then segment of our handler
 
-	mov di, [ds:bx]		; Then segment of our handler
-
-	pop ds
-
-	mov [.tmp_word], si
-	mov [.tmp_sgmt], di
-	popa
-	mov si, [.tmp_word]
-	mov di, [.tmp_sgmt]
+	pop bx
 	ret
 
-	.tmp_word	dw 0
-	.tmp_sgmt	dw 0
-	
 ; ------------------------------------------------------------------
 ; os_pause -- Delay execution for a specified number of ticks (18.2 Hz by default)
 ; IN: AX = amount of ticks to wait
@@ -90,9 +64,7 @@ os_attach_app_timer:
 	mov [timer_application_offset], si
 	mov byte [timer_application_attached], 1
 	
-	call os_set_timer_speed
-	popa
-	ret
+	jmp os_set_timer_speed.no_pusha
 	
 ; -----------------------------------------------------------------
 ; os_return_app_timer -- Returns the timer interrupt back to the system and resets the timer speed
@@ -108,9 +80,7 @@ os_return_app_timer:
 	mov cl, 1Ch					; RTC handler
 	mov si, os_compat_int1C
 	mov di, cs
-	call os_modify_int_handler
-	popa
-	ret
+	jmp os_modify_int_handler.no_pusha
 	
 ; -----------------------------------------------------------------
 ; os_set_timer_speed -- Sets the timer's trigger speed.
@@ -121,6 +91,7 @@ os_return_app_timer:
 os_set_timer_speed:
 	pusha
 	
+.no_pusha:
 	mov [current_timer_speed], cx
 	
 	mov al, 00110110b	; Timer 0, square wave
