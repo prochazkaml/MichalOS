@@ -281,20 +281,12 @@ os_main:
 	mov si, os_compat_int07
 	call os_modify_int_handler
 
-	mov cl, 1Ch					; RTC handler
-	mov si, os_compat_int1C
-	call os_modify_int_handler
-	
 	sti
-
-;	int 5
 	
-	mov di, 100h
-	clr al
-	mov cx, 7EFFh
-	rep stosb
-
 	call os_init_text_mode
+	call os_return_app_timer	; Also sets up RTC handler
+	clr cx
+	call os_set_timer_speed
 	
 	mov ax, 0305h
 	mov bx, 0104h

@@ -89,7 +89,7 @@ os_return_app_timer:
 ; OUT: Nothing, registers preserved
 
 os_set_timer_speed:
-	pusha
+	pushad
 	
 .no_pusha:
 	mov [current_timer_speed], cx
@@ -100,8 +100,19 @@ os_set_timer_speed:
 	out 40h, al
 	mov al, ch
 	out 40h, al
-	
-	popa
+
+	clr edx
+	mov eax, 105000000*60/88	; Ticks per minute
+
+	dec cx				; 0x0000 -> 0xFFFF
+	movzx ecx, cx
+	inc ecx				; 0xFFFF -> 0x10000
+
+	div ecx
+
+	mov [current_timer_freq], eax
+
+	popad
 	ret
 	
 ; -----------------------------------------------------------------
@@ -155,10 +166,10 @@ os_compat_int1C:
 	mov ds, ax
 	mov es, ax
 	
-	cmp word [screensaver_timer], 0
+	cmp dword [screensaver_timer], 0
 	je .no_update_screensaver
 	
-	dec word [screensaver_timer]
+	dec dword [screensaver_timer]
 	
 .no_update_screensaver:
 	cmp word [pause_timer], 0
@@ -202,8 +213,9 @@ os_compat_int1C:
 	timer_application_offset	dw 0
 	
 	current_timer_speed			dw 0
-	
-	screensaver_timer			dw 0
+	current_timer_freq			dd 0	; in Hz/64
+
+	screensaver_timer			dd 0
 	pause_timer					dw 0
 
 ; ==================================================================
