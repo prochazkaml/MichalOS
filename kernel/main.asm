@@ -287,8 +287,6 @@ os_main:
 
 ;	int 5
 	
-	call os_seed_random
-
 	mov di, 100h
 	clr al
 	mov cx, 7EFFh

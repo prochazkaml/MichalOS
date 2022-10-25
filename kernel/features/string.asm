@@ -1,9 +1,11 @@
 ; ==================================================================
-; STRING MANIPULATION ROUTINES
+; MichalOS String manipulation functions
 ; ==================================================================
 
+; ------------------------------------------------------------------
 ; os_string_encrypt -- Encrypts a string using a totally military-grade encryption algorithm
 ; IN: SI = Input string/Output string
+; OUT: None, registers preserved
 
 os_string_encrypt:
 	pusha
@@ -33,9 +35,11 @@ os_string_encrypt:
 .exit:
 	popa
 	ret
-	
+
+; ------------------------------------------------------------------
 ; os_string_add -- Add a string on top of another string
 ; IN: AX/BX = Main string/Added string
+; OUT: None, registers preserved
 
 os_string_add:
 	pusha
@@ -82,6 +86,7 @@ os_string_length:
 ; ------------------------------------------------------------------
 ; os_string_reverse -- Reverse the characters in a string
 ; IN: SI = string location
+; OUT: None, registers preserved
 
 os_string_reverse:
 	pusha
@@ -152,7 +157,8 @@ os_find_char_in_string:
 
 ; ------------------------------------------------------------------
 ; os_string_uppercase -- Convert zero-terminated string to upper case
-; IN/OUT: AX = string location
+; IN: AX = string location
+; OUT: None, registers preserved
 
 os_string_uppercase:
 	pusha
@@ -184,7 +190,8 @@ os_string_uppercase:
 
 ; ------------------------------------------------------------------
 ; os_string_lowercase -- Convert zero-terminated string to lower case
-; IN/OUT: AX = string location
+; IN: AX = string location
+; OUT: None, registers preserved
 
 os_string_lowercase:
 	pusha
@@ -216,7 +223,8 @@ os_string_lowercase:
 
 ; ------------------------------------------------------------------
 ; os_string_copy -- Copy one string into another
-; IN/OUT: SI = source, DI = destination (programmer ensure sufficient room)
+; IN: SI = source, DI = destination (programmer ensure sufficient room)
+; OUT: None, registers preserved
 
 os_string_copy:
 	pusha
@@ -232,7 +240,8 @@ os_string_copy:
 
 ; ------------------------------------------------------------------
 ; os_string_join -- Join two strings into a third string
-; IN/OUT: AX = string one, BX = string two, CX = destination string
+; IN: AX = string one, BX = string two, CX = destination string
+; OUT: None, registers preserved
 
 os_string_join:
 	pusha
@@ -256,6 +265,7 @@ os_string_join:
 ; ------------------------------------------------------------------
 ; os_string_chomp -- Strip leading and trailing spaces from a string
 ; IN: AX = string location
+; OUT: None, registers preserved
 
 os_string_chomp:
 	pusha
@@ -348,7 +358,8 @@ os_string_compare:
 ; ------------------------------------------------------------------
 ; os_string_parse -- Take string (eg "run foo bar baz") and return
 ; pointers to zero-terminated strings (eg AX = "run", BX = "foo" etc.)
-; IN: SI = string; OUT: AX, BX, CX, DX = individual strings
+; IN: SI = string
+; OUT: AX, BX, CX, DX = individual strings
 
 os_string_parse:
 	push si
@@ -537,7 +548,8 @@ os_sint_to_string:
 
 ; ------------------------------------------------------------------
 ; os_get_time_string -- Get current time in a string (eg '10:25')
-; IN/OUT: BX = string location
+; IN: BX = string location
+; OUT: None, registers preserved
 
 os_get_time_string:
 	pusha
@@ -604,7 +616,8 @@ os_get_time_string:
 
 ; ------------------------------------------------------------------
 ; os_get_date_string -- Get current date in a string (eg '12/31/2007')
-; IN/OUT: BX = string location
+; IN: BX = string location
+; OUT: None, registers preserved
 
 os_get_date_string:
 	pusha
@@ -666,7 +679,8 @@ os_get_date_string:
 ; ------------------------------------------------------------------
 ; os_string_tokenize -- Reads tokens separated by specified char from
 ; a string. Returns pointer to next token, or 0 if none left
-; IN: AL = separator char, SI = beginning; OUT: DI = next token or 0 if none
+; IN: AL = separator char, SI = beginning
+; OUT: DI = next token or 0 if none
 
 os_string_tokenize:
 	push si
@@ -691,7 +705,8 @@ os_string_tokenize:
 	pop si
 	ret
 
-; Converts an unsigned 32-bit integer into a string.
+; ------------------------------------------------------------------
+; os_32int_to_string -- Converts an unsigned 32-bit integer into a string.
 ; IN: EAX = unsigned int
 ; OUT: AX = string location
 
@@ -727,7 +742,8 @@ os_32int_to_string:
 
 	.t times 11 db 0
 
-; Converts a string into a 32-bit integer.
+; ------------------------------------------------------------------
+; os_string_to_32int -- Converts a string into a 32-bit integer.
 ; IN: SI = string location
 ; OUT: EAX = unsigned integer
 
@@ -757,9 +773,10 @@ os_string_to_32int:
 	.tmp_dword	dd 0
 	.divisor	dd 10
 	
-; Prints a 32 bit integer in decimal.
+; ------------------------------------------------------------------
+; os_print_32int -- Prints a 32 bit integer in decimal.
 ; IN: EAX = unsigned integer
-; OUT: nothing
+; OUT: None, registers preserved
 
 os_print_32int:
 	pushad
@@ -770,4 +787,3 @@ os_print_32int:
 	ret
 	
 ; ==================================================================
-

@@ -1,11 +1,11 @@
 ; ==================================================================
-; SCREEN HANDLING SYSTEM CALLS
+; MichalOS Text display output functions
 ; ==================================================================
 
 ; ------------------------------------------------------------------
 ; os_putchar -- Puts a character on the screen
 ; IN: AL = character
-; OUT: Nothing (registers preserved)
+; OUT: None, registers preserved
 
 os_putchar:
 	pusha
@@ -20,7 +20,7 @@ os_putchar:
 ; ------------------------------------------------------------------
 ; os_put_chars -- Puts up to a set amount of characters on the screen
 ; IN: BL = terminator, SI = location, CX = character count
-; OUT: Nothing (registers preserved)
+; OUT: None, registers preserved
 
 os_put_chars:
 	pusha
@@ -38,7 +38,7 @@ os_put_chars:
 ; ------------------------------------------------------------------
 ; os_print_string -- Displays text
 ; IN: SI = message location (zero-terminated string)
-; OUT: Nothing (registers preserved)
+; OUT: None, registers preserved
 
 os_print_string:
 	pusha
@@ -51,7 +51,7 @@ os_print_string:
 ; ------------------------------------------------------------------
 ; os_print_string_box -- Displays text inside a text-box.
 ; IN: SI = message location (zero-terminated string), DL = left alignment
-; OUT: Nothing (registers preserved)
+; OUT: None, registers preserved
 
 os_print_string_box:
 	pusha
@@ -77,7 +77,7 @@ os_print_string_box:
 ; ------------------------------------------------------------------
 ; os_format_string -- Displays colored text
 ; IN: BL/SI = text color/message location (zero-terminated string)
-; OUT: Nothing (registers preserved)
+; OUT: None, registers preserved
 
 os_format_string:
 	pusha
@@ -116,7 +116,7 @@ os_format_string:
 
 ; ------------------------------------------------------------------
 ; os_clear_screen -- Clears the screen to background
-; IN/OUT: Nothing (registers preserved)
+; IN/OUT: None, registers preserved
 
 os_clear_screen:
 	pusha
@@ -138,7 +138,8 @@ os_clear_screen:
 
 ; ------------------------------------------------------------------
 ; os_move_cursor -- Moves cursor in text mode
-; IN: DH, DL = row, column; OUT: Nothing (registers preserved)
+; IN: DH, DL = row, column
+; OUT: None, registers preserved
 
 os_move_cursor:
 	pusha
@@ -154,6 +155,7 @@ os_move_cursor:
 
 ; ------------------------------------------------------------------
 ; os_get_cursor_pos -- Return position of text cursor
+; IN: None
 ; OUT: DH, DL = row, column
 
 os_get_cursor_pos:
@@ -171,7 +173,7 @@ os_get_cursor_pos:
 
 ; ------------------------------------------------------------------
 ; os_show_cursor -- Turns on cursor in text mode
-; IN/OUT: Nothing
+; IN/OUT: None, registers preserved
 
 os_show_cursor:
 	pusha
@@ -187,7 +189,7 @@ os_show_cursor:
 
 ; ------------------------------------------------------------------
 ; os_hide_cursor -- Turns off cursor in text mode
-; IN/OUT: Nothing
+; IN/OUT: None, registers preserved
 
 os_hide_cursor:
 	pusha
@@ -203,6 +205,7 @@ os_hide_cursor:
 ; ------------------------------------------------------------------
 ; os_draw_block -- Render block of specified colour
 ; IN: BL/DL/DH/SI/DI = colour/start X pos/start Y pos/width/finish Y pos
+; OUT: None, registers preserved
 
 os_draw_block:
 	pusha
@@ -1028,6 +1031,7 @@ os_list_dialog:
 ; os_draw_background -- Clear screen with white top and bottom bars
 ; containing text, and a coloured middle section.
 ; IN: AX/BX = top/bottom string locations, CX = colour (256 if the app wants to display the default background)
+; OUT: None, registers preserved
 
 os_draw_background:
 	pusha
@@ -1112,7 +1116,7 @@ os_draw_background:
 
 ; ------------------------------------------------------------------
 ; os_print_newline -- Reset cursor to start of next line
-; IN/OUT: Nothing (registers preserved)
+; IN/OUT: None, registers preserved
 
 os_print_newline:
 	pusha
@@ -1125,7 +1129,8 @@ os_print_newline:
 
 ; ------------------------------------------------------------------
 ; os_dump_registers -- Displays register contents in hex on the screen
-; IN/OUT: EAX/EBX/ECX/EDX/ESI/EDI = registers to show
+; IN: EAX/EBX/ECX/EDX/ESI/EDI = registers to show
+; OUT: None, registers preserved
 
 os_dump_registers:
 	pushad
@@ -1168,7 +1173,8 @@ os_dump_registers:
 
 ; ------------------------------------------------------------------
 ; os_input_dialog -- Get text string from user via a dialog box
-; IN: AX = string location, BX = message to show; OUT: AX = string location
+; IN: AX = string location, BX = message to show
+; OUT: None, registers preserved
 
 os_input_dialog:
 	pusha
@@ -1177,7 +1183,8 @@ os_input_dialog:
 
 ; ------------------------------------------------------------------
 ; os_password_dialog -- Get a password from user via a dialog box
-; IN: AX = string location, BX = message to show; OUT: AX = string location
+; IN: AX = string location, BX = message to show
+; OUT: None, registers preserved
 
 os_password_dialog:
 	pusha
@@ -1187,6 +1194,7 @@ os_password_dialog:
 ; int_input_dialog -- Get text string from user via a dialog box
 ; IN: AX = string location, BX = message to show,
 ;     CH = CH = 0 if normal input, 1 if password input
+; OUT: None, registers preserved
 
 int_input_dialog:
 	pusha
@@ -1347,7 +1355,7 @@ os_dialog_box:
 
 ; ------------------------------------------------------------------
 ; os_print_space -- Print a space to the screen
-; IN/OUT: Nothing
+; IN/OUT: None, registers preserved
 
 os_print_space:
 	pusha
@@ -1359,6 +1367,7 @@ os_print_space:
 ; os_print_digit -- Displays contents of AX as a single digit
 ; Works up to base 37, ie digits 0-Z
 ; IN: AX = "digit" to format and print
+; OUT: None, registers preserved
 
 os_print_digit:
 	push ax
@@ -1380,6 +1389,7 @@ os_print_digit:
 ; ------------------------------------------------------------------
 ; os_print_1hex -- Displays low nibble of AL in hex format
 ; IN: AL = number to format and print
+; OUT: None, registers preserved
 
 os_print_1hex:
 	push ax
@@ -1392,6 +1402,7 @@ os_print_1hex:
 ; ------------------------------------------------------------------
 ; os_print_2hex -- Displays AL in hex format
 ; IN: AL = number to format and print
+; OUT: None, registers preserved
 
 os_print_2hex:
 	push ax
@@ -1408,6 +1419,7 @@ os_print_2hex:
 ; ------------------------------------------------------------------
 ; os_print_4hex -- Displays AX in hex format
 ; IN: AX = number to format and print
+; OUT: None, registers preserved
 
 os_print_4hex:
 	push ax
@@ -1420,9 +1432,23 @@ os_print_4hex:
 	jmp os_print_2hex.no_push_ax
 
 ; ------------------------------------------------------------------
+; os_print_8hex - Displays EAX in hex format
+; IN: EAX = unsigned integer
+; OUT: None, registers preserved
+
+os_print_8hex:
+	pushad
+	shr eax, 16
+	call os_print_4hex
+	popad
+	call os_print_4hex
+	ret
+	
+; ------------------------------------------------------------------
 ; os_input_string -- Take string from keyboard entry
 ; IN: AX = location of string
 ; (Location will contain up to [0088h] characters, zero-terminated)
+; OUT: None, registers preserved
 
 os_input_string:
 	pusha
@@ -1435,6 +1461,7 @@ os_input_string:
 ; os_input_password -- Take password from keyboard entry
 ; IN: AX = location of string
 ; (Location will contain up to [0088h] characters, zero-terminated)
+; OUT: None, registers preserved
 
 os_input_password:
 	pusha
@@ -1446,6 +1473,7 @@ os_input_password:
 ; int_input_string -- Take string from keyboard entry
 ; IN: AX = location of string, CH = 0 if normal input, 1 if password input
 ; (Location will contain up to [0088h] characters, zero-terminated)
+; OUT: None, registers preserved
 
 int_input_string:
 	call os_show_cursor
@@ -1526,9 +1554,10 @@ int_input_string:
 	popa
 	ret
 	
-; Opens up os_list_dialog with color.
-; IN: nothing
-; OUT: color number(0-15)
+; ------------------------------------------------------------------
+; os_color_selector - Pops up a color selector.
+; IN: None
+; OUT: color number (0-15)
 
 os_color_selector:
 	pusha
@@ -1564,20 +1593,11 @@ os_color_selector:
 	.colormsg0	db 'Choose a color...' ; termination not necessary here
 	.colormsg1	db 0
 	
-; Displays EAX in hex format
-; IN: EAX = unsigned integer
-; OUT: nothing
-os_print_8hex:
-	pushad
-	shr eax, 16
-	call os_print_4hex
-	popad
-	call os_print_4hex
-	ret
-	
-; Displays a dialog similar to os_dialog_box, but without the buttons.
+; ------------------------------------------------------------------
+; os_temp_box -- Draws a dialog box with up to 5 lines of text.
 ; IN: SI/AX/BX/CX/DX = string locations (or 0 for no display)
-; OUT: nothing
+; OUT: None, registers preserved
+
 os_temp_box:
 	pusha
 
@@ -1614,9 +1634,11 @@ os_temp_box:
 	popa
 	ret
 
-; Prints a message on the footer.
+; ------------------------------------------------------------------
+; os_print_footer -- Prints a message to the screen footer if possible.
 ; IN: SI = Message location(if 0, then it restores the previous message)
-; OUT: nothing
+; OUT: None, registers preserved
+
 os_print_footer:
 	pusha
 	cmp byte [0082h], 1
@@ -1664,9 +1686,10 @@ os_print_footer:
 	mov si, 1
 	jmp .print
 
-; Resets the font to the selected default.
-; IN = nothing
-; OUT = nothing
+; ------------------------------------------------------------------
+; os_reset_font -- Resets the font to the selected default.
+; IN/OUT = None, registers preserved
+
 os_reset_font:
 	pusha
 	
@@ -1687,9 +1710,11 @@ os_reset_font:
 	popa
 	ret
 
-; Draws the MichalOS logo.
-; IN: nothing
-; OUT: a very beautiful logo :-)
+; ------------------------------------------------------------------
+; os_draw_logo -- Draws the MichalOS logo.
+; IN: None
+; OUT: A very beautiful logo :-)
+
 os_draw_logo:
 	pusha
 	
@@ -1701,9 +1726,11 @@ os_draw_logo:
 	mov si, logo
 	jmp os_draw_icon.no_pusha
 
-; Draws an icon (in the MichalOS format).
+; ------------------------------------------------------------------
+; os_draw_icon -- Draws an icon (in the MichalOS format).
 ; IN: SI = address of the icon
-; OUT: nothing
+; OUT: None, registers preserved
+
 os_draw_icon:
 	pusha
 	

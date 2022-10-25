@@ -1,10 +1,11 @@
 ; ==================================================================
-; PC SPEAKER/ADLIB SOUND ROUTINES
+; MichalOS Sound functions (PC speaker, YM3812)
 ; ==================================================================
 
 ; ------------------------------------------------------------------
 ; os_speaker_tone -- Generate PC speaker tone (call os_speaker_off to turn off)
-; IN: AX = note frequency; OUT: Nothing (registers preserved)
+; IN: AX = note frequency
+; OUT: None, registers preserved
 
 os_speaker_tone:
 	pusha
@@ -39,6 +40,7 @@ os_speaker_tone:
 ; ------------------------------------------------------------------
 ; os_speaker_note_length -- Generate PC speaker tone for a set amount of time and then stop
 ; IN: AX = note frequency, CX = length (in ticks)
+; OUT: None, registers preserved
 
 os_speaker_note_length:
 	pusha
@@ -53,7 +55,7 @@ os_speaker_note_length:
 
 ; ------------------------------------------------------------------
 ; os_speaker_off -- Turn off PC speaker
-; IN/OUT: Nothing (registers preserved)
+; IN/OUT: None, registers preserved
 
 os_speaker_off:
 	pusha
@@ -73,6 +75,7 @@ os_speaker_off:
 ;		33 = ~1 kHz (1004.362 Hz)
 ;		663 = ~50 Hz (49.991 Hz)
 ;		1820 = ~18.2 Hz (18.211 Hz)
+; OUT: None, registers preserved
 
 os_start_adlib:
 	pusha
@@ -126,6 +129,7 @@ os_start_adlib:
 	
 ; ------------------------------------------------------------------
 ; os_stop_adlib -- Stops the Adlib driver
+; IN/OUT: None, registers preserved
 
 os_stop_adlib:
 	pusha
@@ -170,6 +174,7 @@ os_stop_adlib:
 	
 ; ------------------------------------------------------------------
 ; os_check_adlib -- Checks if YM3812 is present in the system
+; IN: None
 ; OUT: CF clear if YM3812 is present
 
 os_check_adlib:
@@ -215,7 +220,8 @@ os_adlib_regwrite:
 	
 ; ------------------------------------------------------------------
 ; os_adlib_regread -- Read from a YM3812 register
-; IN: AH - register address; OUT: AL - value
+; IN: AH - register address
+; OUT: AL - value
 
 os_adlib_regread:
 	push bx
@@ -229,7 +235,8 @@ os_adlib_regread:
 ; ------------------------------------------------------------------
 ; int_adlib_regwrite -- Internal kernel function - not available to user programs
 ; IN: AH/AL - register address/value to write
-	
+; OUT: None, registers preserved
+
 int_adlib_regwrite:
 	pusha
 
@@ -332,7 +339,7 @@ int_adlib_regwrite:
 	
 ; ------------------------------------------------------------------
 ; os_adlib_mute -- Mute the YM3812's current state
-; IN: nothing
+; IN/OUT: None
 
 os_adlib_mute:
 	pusha
@@ -362,7 +369,7 @@ os_adlib_mute:
 	
 ; ------------------------------------------------------------------
 ; os_adlib_unmute -- Unmute the YM3812's current state
-; IN: nothing
+; IN/OUT: None
 
 os_adlib_unmute:
 	pusha
@@ -498,7 +505,8 @@ pwm_handler:
 	
 ; ------------------------------------------------------------------
 ; os_adlib_calcfreq -- Play a frequency
-; IN: AX - frequency, CL = channel; OUT: nothing
+; IN: AX - frequency, CL = channel
+; OUT: None, registers preserved
 
 os_adlib_calcfreq:
 	pushad
@@ -566,7 +574,8 @@ os_adlib_calcfreq:
 	
 ; ------------------------------------------------------------------
 ; os_adlib_noteoff -- Turns off a note
-; IN: CL = channel; OUT: nothing
+; IN: CL = channel
+; OUT: None, registers preserved
 
 os_adlib_noteoff:
 	cmp byte [57070], 1
@@ -593,4 +602,3 @@ os_adlib_noteoff:
 	ret	
 	
 ; ==================================================================
-

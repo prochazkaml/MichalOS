@@ -1,11 +1,12 @@
 ; ==================================================================
-; KEYBOARD HANDLING ROUTINES
+; MichalOS Keyboard input handling functions
 ; ==================================================================
 
 ; ------------------------------------------------------------------
 ; os_wait_for_key -- Waits for keypress and returns key
 ; Also handles the screensaver. TODO: move the screensaver code to "int.asm"
-; IN: Nothing; OUT: AX = key pressed, other regs preserved
+; IN: None
+; OUT: AX = key pressed, other regs preserved
 
 os_wait_for_key:
 	pusha
@@ -105,7 +106,8 @@ os_wait_for_key:
 ; ------------------------------------------------------------------
 ; os_check_for_key -- Scans keyboard buffer for input, but doesn't wait
 ; Also handles special keyboard shortcuts.
-; IN: Nothing; OUT: AX = 0 if no key pressed, otherwise scan code
+; IN: None
+; OUT: AX = 0 if no key pressed, otherwise scan code
 
 os_check_for_key:
 	pusha
@@ -119,7 +121,7 @@ os_check_for_key:
 	mov ah, 10h			; Otherwise get it from buffer
 	int 16h
 
-	call special_keys
+	call int_special_keys
 
 	mov [.tmp_buf], ax		; Store resulting keypress
 
@@ -138,10 +140,12 @@ os_check_for_key:
 
 ; ==================================================================
 
-; Checks for special keys and performs their action.
+; ------------------------------------------------------------------
+; int_special_keys -- Checks for special keys and performs their action.
 ; IN: AX = key
-; OUT: nothing
-special_keys:
+; OUT: None, registers preserved
+
+int_special_keys:
 	pusha
 	cmp ah, 105
 	je .disable_sound

@@ -3,9 +3,10 @@
 ; Some graphics routines have been borrowed from TachyonOS
 ; ==================================================================
 
-; Initializes graphics mode.
-; IN: None
-; OUT: None, registers preserved
+; ------------------------------------------------------------------
+; os_init_graphics_mode -- Initializes graphics mode.
+; IN/OUT: None, registers preserved
+
 os_init_graphics_mode:
 	pusha
 	mov byte [0082h], 1
@@ -18,9 +19,10 @@ os_init_graphics_mode:
 	popa
 	ret
 
-; Deinitializes graphics mode.
-; IN: None
-; OUT: None, registers preserved
+; ------------------------------------------------------------------
+; os_init_text_mode -- Deinitializes graphics mode.
+; IN/OUT: None, registers preserved
+
 os_init_text_mode:
 	pusha
 	mov ax, 3			; Back to text mode
@@ -37,9 +39,11 @@ os_init_text_mode:
 	popa
 	ret
 
-; Sets a pixel on the screen to a given value.
+; ------------------------------------------------------------------
+; os_set_pixel -- Sets a pixel on the screen to a given value.
 ; IN: CX = X coordinate, DX = Y coordinate, BL = color
 ; OUT: None, registers preserved
+
 os_set_pixel:
 	pusha
 	push es
@@ -54,9 +58,11 @@ os_set_pixel:
 	popa
 	ret
 
-; Sets a pixel on the screen to a given value.
+; ------------------------------------------------------------------
+; os_fast_set_pixel -- Sets a pixel on the screen to a given value.
 ; IN: ES = destination memory segment, CX = X coordinate, AX = Y coordinate, BL = color
 ; OUT: None, registers preserved
+
 os_fast_set_pixel:
 	cmp cx, 320
 	ja .exit
@@ -76,9 +82,12 @@ os_fast_set_pixel:
 .exit:
 	ret
 	
-; Implementation of Bresenham's line algorithm. Translated from an implementation in C (http://www.edepot.com/linebresenham.html)
+; ------------------------------------------------------------------
+; os_draw_line -- Draws a line with the Bresenham's line algorithm.
+; Translated from an implementation in C (http://www.edepot.com/linebresenham.html)
 ; IN: CX=X1, DX=Y1, SI=X2, DI=Y2, BL=colour
 ; OUT: None, registers preserved
+
 os_draw_line:
 	pusha				; Save parameters
 	
@@ -270,10 +279,12 @@ os_draw_line:
 	.balance dw 0
 	.colour db 0
 	.pad db 0
-	
-; Draw (straight) rectangle
+
+; ------------------------------------------------------------------
+; os_draw_rectangle -- Draws a rectangle.
 ; IN: CX=X1, DX=Y1, SI=X2, DI=Y2, BL=colour, CF = set if filled or clear if not
 ; OUT: None, registers preserved
+
 os_draw_rectangle:
 	pusha
 	pushf
@@ -363,10 +374,12 @@ os_draw_rectangle:
 	.y1				dw 0
 	.y2				dw 0
 
-; Draw freeform shape
+; ------------------------------------------------------------------
+; os_draw_polygon -- Draws a freeform shape.
 ; IN: BH = number of points, BL = colour, SI = location of shape points data
 ; OUT: None, registers preserved
 ; DATA FORMAT: x1, y1, x2, y2, x3, y3, etc
+
 os_draw_polygon:
 	pusha
 	
@@ -424,8 +437,11 @@ os_draw_polygon:
 	.points				db 0
 	
 
-; Clear the screen by setting all pixels to a single colour
+; ------------------------------------------------------------------
+; os_clear_graphics -- Clears the graphics screen with a given color.
 ; BL = colour to set
+; OUT: None, registers preserved
+
 os_clear_graphics:
 	pusha
 	push es
@@ -446,6 +462,7 @@ os_clear_graphics:
 ; ----------------------------------------
 ; os_draw_circle -- draw a circular shape
 ; IN: AL = colour, BX = radius, CX = middle X, DX = middle y
+; OUT: None, registers preserved
 
 os_draw_circle:
 	pusha
@@ -566,3 +583,5 @@ os_draw_circle:
 .xChange			dw 0
 .yChange			dw 0
 .radiusError		dw 0
+
+; ==================================================================

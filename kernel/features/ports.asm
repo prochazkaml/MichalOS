@@ -1,10 +1,11 @@
 ; ==================================================================
-; PORT INPUT AND OUTPUT ROUTINES
+; MichalOS Port I/O functions
 ; ==================================================================
 
 ; ------------------------------------------------------------------
 ; os_serial_port_enable -- Set up the serial port for transmitting data
 ; IN: AX = 0 for normal mode (9600 baud), or 1 for slow mode (1200 baud)
+; OUT: None, registers preserved
 
 os_serial_port_enable:
 	pusha
@@ -28,7 +29,8 @@ os_serial_port_enable:
 
 ; ------------------------------------------------------------------
 ; os_send_via_serial -- Send a byte via the serial port
-; IN: AL = byte to send via serial; OUT: AH = Bit 7 clear on success
+; IN: AL = byte to send via serial
+; OUT: AH = Bit 7 clear on success
 
 os_send_via_serial:
 	pusha
@@ -51,7 +53,8 @@ os_send_via_serial:
 
 ; ------------------------------------------------------------------
 ; os_get_via_serial -- Get a byte from the serial port
-; IN: nothing; OUT: AL = byte that was received, AH = Bit 7 clear on success
+; IN: None
+; OUT: AL = byte that was received, AH = Bit 7 clear on success
 
 os_get_via_serial:
 	pusha
@@ -73,4 +76,3 @@ os_get_via_serial:
 	.tmp dw 0
 
 ; ==================================================================
-

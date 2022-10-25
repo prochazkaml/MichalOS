@@ -1,6 +1,11 @@
+; ==================================================================
+; MichalOS Interrupt management & app timer functions
+; ==================================================================
+
 ; -----------------------------------------------------------------
 ; os_modify_int_handler -- Change location of interrupt handler
 ; IN: CL = int number, DI:SI = handler location
+; OUT: None, registers preserved
 
 os_modify_int_handler:
 	pusha
@@ -30,7 +35,8 @@ os_modify_int_handler:
 
 ; -----------------------------------------------------------------
 ; os_get_int_handler -- Change location of interrupt handler
-; IN: CL = int number; OUT: DI:SI = handler location
+; IN: CL = int number
+; OUT: DI:SI = handler location
 
 os_get_int_handler:
 	pusha
@@ -64,6 +70,7 @@ os_get_int_handler:
 ; os_attach_app_timer -- Attach a timer interrupt to an application and sets the timer speed
 ; Formula: speed = (105000000 / 88) / frequency
 ; IN: SI = handler location, CX = speed
+; OUT: None, registers preserved
 
 os_attach_app_timer:
 	pusha
@@ -76,7 +83,7 @@ os_attach_app_timer:
 	
 ; -----------------------------------------------------------------
 ; os_return_app_timer -- Returns the timer interrupt back to the system and resets the timer speed
-; IN: nothing
+; IN/OUT: None, registers preserved
 
 os_return_app_timer:
 	pusha
@@ -96,6 +103,7 @@ os_return_app_timer:
 ; os_set_timer_speed -- Sets the timer's trigger speed.
 ; Formula: speed = (105000000 / 88) / frequency
 ; IN: CX = speed
+; OUT: Nothing, registers preserved
 
 os_set_timer_speed:
 	pusha
@@ -206,3 +214,5 @@ os_compat_int1C:
 	current_timer_speed			dw 0
 	
 	screensaver_timer			dw 0
+
+; ==================================================================

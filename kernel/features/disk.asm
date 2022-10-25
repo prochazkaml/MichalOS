@@ -1,8 +1,10 @@
 ; ==================================================================
-; FAT12 FLOPPY DISK ROUTINES
+; MichalOS Disk access functions
 ; ==================================================================
 
+; ------------------------------------------------------------------
 ; os_report_free_space -- Returns the amount of free space on disk
+; IN: None
 ; OUT: AX = Number of sectors free
 
 os_report_free_space:
@@ -881,7 +883,8 @@ os_file_exists:
 
 ; --------------------------------------------------------------------------
 ; os_create_file -- Creates a new 0-byte file on the floppy disk
-; IN: AX = location of filename; OUT: Nothing
+; IN: AX = location of filename
+; OUT: None, registers preserved
 
 os_create_file:
 	clc
@@ -1425,7 +1428,8 @@ int_get_root_entry:
 
 ; --------------------------------------------------------------------------
 ; int_read_fat -- Read FAT entry from floppy into disk_buffer
-; IN: Nothing; OUT: carry set if failure
+; IN: None
+; OUT: carry set if failure
 
 int_read_fat:
 	pusha
@@ -1506,7 +1510,8 @@ int_write_fat:
 
 ; --------------------------------------------------------------------------
 ; int_read_root_dir -- Get the root directory contents
-; IN: Nothing; OUT: root directory contents in disk_buffer, carry set if error
+; IN: None
+; OUT: root directory contents in disk_buffer, carry set if error
 
 int_read_root_dir:
 	pusha
@@ -1640,5 +1645,3 @@ os_convert_l2hts:
 
 
 ; ==================================================================
-
-

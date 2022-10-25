@@ -1,10 +1,11 @@
 ; ==================================================================
-; MISCELLANEOUS ROUTINES
+; MichalOS Miscellaneous functions
 ; ==================================================================
 
 ; ------------------------------------------------------------------
 ; os_pause -- Delay execution for specified 110ms chunks
 ; IN: AX = amount of ticks to wait
+; OUT: None, registers preserved
 
 os_pause:
 	pusha
@@ -51,7 +52,8 @@ os_pause:
 
 ; ------------------------------------------------------------------
 ; os_clear_registers -- Clear all registers
-; IN: Nothing; OUT: Clear registers
+; IN: None
+; OUT: Cleared registers
 
 os_clear_registers:
 	xor eax, eax
@@ -70,6 +72,7 @@ os_illegal_call:
 	
 ; ------------------------------------------------------------------
 ; os_get_os_name -- Get the OS name string
+; IN: None
 ; OUT: SI = OS name string, zero-terminated
 
 os_get_os_name:
@@ -81,6 +84,7 @@ os_get_os_name:
 ; ------------------------------------------------------------------
 ; os_fatal_error -- Display error message and halt execution
 ; IN: AX = error message string location
+; OUT: None, as it does not return
 
 os_fatal_error:
 	mov [.ax], ax			; Store string location for now, ...
@@ -171,9 +175,11 @@ os_fatal_error:
 
 	.ax				dw 0
 
-; Gets the amount of system RAM.
-; IN: nothing
-; OUT: AX = conventional memory(kB), EBX = high memory(kB)
+; ------------------------------------------------------------------
+; os_get_memory -- Gets the amount of system RAM.
+; IN: None
+; OUT: AX = conventional memory (in kB), EBX = high memory (in kB)
+
 os_get_memory:
 	pusha
 	xor cx, cx
@@ -191,15 +197,10 @@ os_get_memory:
 	.conv_mem	dw 0
 	.high_mem	dw 0
 
-; Calls a system function from a far location.
-; IN: BP = System function number (8000h, 8003h...)
-; OUT: nothing
-os_far_call:
-	call bp
-	retf
-	
-; Serves as a middle-man between the INT 1Ah call and the kernel/apps (used for timezones).
+; ------------------------------------------------------------------
+; os_int_1Ah -- Middle-man between the INT 1Ah call and the kernel/apps (used for timezones).
 ; IN/OUT: same as int 1Ah
+
 os_int_1Ah:
 	pusha
 
@@ -353,4 +354,3 @@ int_popa_ret:
 	ret
 
 ; ==================================================================
-

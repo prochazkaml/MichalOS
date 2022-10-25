@@ -1,18 +1,6 @@
 ; ==================================================================
-; MATH ROUTINES
+; MichalOS Math functions
 ; ==================================================================
-
-; ------------------------------------------------------------------
-; os_seed_random -- Seed the random number generator based on the current state of registers and time
-; IN: every register; OUT: Nothing (registers preserved)
-
-os_seed_random:
-	mov word [os_random_seed], 0x7384
-	ret
-
-
-	os_random_seed	dw 0
-
 
 ; ------------------------------------------------------------------
 ; os_get_random -- Return a random integer between low and high (inclusive)
@@ -49,10 +37,12 @@ os_get_random:
  	pop dx
 	ret
 
+	os_random_seed	dw 0x7384
 
 ; ------------------------------------------------------------------
 ; os_bcd_to_int -- Converts a binary coded decimal number to an integer
-; IN: AL = BCD number; OUT: AX = integer value
+; IN: AL = BCD number
+; OUT: AX = integer value
 
 os_bcd_to_int:
 	pusha
@@ -79,7 +69,8 @@ os_bcd_to_int:
 	
 ; ------------------------------------------------------------------
 ; os_int_to_bcd -- Converts an integer to a binary coded decimal number
-; IN: AL = integer value; OUT: AL = BCD number
+; IN: AL = integer value
+; OUT: AL = BCD number
 
 os_int_to_bcd:
 	pusha
@@ -99,8 +90,8 @@ os_int_to_bcd:
 
 	.tmp	db 0
 
-
-; Calculates EAX^EBX.
+; ------------------------------------------------------------------
+; os_math_power -- Calculates EAX^EBX.
 ; IN: EAX^EBX = input
 ; OUT: EAX = result
 
@@ -132,7 +123,8 @@ os_math_power:
 	.tmp_dword		dd 0
 	.tmp_dword2		dd 0
 	
-; Calculates the EBX root of EAX.
+; ------------------------------------------------------------------
+; os_math_root -- Approximates the EBXth root of EAX.
 ; IN: EAX = input, EBX = root
 ; OUT: EAX(EDX = 0) = result; EAX to EDX = range
 
