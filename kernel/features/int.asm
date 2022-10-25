@@ -61,7 +61,7 @@ os_get_int_handler:
 	.tmp_sgmt	dw 0
 	
 ; -----------------------------------------------------------------
-; os_attach_timer_interrupt -- Attach a timer interrupt to an application and sets the timer speed
+; os_attach_app_timer -- Attach a timer interrupt to an application and sets the timer speed
 ; Formula: speed = (105000000 / 88) / frequency
 ; IN: SI = handler location, CX = speed
 
@@ -75,7 +75,7 @@ os_attach_app_timer:
 	ret
 	
 ; -----------------------------------------------------------------
-; os_return_timer_interrupt -- Returns the timer interrupt back to the system and resets the timer speed
+; os_return_app_timer -- Returns the timer interrupt back to the system and resets the timer speed
 ; IN: nothing
 
 os_return_app_timer:
