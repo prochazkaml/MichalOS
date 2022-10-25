@@ -288,9 +288,9 @@ start:
 	.delete_confirm_msg		db 'Are you sure?', 0
 
 	.filename_msg			db 'Enter a new filename:', 0
-	.filename_input			times 15 db 0
-	.filename_tmp1			times 15 db 0
-	.filename_tmp2			times 15 db 0
+	.filename_input			times 60 db 0
+	.filename_tmp1			times 60 db 0
+	.filename_tmp2			times 60 db 0
 
 	.error_msg				db 'Error writing to the disk!', 0
 	.error_msg2				db '(Disk is read-only/file already exists)?', 0

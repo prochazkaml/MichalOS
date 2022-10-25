@@ -185,8 +185,7 @@ start:
 	jmp start
 	
 .save_as:
-	mov byte [.save_flag], 1
-	mov ax, .load_file
+	mov ax, .filenamebuff
 	mov bx, .save_msg
 	call os_input_dialog
 	
@@ -197,6 +196,10 @@ start:
 	call os_write_file
 	jc .save_error
 	
+	mov byte [.save_flag], 1
+	mov si, .filenamebuff
+	mov di, .load_file
+	call os_string_copy
 	jmp start
 	
 .mode_change:
@@ -444,6 +447,7 @@ start:
 	.cursor_y			db 0
 	.mode				db 0
 	.load_file			db 'Unnamed picture', 0
+	.filenamebuff		times 60 db 0
 	.save_flag			db 0
 	.extension_number	db 1
 	.pix_extension		db 'PIX', 0

@@ -341,8 +341,7 @@ start:
 	jmp .loop
 	
 .save_as:
-	mov byte [.save_flag], 1
-	mov ax, .load_file
+	mov ax, .filenamebuff
 	mov bx, .save_msg
 	call os_input_dialog
 	
@@ -353,12 +352,17 @@ start:
 	call os_write_file
 	jc .save_error
 	
+	mov byte [.save_flag], 1
+	mov si, .filenamebuff
+	mov di, .load_file
+	call os_string_copy
 	jmp .save_ok
 
 	.file_list			db 'New,Open...,Save,Save as...,Exit', 0
 	.save_error_msg		db 'Error saving the file!', 0
 	.save_msg			db 'Enter a filename (PICTURE.ASC):', 0
 	.load_file			db 'Unnamed picture', 0
+	.filenamebuff		times 60 db 0
 	.save_flag			db 0
 	.extension_number	db 1
 	.asc_extension		db 'ASC', 0
