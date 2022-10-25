@@ -27,9 +27,7 @@ vesa:				; CPU vendor
 	clr eax
 	mov ax, [buffer + 12h]
 	shl eax, 6
-	call os_32int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_32int
 	mov si, unit_kb
 	call os_print_string
 	

@@ -256,9 +256,7 @@ start:
 	mov al, [.day]
 	call os_bcd_to_int
 	clr ah
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	call os_print_space
 	
@@ -280,16 +278,12 @@ start:
 	mov al, [.century]
 	call os_bcd_to_int
 	clr ah
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov al, [.year]
 	call os_bcd_to_int
 	clr ah
-	call os_int_to_string
-	mov si, ax
-	call os_print_string	
+	call os_print_int
 	
 	mov si, .spacer
 	call os_print_string

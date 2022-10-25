@@ -968,17 +968,13 @@ os_list_dialog:
 	call os_putchar
 
 	call .get_selected_id
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov al, '/'
 	call os_putchar
 	
 	movzx ax, byte [.num_of_entries]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, .str_pos_end
 	call os_print_string
@@ -1443,7 +1439,33 @@ os_print_8hex:
 	popad
 	call os_print_4hex
 	ret
-	
+
+; ------------------------------------------------------------------
+; os_print_int -- Prints an integer in decimal.
+; IN: AX = unsigned integer
+; OUT: None, registers preserved
+
+os_print_int:
+	pusha
+	call os_int_to_string
+	mov si, ax
+	call os_print_string
+	popa
+	ret
+
+; ------------------------------------------------------------------
+; os_print_32int -- Prints a 32 bit integer in decimal.
+; IN: EAX = unsigned integer
+; OUT: None, registers preserved
+
+os_print_32int:
+	pushad
+	call os_32int_to_string
+	mov si, ax
+	call os_print_string
+	popad
+	ret
+
 ; ------------------------------------------------------------------
 ; os_input_string -- Take string from keyboard entry
 ; IN: AX = location of string

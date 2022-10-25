@@ -154,18 +154,14 @@ start:
 	call os_move_cursor
 	
 	mov ax, [.loadedbuffers]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 
 	mov si, .buffmsg
 	call os_print_string
 
 	mov ax, [.loadedbuffers]
 	shl ax, 2
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 
 	mov si, .buffmsg2
 	call os_print_string
@@ -182,9 +178,7 @@ start:
 	mov ebx, 11025
 	div ebx
 	
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, .secondmsg
 	call os_print_string

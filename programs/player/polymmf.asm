@@ -102,9 +102,7 @@ start_poly_mmf:
 	call os_move_cursor
 	
 	mov ax, [.counter]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 
 	movzx eax, word [.pointer_2]
 	sub eax, buffer2 + 3

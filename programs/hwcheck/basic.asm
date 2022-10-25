@@ -109,9 +109,7 @@ familyoutput:
 	mov si, msg1
 	call os_print_string
 	mov eax, [p1]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	call os_print_newline
 	
 	mov si, msg2
@@ -122,9 +120,7 @@ familyoutput:
 	mov ebx, eax			; Store the result to EBX
 	mov eax, [p2]			; Get the low 4 bits
 	add eax, ebx			; Add the high and low bits together
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	call os_print_newline
 	
 	mov si, msg3
@@ -135,25 +131,19 @@ familyoutput:
 	mov ebx, eax			; Store the result to EBX
 	mov eax, [p3]			; Get the low 4 bits
 	add eax, ebx			; Add the high and low bits together
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	call os_print_newline
 	
 	mov si, msg4
 	call os_print_string
 	mov eax, [p4]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	call os_print_newline
 	
 	mov si, convmem
 	call os_print_string
 	call os_get_memory
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	mov si, unit_kb
 	call os_print_string
 	call os_print_newline
@@ -162,9 +152,7 @@ familyoutput:
 	call os_print_string
 	call os_get_memory
 	mov ax, bx
-	call os_32int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	mov si, unit_kb
 	call os_print_string
 	call os_get_memory

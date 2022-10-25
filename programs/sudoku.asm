@@ -304,9 +304,7 @@ check_free_spaces:
 	mov si, .free_msg
 	call os_print_string
 	mov ax, cx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	call os_print_space
 	
 	popa

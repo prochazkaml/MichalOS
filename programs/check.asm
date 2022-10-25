@@ -28,9 +28,7 @@ start:
 	jl .loop
 	
 	mov ax, [.bad_sectors]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, .badmsg0
 	call os_print_string
@@ -45,9 +43,7 @@ start:
 	mov si, .sectormsg
 	call os_print_string
 	
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	popa
 	
 	pusha

@@ -174,9 +174,7 @@ keypresswait:
 	call os_print_space
 	
 .no_space_1:
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	mov dx, 0C1Eh
 	call os_move_cursor
 	movzx ax, byte [OrderSize]
@@ -187,9 +185,7 @@ keypresswait:
 	call os_print_space
 	
 .no_space_2:
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	mov dx, 0C27h
 	call os_move_cursor
 	mov al, [Line]

@@ -77,9 +77,7 @@ start_mono_mmf:
 	mov dx, 0C26h
 	call os_move_cursor
 	mov ax, [.counter]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	popa
 	
 	movzx eax, word [.pointer]

@@ -1090,13 +1090,12 @@ update_screen:
 showbytepos:
 	pusha
 
-	mov word ax, [cursor_byte]
-	call os_int_to_string
-	mov si, ax
-
 	mov16 dl, 60, 0
 	call os_move_cursor
 
+	mov word ax, [cursor_byte]
+
+	call os_print_int
 	call os_print_string
 	call os_print_space
 

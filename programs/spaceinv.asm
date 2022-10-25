@@ -212,10 +212,7 @@ game_over:
 	call os_format_string
 	
 	mov eax, [current_score]		; Get the current score...
-	call os_32int_to_string
-	
-	mov si, ax
-	call os_format_string			; ...and print it too
+	call os_print_32int
 	call os_print_newline
 	
 	mov si, gameover_msg3

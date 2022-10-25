@@ -333,9 +333,7 @@ la_directory:
 	call os_get_cursor_pos
 	mov dl, 20
 	call os_move_cursor
-	call os_32int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_32int
 	mov si, size_file.size_msg
 	call os_print_string
 	popa
@@ -352,10 +350,7 @@ la_directory:
 
 	mov ax, cx		; Days
 	and ax, 11111b
-	
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, dateseparator
 	call os_print_string
@@ -363,10 +358,7 @@ la_directory:
 	mov ax, cx		; Months
 	shr ax, 5
 	and ax, 1111b
-	
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, dateseparator
 	call os_print_string
@@ -374,10 +366,7 @@ la_directory:
 	mov ax, cx		; Years
 	shr ax, 9
 	add ax, 1980
-	
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 
 	call os_print_space
 	
@@ -391,9 +380,7 @@ la_directory:
 	call os_print_string
 	
 .no_hour_zero:
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, timeseparator
 	call os_print_string
@@ -409,9 +396,7 @@ la_directory:
 	call os_print_string
 	
 .no_minute_zero:
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, timeseparator
 	call os_print_string
@@ -427,9 +412,7 @@ la_directory:
 	call os_print_string
 	
 .no_second_zero:
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	popa
 	
 	clr al
@@ -602,10 +585,8 @@ size_file:
 	call os_get_file_size
 	jc .failure
 
-	mov ax, bx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	mov eax, ebx
+	call os_print_32int
 
 	mov si, .size_msg
 	call os_print_string

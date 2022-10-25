@@ -130,7 +130,7 @@ os_fatal_error:
 ; ------------------------------------------------------------------
 ; os_get_memory -- Gets the amount of system RAM.
 ; IN: None
-; OUT: AX = conventional memory (in kB), EBX = high memory (in kB)
+; OUT: AX = conventional memory (in kB), BX = high memory (in kB)
 
 os_get_memory:
 	pusha

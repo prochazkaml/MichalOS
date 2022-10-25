@@ -773,17 +773,4 @@ os_string_to_32int:
 	.tmp_dword	dd 0
 	.divisor	dd 10
 	
-; ------------------------------------------------------------------
-; os_print_32int -- Prints a 32 bit integer in decimal.
-; IN: EAX = unsigned integer
-; OUT: None, registers preserved
-
-os_print_32int:
-	pushad
-	call os_32int_to_string
-	mov si, ax
-	call os_print_string
-	popad
-	ret
-	
 ; ==================================================================

@@ -2776,9 +2776,7 @@ do_print:
 	movzx ax, byte [token]
 	call get_var				; Get its value
 
-	call os_int_to_string			; Convert to string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 
 	jmp .newline_or_not
 
@@ -4035,10 +4033,7 @@ error:
 .finish:
 
 	mov ax, cx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
-
+	call os_print_int
 
 	call os_print_newline
 

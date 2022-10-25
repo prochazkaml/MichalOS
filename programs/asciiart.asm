@@ -544,17 +544,13 @@ sub_draw_screen:
 	call os_print_string
 	
 	movzx ax, byte [cursor_x]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, .y_msg
 	call os_print_string
 	
 	movzx ax, byte [cursor_y]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	call os_print_space
 	
 	mov dx, 25

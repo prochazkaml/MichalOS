@@ -42,17 +42,11 @@ start:
 	mov bx, 100h
 	clr dx
 	div bx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
-	mov si, .space
-	call os_print_string
+	call os_print_int
+	call os_print_space
 	mov ax, dx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
-	mov si, .space
-	call os_print_string
+	call os_print_int
+	call os_print_space
 	
 	pop ax
 	call os_print_4hex
@@ -71,17 +65,11 @@ start:
 	mov bx, 100h
 	clr dx
 	div bx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
-	mov si, .space
-	call os_print_string
+	call os_print_int
+	call os_print_space
 	mov ax, dx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
-	mov si, .space
-	call os_print_string
+	call os_print_int
+	call os_print_space
 	
 	pop ax
 	call os_print_4hex
@@ -107,17 +95,11 @@ start:
 	mov bx, 100h
 	clr dx
 	div bx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
-	mov si, .space
-	call os_print_string
+	call os_print_int
+	call os_print_space
 	mov ax, dx
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
-	mov si, .space
-	call os_print_string
+	call os_print_int
+	call os_print_space
 	
 	pop ax
 	call os_print_4hex
@@ -159,7 +141,6 @@ start:
 	.options		db 'INT 16h (00h) - Slow key test,INT 16h (01h) - Fast key test,INT 16h (02h) - Modifier key test,INT 16h (10h) - Slow key test (AT)', 0
 	.blank			db 0
 	
-	.space			db ' ', 0
 	.exit_msg		db 'Press Shift+Q to quit.', 0
 
 buffer:

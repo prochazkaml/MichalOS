@@ -83,9 +83,7 @@ start:
 	mov16 dx, 40, 2
 	call os_move_cursor
 	mov ax, [.sectornum]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	ret
 	
 .asciidraw:

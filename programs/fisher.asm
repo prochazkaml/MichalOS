@@ -211,9 +211,7 @@ drawscreen:
         mov dh,2                ;row
         call os_move_cursor
         mov ax,[total]
-        call os_int_to_string
-        mov si,ax
-        call os_print_string
+        call os_print_int
 
         ;display hook count ---------------------
 
@@ -221,9 +219,7 @@ drawscreen:
         mov dh,3                ;row
         call os_move_cursor
         mov ax,[hooks]
-        call os_int_to_string
-        mov si,ax
-        call os_print_string
+        call os_print_int
 
         ret
 

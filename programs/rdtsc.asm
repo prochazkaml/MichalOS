@@ -39,10 +39,7 @@ start:
 	mov ebx, 10
 	div ebx
 	
-	call os_32int_to_string
-	mov si, ax
-	call os_print_string
-
+	call os_print_32int
 	call os_print_newline
 	
 	call os_check_for_key

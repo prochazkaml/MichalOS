@@ -168,10 +168,8 @@ start_dro:
 	mov dx, 0C26h
 	call os_move_cursor
 
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
-		
+	call os_print_int
+	
 	mov al, 73h			; Print an "s"
 	call os_putchar
 	
@@ -179,9 +177,7 @@ start_dro:
 	call os_putchar
 	
 	mov ax, [.song_length]
-	call os_int_to_string
-	mov si, ax
-	call os_print_string
+	call os_print_int
 	
 	mov si, .end_time_msg
 	call os_print_string

@@ -148,6 +148,7 @@ os_string_to_32int		equ 8132h	; IN: SI = string						OUT: EAX = integer
 os_string_to_hex		equ 804Bh	; IN: SI = string (hex formatted)		OUT: EAX = integer
 os_string_add			equ 8084h	; IN: AX/BX = Main string/Added string
 os_print_32int			equ 80BAh	; IN: EAX = unsigned integer
+os_print_int			equ 8153h	; IN: AX = unsigned integer
 os_string_encrypt		equ 80FCh
 
 ; Math routines

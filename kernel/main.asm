@@ -190,7 +190,7 @@ os_call_vectors:
 	jmp os_read_root			; 814Ah
 	jmp os_init_text_mode		; 814Dh
 	jmp os_fast_set_pixel		; 8150h
-	jmp os_illegal_call			; 8153h ; FREE!!!!!!!!!!!!!!!!!!!
+	jmp os_print_int			; 8153h
 	jmp os_convert_l2hts		; 8156h
 	
 ; ------------------------------------------------------------------
