@@ -204,7 +204,7 @@ start:
 	mov si, buffer
 	call os_string_to_int
 	
-	cmp ax, 30
+	cmp ax, 60
 	jg .screensaver_error
 	
 	mov [57074], al
@@ -503,7 +503,7 @@ start:
 	.password_msg		db 'Enter a new password:', 0
 	.name_msg			db 'Enter a new name (32 chars max.):', 0
 	
-	.screensaver_msg	db 'Enter the amount of minutes (max. 30):', 0
+	.screensaver_msg	db 'Enter the amount of minutes (max. 60):', 0
 	
 	.changedone			db 'Changes have been saved.', 0
 	
@@ -524,7 +524,7 @@ start:
 
 	.permerrmsg1		db 'Authentication failed!', 0
 
-	.scrnsaveerr		db 'Max. 30 minutes!', 0
+	.scrnsaveerr		db 'Max. 60 minutes!', 0
 	
 	driversgmt	dw 0
 	
