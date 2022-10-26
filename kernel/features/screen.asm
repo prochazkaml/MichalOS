@@ -758,13 +758,13 @@ os_cb_list_dialog:
 	jmp word [.parsercb]
 
 .cbdisplay:
-	test ax, ax
-	jnz .cbexit
-
 	pusha
 	xchg ax, cx
 	call word [.displaycb]
 	popa
+
+	test ax, ax
+	jnz .cbexit
 
 	mov16 dx, 5, 22
 	call os_move_cursor
@@ -908,7 +908,7 @@ os_select_list:
 	add bx, cx
 
 	cmp bx, [.num_of_entries]	; Are we at the bottom?
-	je .no_draw_bottom_arrow
+	jge .no_draw_bottom_arrow
 
 	mov dx, [.xpos]
 	add dh, [.height]
@@ -1040,6 +1040,11 @@ os_select_list:
 
 .move_down:
 	inc dh					; Move the cursor down
+
+	movzx cx, byte [.height]	; Figure out whether the list is scrollable or not
+	cmp cx, [.num_of_entries]
+	jg .move_down_not_scrollable
+
 	cmp dh, [.endypos]		; Have we reached the bottom?
 	jl .sub_exit
 
@@ -1053,6 +1058,13 @@ os_select_list:
 	inc word [.skip_num]	; If not, then scroll the list down
 	dec dh
 	ret
+
+.move_down_not_scrollable:
+	mov cl, [.ypos]
+	add cl, [.num_of_entries]
+
+	cmp dh, cl
+	jle .sub_exit
 
 .jump_up:
 	mov word [.skip_num], 0
