@@ -42,7 +42,7 @@ os_speaker_tone:
 
 ; ------------------------------------------------------------------
 ; os_speaker_raw_period -- Generate PC speaker tone (call os_speaker_off to turn off)
-; IN: AX = note period (= 105000000 / 88 * freq)
+; IN: AX = note period (= 105000000 / 88 / freq)
 ; OUT: None, registers preserved
 
 os_speaker_raw_period:
