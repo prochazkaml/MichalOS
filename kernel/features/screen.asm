@@ -1328,7 +1328,8 @@ int_input_dialog:
 
 	push .retptr		; Don't worry too much about this
 	pusha
-	jmp os_input_string_ex
+	clr si
+	jmp os_input_string_ex.no_pusha
 
 .retptr:
 	mov dl, [.og_value]
