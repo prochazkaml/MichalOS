@@ -229,6 +229,23 @@ os_int_1Ah:
 	.years		db 0
 	.centuries	db 0
 
+; ------------------------------------------------------------------
+; int_set_stack -- Sets up allocation for the system stack.
+; IN: SI = return address, AX = RAM top (in 16-byte blocks),
+;     BX = number of 16-byte blocks to allocate (up to 4096 blocks, 64 kB)
+; *** DO NOT CALL, USE JMP AND PASS RETURN ADDRESS!!! ***
+
+int_set_stack:
+	cli
+	sub ax, bx	; Calculate the stack segment by subtracting the ram top and blocks
+	mov ss, ax
+
+	shl bx, 4	; Calculate the top stack pointer value
+	sub bx, 2
+	mov sp, bx
+	sti
+	jmp si
+
 ; Generic jump location for function termination
 
 int_popa_ret:

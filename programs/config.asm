@@ -16,7 +16,8 @@
 ; 72 - Menu color (BYTE)
 ; 73 - "DOS" font enabled (BYTE)
 ; 74 - Minutes to wait for screensaver (BYTE)
-; 75 - 80 - Unused *******************************
+; 75 - System stack size in 16-byte blocks (WORD)
+; 77 - 80 - Unused *******************************
 ; 81 - Minute time offset (WORD)
 
 	%INCLUDE "michalos.inc"
@@ -44,7 +45,10 @@ start:
 		
 	cmp ax, 4
 	je .timezone
-		
+	
+	cmp ax, 5
+	je .advanced
+
 .look:
 	call .draw_background
 
@@ -319,8 +323,52 @@ start:
 	mov [57081], ax
 	
 	call .update_config
-	jmp start	
+	jmp start
 	
+.advanced:
+	call .draw_background
+	
+	mov ax, .advanced_list		; Draw list of settings
+	mov bx, .help_msg1
+	mov cx, .help_msg2
+
+	call os_list_dialog
+
+	jc .start					; User pressed Esc?
+
+	cmp ax, 1
+	je .stack_size
+	
+.stack_size:
+	call .draw_background
+	
+	mov ax, buffer
+	mov bx, .stack_msg
+	call os_input_dialog
+	
+	mov si, buffer
+	call os_string_to_int
+
+	shl ax, 6					; kB -> segments
+
+	cmp ax, 256
+	jb .stack_size_error
+
+	cmp ax, 4096
+	ja .stack_size_error
+
+	mov [57075], ax
+
+	call .update_config
+	jmp .advanced
+
+.stack_size_error:
+	mov ax, .stack_err_msg
+	clr bx
+	clr cx
+	clr dx
+	call os_dialog_box
+	jmp .advanced
 
 .sound:
 	mov ax, .sound_list			; Draw list of settings
@@ -486,13 +534,14 @@ start:
 	call os_dialog_box
 	ret
 
-	.command_list		db 'Look and feel,Sound,User information,Set timezone', 0
+	.command_list		db 'Look and feel,Sound,User information,Set timezone,Advanced system settings', 0
 	.password_list		db 'Change the name,Disable the password,Set the password', 0
 	.look_list			db 'Set the background color,Set an image as a background,Remove the image background,Set the window color,Set the main menu color,Screensaver settings,Select the default font,Enable background dimming when in menu,Disable background dimming when in menu,(INFO) Why should I set the background color when I use an image?', 0
 	.font_list			db 'MichalOS System Font,BIOS Default Font', 0
 	.screensaver_list	db 'Disable the screensaver,Set the screensaver', 0
 	.sound_list			db 'Enable sound at startup,Disable sound at startup,Set Adlib device driver', 0
 	.adlib_list			db 'Standard Adlib card (ports 0x388-0x389),9-voice PC speaker square wave generator (PWM),9-voice PC speaker square wave generator (PWM - max volume)', 0
+	.advanced_list		db 'System stack size', 0
 
 	.imghelp1			db 'Some applications do not support drawing', 0
 	.imghelp2			db 'the image to the BG, so the background', 0
@@ -505,6 +554,9 @@ start:
 	
 	.screensaver_msg	db 'Enter the amount of minutes (max. 60):', 0
 	
+	.stack_msg			db 'Enter stack size (4-64 kB, default = 8):', 0
+	.stack_err_msg		db 'Stack size not in range (4-64 kB)!', 0
+
 	.changedone			db 'Changes have been saved.', 0
 	
 	.help_msg1			db 'Choose an option...', 0

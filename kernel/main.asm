@@ -206,12 +206,12 @@ os_main:
 	dec ax						; Some BIOSes round up, so we have to sacrifice 1 kB :(
 	shl ax, 6					; Convert kB to segments
 
-	cli
-	sub ax, 65536 / 16			; Set the stack to the top of the memory
-	mov ss, ax
-	mov sp, 0FFFEh
-	sti
+	mov bx, 256					; Set up a 4 kB stack - good enough for now
 
+	mov si, first_init_stack_done
+	jmp int_set_stack
+
+first_init_stack_done:
 	mov ax, cs					; Set all segments to match where kernel is loaded
 	mov ds, ax			
 	mov es, ax
@@ -307,6 +307,22 @@ os_main:
 	call run_binary_program
 
 no_load_demotour:
+	int 12h						; Get RAM size
+	dec ax						; Some BIOSes round up, so we have to sacrifice 1 kB :(
+	shl ax, 6					; Convert kB to segments
+
+	mov bx, [57075]				; Set up the proper stack according to the config file
+
+	cmp bx, 256
+	jb second_init_stack_done
+
+	cmp bx, 4096
+	ja second_init_stack_done
+
+	mov si, second_init_stack_done
+	jmp int_set_stack
+
+second_init_stack_done:
 	clr ax
 
 start_desktop:

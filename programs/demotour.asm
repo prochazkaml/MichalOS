@@ -459,7 +459,8 @@ os_demotour:
 	.test_menucolor		db 0F0h
 	.test_dosfont		db 0
 	.test_scrnsave		db 3
-	.test_blank			times 6 db 0
+	.test_stacksize		dw 512	; 8 kB
+	.test_blank			times 4 db 0
 	.test_minute_offset	dw 0
 	
 	.test_data_end:
