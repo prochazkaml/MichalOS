@@ -7,6 +7,8 @@
 start:
 	call .draw_background
 	
+	mov byte [0088h], 30
+
 	mov16 dx, 11, 4
 	call os_move_cursor
 	
@@ -32,6 +34,7 @@ start:
 	
 .loop:
 	call .draw
+	call .runprompt
 
 	lodsb
 	cmp al, 'Q'				; 'Q' typed?
@@ -159,6 +162,7 @@ start:
 .datadecimal:
 	mov byte [.data_mode], 1
 	call .draw
+	call .runprompt
 	mov byte [.data_mode], 0
 	
 	cmp byte [si], 'Q'
@@ -179,6 +183,7 @@ start:
 .datahexadecimal:
 	mov byte [.data_mode], 1
 	call .draw
+	call .runprompt
 	mov byte [.data_mode], 0
 	
 	cmp byte [si], 'Q'
@@ -196,13 +201,27 @@ start:
 	
 	jmp .datahexadecimal
 	
+.statusdraw:
+	mov16 dx, 40, 2
+	call os_move_cursor
+	
+	mov ax, [.segment]
+	call os_print_4hex
+	
+	mov si, .semicolon
+	call os_print_string
+	
+	mov ax, [.offset]
+	call os_print_4hex
+	ret
+
 .draw:
 	call .bardraw
-	
 	call .datadraw
-	
 	call .asciidraw
-	
+	jmp .statusdraw
+
+.runprompt:
 	mov16 dx, 0, 2	; Print the input label
 	call os_move_cursor
 	cmp byte [.data_mode], 0
@@ -221,32 +240,90 @@ start:
 	mov ax, 0920h				; Clear the screen for the next input
 	clr bh
 	mov bl, [57000]
-	mov cx, 60
+	mov cx, 30
 	int 10h
 	
-	mov16 dx, 40, 2
-	call os_move_cursor
-	
-	mov ax, [.segment]
-	call os_print_4hex
-	
-	mov si, .semicolon
-	call os_print_string
-	
-	mov ax, [.offset]
-	call os_print_4hex
+	; Display the prompt
 
 	mov16 dx, 2, 2
 	call os_move_cursor
 	call os_show_cursor		; Get a command from the user
 	mov ax, .input_buffer
-	call os_input_string
+	mov si, .callback
+	clr ch
+	call os_input_string_ex
 	
 	mov si, .input_buffer	; Decode the command
 	call os_string_uppercase
 
 	ret
+
+
+.callback:
+	clr bx
 	
+	cmp ah, 48h				; Up arrow
+	je .cbup
+
+	cmp ah, 50h				; Down arrow
+	je .cbdown
+
+	cmp ah, 4Bh				; Left arrow
+	je .cbleft
+
+	cmp ah, 4Dh				; Right arrow
+	je .cbright
+
+	cmp ah, 49h				; Page Up
+	je .cbpgup
+
+	cmp ah, 51h				; Page Down
+	je .cbpgdown
+
+	cmp ah, 3Fh				; Refresh
+	je .cbrefresh
+
+.cbfinish:
+	test bx, bx
+	jz .cbexit
+
+	add [.offset], bx
+
+.cbrefresh:
+	call os_get_cursor_pos
+	push dx
+	call .draw
+	pop dx
+	call os_move_cursor
+
+.cbexit:
+	ret
+
+.cbup:
+	mov bx, -16
+	jmp .cbfinish
+
+.cbdown:
+	mov bx, 16
+	jmp .cbfinish
+
+.cbleft:
+	mov bx, -1
+	jmp .cbfinish
+
+.cbright:
+	mov bx, 1
+	jmp .cbfinish
+
+.cbpgup:
+	mov bx, -256
+	jmp .cbfinish
+
+.cbpgdown:
+	mov bx, 256
+	jmp .cbfinish
+
+
 .asciidraw:
 	pusha
 	
@@ -261,6 +338,9 @@ start:
 	and si, 0FFF0h			; Mask off the lowest 4 bits
 	
 .asciiloop:
+	mov cx, 1
+	call .adjust_sel_fmt
+
 	mov al, [es:si]
 	inc si
 
@@ -302,6 +382,9 @@ start:
 	and si, 0FFF0h			; Mask off the lowest 4 bits
 
 .dataloop:
+	mov cx, 2
+	call .adjust_sel_fmt
+
 	mov al, [es:si]
 	inc si
 	
@@ -324,8 +407,25 @@ start:
 	
 	popa
 	ret
-	
+
+.adjust_sel_fmt:
+	pusha
+	mov bl, [57000]
+
+	cmp si, [.offset]
+	jne .no_adjust_sel_fmt
+
+	ror bl, 4
+
+.no_adjust_sel_fmt:
+	mov ax, 0920h
+	clr bh
+	int 10h
+	popa
+	ret
+
 .exit:
+	mov byte [0088h], 255
 	call os_clear_screen
 	ret
 
@@ -380,7 +480,7 @@ start:
 ; DAAAAAAATAAAAAAA!
 	
 	.title_msg			db 'MichalOS Memory Editor', 0
-	.footer_msg			db '[h], [Enter] = Command list', 0
+	.footer_msg			db '[h], [Enter] Command list [F5] Refresh [', 18h, ',', 19h, ',', 1Ah, ',', 1Bh, ',PgUp,PgDn] Move selection', 0
 	
 	.input_label		db ' >', 0
 	.data_label			db 'D>', 0
