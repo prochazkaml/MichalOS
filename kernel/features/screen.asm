@@ -1121,6 +1121,36 @@ os_select_list:
 	loop .entry_draw_loop
 	popa
 
+	; Draw arrows indicating that there may be entries outside the visible area
+
+	pusha
+	mov bx, [.skip_num]			; Are we at the top?
+	test bx, bx
+	je .no_draw_top_arrow
+
+	mov dx, [.xpos]
+	add dl, 2
+	call os_move_cursor
+	mov al, 1Eh
+	call os_putchar
+
+.no_draw_top_arrow:
+	movzx cx, byte [.height]
+	add bx, cx
+
+	cmp bx, [.num_of_entries]	; Are we at the bottom?
+	je .no_draw_bottom_arrow
+
+	mov dx, [.xpos]
+	add dh, [.height]
+	add dx, 102h
+	call os_move_cursor
+	mov al, 1Fh
+	call os_putchar
+
+.no_draw_bottom_arrow:
+	popa
+
 .another_key:
 	call os_wait_for_key	; Move / select option
 	cmp al, 'j'
@@ -2064,8 +2094,15 @@ os_option_menu:
 .skip:
 	call os_string_callback_tokenizer
 
-	mov16 dx, 1, 1
 	mov ah, cl
+
+	cmp cx, 20			; Would the list overflow?
+	jle .good
+
+	mov ah, 20			; If so, shrink it to fit on the screen
+
+.good
+	mov16 dx, 1, 1
 	mov bl, [57072]
 	clr di
 	jmp os_select_list.no_pusha
