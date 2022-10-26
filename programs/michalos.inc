@@ -89,6 +89,9 @@ os_putchar				equ 80D8h
 os_list_dialog_tooltip	equ 8093h
 os_print_string_box		equ 80E4h
 os_put_chars			equ 80E7h
+os_select_list			equ 815Ch
+os_cb_list_dialog		equ 815Fh
+os_cb_list_dialog_tooltip	equ 8162h
 
 ; Keyboard handling
 
@@ -123,6 +126,7 @@ os_adlib_mute			equ 811Ah
 os_adlib_unmute			equ 8147h
 os_check_adlib			equ 80EAh
 os_adlib_noteoff		equ 810Bh
+os_speaker_raw_period	equ 8159h
 
 ; String handling
 

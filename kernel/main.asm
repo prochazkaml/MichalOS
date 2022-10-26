@@ -192,6 +192,10 @@ os_call_vectors:
 	jmp os_fast_set_pixel		; 8150h
 	jmp os_print_int			; 8153h
 	jmp os_convert_l2hts		; 8156h
+	jmp os_speaker_raw_period	; 8159h
+	jmp os_select_list			; 815Ch
+	jmp os_cb_list_dialog		; 815Fh
+	jmp os_cb_list_dialog_tooltip	; 8162h
 
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE
