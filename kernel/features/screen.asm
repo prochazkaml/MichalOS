@@ -365,6 +365,7 @@ os_file_selector:
 	mov ax, cx			; Pass the number of files
 	mov bx, .root
 	mov cx, 0051h
+	mov dx, .history
 	mov di, .callback
 	mov si, .print_filename
 	call os_cb_list_dialog_tooltip
@@ -620,6 +621,7 @@ os_file_selector:
 	.freespace		dw 0
 	.extension_list	dw 0
 
+	.history		times 5 db 0
 
 ; ------------------------------------------------------------------
 ; os_list_dialog_tooltip -- Show a dialog with a list of options and a tooltip.
@@ -633,6 +635,7 @@ os_file_selector:
 os_list_dialog_tooltip:
 	push di
 	push si
+	push dx
 
 	mov di, si
 	push cx
@@ -640,8 +643,10 @@ os_list_dialog_tooltip:
 	mov ax, cx
 	pop cx
 
+	clr dx
 	call os_cb_list_dialog_tooltip
 
+	pop dx
 	pop si
 	pop di
 	ret
@@ -651,7 +656,7 @@ os_list_dialog_tooltip:
 ; That means, when the user changes the selection, the application will be called back
 ; to change the tooltip's contents.
 ; IN: AX = number of entries,
-;     BX = first help string, CX = second help string
+;     BX = first help string, CX = second help string, DX = history data (ptr to 5 bytes)
 ;     DI = key/display callback, SI = entry callback (see os_cb_list_dialog)
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
@@ -706,13 +711,14 @@ os_list_dialog:
 ; os_cb_list_dialog -- Show a dialog with a list of options
 ; IN: SI = entry callback (accepts CX as entry ID, prints out result),
 ;     DI = key/display callback (accepts AX as entry ID, CX as keypress) AX = number of entries,
-;     BX = first help string, CX = second help string
+;     BX = first help string, CX = second help string, DX = history data (ptr to 5 bytes)
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_cb_list_dialog:
 	pusha
 
 .no_pusha:
+	push dx
 	mov [.displaycb], di
 	mov [.parsercb], si
 	mov [.num_of_entries], ax
@@ -749,7 +755,7 @@ os_cb_list_dialog:
 	mov16 dx, 3, 5
 	mov cx, [.num_of_entries]
 	mov si, .callbackroutine
-	clr di
+	pop di
 	jmp os_select_list.no_pusha
 
 .callbackroutine:
@@ -818,9 +824,10 @@ os_select_list:
 	mov [.endypos], ah
 
 	mov word [.skip_num], 0
-	mov byte [.cursor], dh
 
 	; If history is enabled, check if it matches the data
+
+	mov [.history], di
 
 	test di, di
 	jz .no_history
@@ -831,12 +838,9 @@ os_select_list:
 	mov ax, [di + 2]
 	mov [.skip_num], ax
 
-	mov al, [di + 4]
-	mov [.cursor], al
+	mov dh, [di + 4]
 
 .no_history:
-	mov dh, [.cursor]
-
 	mov [.num_of_entries], cx
 
 .redraw:
@@ -1096,12 +1100,27 @@ os_select_list:
 
 .dialog_end:
 	call os_show_cursor
-	mov [.cursor], dh
+
+	mov di, [.history]
+	test di, di
+	jz .no_save_history
+
+	; Save the history data
+
+	mov si, .num_of_entries
+	mov cx, 4
+	rep movsb
+
+	mov al, dh
+	stosb
+
+.no_save_history:
 	ret
 
 	.num_of_entries	dw 0
 	.skip_num		dw 0
-	.cursor			db 0	; Only for keeping the history
+
+	.history		dw 0
 
 	.callback		dw 0
 	.xpos			db 0
