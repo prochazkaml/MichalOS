@@ -4,16 +4,14 @@
 
 ; ------------------------------------------------------------------
 ; os_speaker_tone -- Generate PC speaker tone (call os_speaker_off to turn off)
-; IN: AX = note frequency
+; IN: AX = note frequency (in Hz)
 ; OUT: None, registers preserved
 
 os_speaker_tone:
 	pusha
 	cmp byte [0083h], 0
 	je .exit
-	popa
-	
-	pusha
+
 	test ax, ax
 	jz .exit
 	
@@ -25,6 +23,39 @@ os_speaker_tone:
 	mov dx, 12h			; Set up frequency
 	mov ax, 34DCh
 	div cx
+
+	mov [speaker_period], ax
+
+	out 42h, al
+	mov al, ah
+	out 42h, al
+
+	in al, 61h			; Switch PC speaker on
+	or al, 03h
+	out 61h, al
+
+.exit:
+	popa
+	ret
+
+	speaker_period	dw 1
+
+; ------------------------------------------------------------------
+; os_speaker_raw_period -- Generate PC speaker tone (call os_speaker_off to turn off)
+; IN: AX = note period (= 105000000 / 88 * freq)
+; OUT: None, registers preserved
+
+os_speaker_raw_period:
+	pusha
+	cmp byte [0083h], 0
+	je .exit
+
+	mov [speaker_period], ax
+
+	push ax
+	mov al, 10110110b
+	out 43h, al
+	pop ax
 	out 42h, al
 	mov al, ah
 	out 42h, al
@@ -64,6 +95,12 @@ os_speaker_off:
 	and al, 0FCh
 	out 61h, al
 
+	cmp byte [0083h], 0
+	je .exit
+
+	mov word [speaker_period], 1
+
+.exit:
 	popa
 	ret
 

@@ -173,6 +173,15 @@ int_special_keys:
 		
 .enable_sound:
 	mov byte [0083h], 1
+
+	mov ax, [speaker_period]
+
+	cmp ax, 1
+	je .no_play_note
+	
+	call os_speaker_raw_period
+
+.no_play_note:
 	jmp .display_speaker
 	
 .disable_sound:
