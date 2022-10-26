@@ -357,6 +357,8 @@ os_file_selector:
 	; Let the user select a file
 
 	mov ax, cx			; Pass the number of files
+	test cx, cx
+	jz .empty_list
 	mov bx, .root
 	mov cx, 0051h
 	mov dx, .history
@@ -372,6 +374,19 @@ os_file_selector:
 	mov ax, .filename
 	clc
 	ret
+
+.empty_list:
+	mov ax, .nofilesmsg
+	clr bx
+	clr cx
+	clr dx
+	call os_dialog_box
+
+	popa
+	stc
+	ret
+
+	.nofilesmsg		db "There are no files available.", 0
 
 .esc_pressed:				; Set carry flag if Escape was pressed
 	popa

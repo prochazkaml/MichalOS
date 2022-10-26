@@ -219,7 +219,7 @@ os_main:
 	mov [SecsPerTrack], cx
 
 	mov cx, 0x8000
-	mov di, 0
+	clr di
 	clr al
 	rep stosb
 
@@ -228,9 +228,6 @@ os_main:
 	mov byte [0088h], 255
 	mov word [0089h], 76
 ;	mov byte [00E0h], 0
-
-	clr ax
-	call os_serial_port_enable
 
 	; Load the files
 	
