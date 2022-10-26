@@ -275,18 +275,15 @@ os_file_selector:
 	pusha
 	mov di, 0051h + 9
 	mov si, bx
-	mov bl, [si]
+	movzx cx, byte [si]
 	inc si
-	clr cl
 	
 .filter_loop:
 	call os_string_copy
 	mov byte [di + 3], ' '
 	add di, 4
 	add si, 4
-	inc cl
-	cmp cl, bl
-	jne .filter_loop
+	loop .filter_loop
 	
 	mov byte [di], 0
 	popa
@@ -322,20 +319,19 @@ os_file_selector:
 
 	cmp byte [0087h], 1	; Check if we are supposed to filter the filenames
 	jne .no_extension_check
-	
+
 	mov bx, [.extension_list]
-	movzx cx, byte [bx]
+	movzx cx, byte [bx]	; Cycle through all filters
+
+	mov di, bx
+	sub di, 3			; 1 - 4 = -3 (skip header, prepare for addition)
+
+	add si, 8			; Extension
 
 .extension_loop:
+	add di, 4
+
 	pusha
-	add si, 8
-	
-	dec cx
-	mov di, cx
-	shl di, 2	; Each entry is 4 bytes long
-	inc di		; The entry list starts with a 1-byte header
-	add di, [.extension_list]
-	
 	mov cx, 3
 	rep cmpsb
 	popa
@@ -353,10 +349,8 @@ os_file_selector:
 	mov ax, si			; Store the filename pointer into the buffer
 	stosw
 
-	mov byte [si+11], 0	; Zero-terminate the string
-
 .skip:
-	add si, byte 32		; Skip to the next file
+	add si, 32		; Skip to the next file
 	jmp .index_loop
 
 .done:
@@ -391,16 +385,19 @@ os_file_selector:
 	call os_print_string
 	ret
 
-.get_filename:
+.get_ptr_from_index:
 	dec ax				; Result from os_list_dialog starts from 1, but
 						; for our file list offset we want to start from 0
 	
+	shl ax, 1
+	add ax, 64512
 	mov si, ax			; Get the pointer to the string in the index
-	shl si, 1
-	add si, 64512
 
-	lodsw
-	mov si, ax			; Our resulting pointer
+	mov si, [si]		; Our resulting pointer
+	ret
+
+.get_filename:
+	call .get_ptr_from_index
 	clr cx
 	mov di, .filename
 	
@@ -413,35 +410,33 @@ os_file_selector:
 .ignore_space:
 	inc cx
 	cmp cx, 8
-	je .add_dot
+	jne .no_add_dot
+
+	mov al, '.'
+	stosb
+
+.no_add_dot:
 	cmp cx, 11
-	je .done_copy
-	jmp .loopy
+	jne .loopy
 
-.add_dot:
-	mov byte [di], '.'
-	inc di
-	jmp .loopy
-
-.done_copy:
-	mov byte [di], 0
-
+	mov al, 0
+	stosb
 	ret
-	
+
 .callback:
 	; Draw the box on the right
 	mov bl, [57001]		; Color from RAM
 	mov16 dx, 41, 2		; Start X/Y position
 	mov si, 37			; Width
 	mov di, 23			; Finish Y position
-	call os_draw_block	; Draw option selector window
+	call os_draw_block
 
 	; Draw the icon's background
 	mov bl, 0F0h
 	mov16 dx, 50, 3
 	mov si, 19			; Width
 	mov di, 13			; Finish Y position
-	call os_draw_block	; Draw option selector window	
+	call os_draw_block
 
 	; Draw the icon
 	
@@ -457,20 +452,13 @@ os_file_selector:
 	call os_move_cursor
 
 	push ax
-	call .get_filename
-	
-	mov si, .filename
-	call os_print_string
+	mov cx, ax
+	call .print_filename
+	pop ax
 	
 	; Find the correct directory entry for this file
 
-	pop ax
-
-	dec ax
-	mov si, ax
-	shl si, 1
-	add si, 64512
-	mov si, [si]			; Get the pointer to the entry in the index list
+	call .get_ptr_from_index
 
 	push si
 	
@@ -478,27 +466,26 @@ os_file_selector:
 	
 	mov eax, [si + 28]
 	call os_32int_to_string
-	
-	mov si, ax
-	mov di, .filename
-	call os_string_copy
-	
-	mov ax, .filename
-	mov bx, .byte_msg
-	call os_string_add
-	
+	push ax
 	call os_string_length
 
-	mov dl, 77
+	mov dl, 77 - 6
 	sub dl, al
 	call os_move_cursor
-	
-	mov si, .filename
+
+	pop si
+	call os_print_string
+
+	mov si, .byte_msg
 	call os_print_string
 	
 	; Display the file write date/time
 	
-	mov byte [.filename], 0
+	mov16 dx, 42, 16
+	call os_move_cursor
+
+	mov si, .time_msg
+	call os_print_string
 	
 	pop si
 	mov bx, [si + 14]
@@ -508,48 +495,41 @@ os_file_selector:
 	mov ax, cx		; Days
 	and ax, 11111b
 	
-	mov dx, .dateseparator
-	call .cb_add_num
+	mov dl, '/'
+	call .cb_print_num
 	
 	mov ax, cx		; Months
 	shr ax, 5
 	and ax, 1111b
 	
-	call .cb_add_num
+	call .cb_print_num
 	
 	mov ax, cx		; Years
 	shr ax, 9
 	add ax, 1980
 	
-	mov dx, .whiteseparator
-	call .cb_add_num
-	
+	mov dl, ' '
+	call .cb_print_num
 	pop cx
 	
 	mov ax, cx		; Hours
 	shr ax, 11
 
-	mov dx, .timeseparator
-	call .cb_add_num
+	mov dl, ':'
+	call .cb_print_num
 	
 	mov ax, cx		; Minutes
 	shr ax, 5
 	and ax, 111111b
 	
-	call .cb_add_num
+	call .cb_print_num
 
 	mov ax, cx		; Seconds
 	and ax, 11111b
 	shl ax, 1
 
-	mov dx, .help_msg2
-	call .cb_add_num
-	
-	mov16 dx, 42, 16
-	call os_move_cursor
-
-	mov si, .time_msg
-	call os_print_string
+	mov dl, ' '
+	call .cb_print_num
 	
 	; Display volume information
 	
@@ -582,39 +562,30 @@ os_file_selector:
 	call os_print_string
 	ret
 	
-.cb_add_num:
+.cb_print_num:
 	cmp ax, 10
 	jge .no_zero
 	
 	push ax
-	mov bx, .zerofill
-	mov ax, .filename
-	call os_string_add
+	mov al, '0'
+	call os_putchar
 	pop ax
-	
-.no_zero:
-	call os_int_to_string
-	mov bx, ax
-	mov ax, .filename
-	call os_string_add
-	
-	mov bx, dx
-	call os_string_add
 
+.no_zero:
+	call os_print_int
+
+	mov al, dl
+	call os_putchar
 	ret
 	
 	.help_msg2		db 0
 	.filter_msg		db 'Filters: ', 0
 	.byte_msg		db ' bytes', 0
 	.free_msg		db ' kB free', 0
-	.timeseparator	db ':', 0
-	.dateseparator	db '/', 0
-	.whiteseparator	db ' ', 0
-	.zerofill		db '0', 0
 	.root			db 'A:/', 0
 
-	.time_msg		db 'Written to on:  '
-	.filename		times 20 db 0
+	.time_msg		db 'Written to on:  ', 0
+	.filename		times 13 db 0	; 8 + 1 + 3 + term
 	
 	.vol_msg		db 'Volume '
 	.volname		times 12 db 0
