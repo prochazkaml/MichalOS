@@ -776,7 +776,7 @@ os_cb_list_dialog:
 	mov si, .str_pos_end
 	call os_print_string
 	
-.cbexit
+.cbexit:
 	ret
 
 	.num_of_entries	dw 0
@@ -1328,7 +1328,7 @@ int_input_dialog:
 
 	push .retptr		; Don't worry too much about this
 	pusha
-	jmp int_input_string
+	jmp os_input_string_ex
 
 .retptr:
 	mov dl, [.og_value]
@@ -1569,7 +1569,8 @@ os_input_string:
 
 .no_pusha:
 	clr ch
-	jmp int_input_string
+	clr si
+	jmp os_input_string_ex.no_pusha
 
 ; ------------------------------------------------------------------
 ; os_input_password -- Take password from keyboard entry
@@ -1582,14 +1583,20 @@ os_input_password:
 
 .no_pusha:
 	mov ch, 1
+	clr si
+	jmp os_input_string_ex.no_pusha
 
 ; ------------------------------------------------------------------
-; int_input_string -- Take string from keyboard entry
-; IN: AX = location of string, CH = 0 if normal input, 1 if password input
+; os_input_string_ex -- Take string from keyboard entry
+; IN: AX = location of string, CH = 0 if normal input, 1 if password input,
+;     SI = callback on keys where AL = 0 (input: AX = keypress)
 ; (Location will contain up to [0088h] characters, zero-terminated)
 ; OUT: None, registers preserved
 
-int_input_string:
+os_input_string_ex:
+	pusha
+
+.no_pusha:
 	call os_show_cursor
 	
 	mov di, ax			; DI is where we'll store input (buffer)
@@ -1604,8 +1611,8 @@ int_input_string:
 	cmp al, 8			; Backspace pressed?
 	je .backspace		; If so, skip following checks
 
-	cmp al, ' '			; In ASCII range (32 - 127)?
-	jl .more			; Ignore most non-printable characters
+	cmp al, ' '			; If an incompatible key pressed, call the callback
+	jl .callback
 
 	cmp cl, [0088h]		; Make sure we don't exhaust buffer
 	je .more
@@ -1623,6 +1630,15 @@ int_input_string:
 	inc cl				; Characters processed += 1
 	
 	jmp .more			; Still room for more
+
+.callback:
+	test si, si
+	jz .more
+
+	pusha
+	call si
+	popa
+	jmp .more
 
 .backspace:
 	test cl, cl			; Backspace at start of string?

@@ -92,6 +92,7 @@ os_put_chars			equ 80E7h
 os_select_list			equ 815Ch
 os_cb_list_dialog		equ 815Fh
 os_cb_list_dialog_tooltip	equ 8162h
+os_input_string_ex		equ 8165h
 
 ; Keyboard handling
 

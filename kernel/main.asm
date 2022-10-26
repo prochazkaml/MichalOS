@@ -196,6 +196,7 @@ os_call_vectors:
 	jmp os_select_list			; 815Ch
 	jmp os_cb_list_dialog		; 815Fh
 	jmp os_cb_list_dialog_tooltip	; 8162h
+	jmp os_input_string_ex		; 8165h
 
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE
