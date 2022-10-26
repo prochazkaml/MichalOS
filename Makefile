@@ -58,7 +58,7 @@ build/boot.bin: boot/boot.asm | build
 	nasm -O2 -w+all -f bin -o $@ -l build/boot.lst boot/boot.asm
 
 # Compressed kernel asset target
-build/%.zx7: kernel/compressed/%.asm | build
+build/%.zx7: kernel/compressed/%.asm .git/refs/heads/master | build
 	nasm $< -o $@.raw
 	misc/zx7/raw_zx7 $@.raw $@
 
