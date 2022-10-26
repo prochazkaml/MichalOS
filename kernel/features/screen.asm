@@ -2070,6 +2070,11 @@ os_option_menu:
 	clr di
 	jmp os_select_list.no_pusha
 
+; ------------------------------------------------------------------
+; os_print_clock -- Prints the time/date/speaker status in the
+; top right corner of the screen
+; IN/OUT: None, registers preserved
+
 os_print_clock:
 	pusha
 	call os_get_cursor_pos
