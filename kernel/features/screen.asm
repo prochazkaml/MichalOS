@@ -365,11 +365,9 @@ os_file_selector:
 	mov ax, cx			; Pass the number of files
 	mov bx, .root
 	mov cx, 0051h
-	mov si, .callback
-
-	mov byte [.file_selector_calling], 1
-	call os_list_dialog_tooltip
-	mov byte [.file_selector_calling], 0
+	mov di, .callback
+	mov si, .print_filename
+	call os_cb_list_dialog_tooltip
 
 	jc .esc_pressed
 
@@ -383,6 +381,13 @@ os_file_selector:
 .esc_pressed:				; Set carry flag if Escape was pressed
 	popa
 	stc
+	ret
+
+.print_filename:
+	mov ax, cx
+	call .get_filename
+	mov si, .filename
+	call os_print_string
 	ret
 
 .get_filename:
@@ -615,11 +620,6 @@ os_file_selector:
 	.freespace		dw 0
 	.extension_list	dw 0
 
-	.file_selector_calling			db 0
-	.file_selector_cursorpos		db 0
-	.file_selector_skipnum			db 0
-	.file_selector_numofentries		db 0
-
 
 ; ------------------------------------------------------------------
 ; os_list_dialog_tooltip -- Show a dialog with a list of options and a tooltip.
@@ -627,21 +627,50 @@ os_file_selector:
 ; to change the tooltip's contents.
 ; IN: AX = comma-separated list of strings to show (zero-terminated),
 ;     BX = first help string, CX = second help string
-;     SI = callback pointer
+;     SI = key/display callback (see os_cb_list_dialog)
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_list_dialog_tooltip:
+	push di
+	push si
+
+	mov di, si
+	push cx
+	call os_string_callback_tokenizer
+	mov ax, cx
+	pop cx
+
+	call os_cb_list_dialog_tooltip
+
+	pop si
+	pop di
+	ret
+
+; ------------------------------------------------------------------
+; os_cb_list_dialog_tooltip -- Show a dialog with a list of options and a tooltip.
+; That means, when the user changes the selection, the application will be called back
+; to change the tooltip's contents.
+; IN: AX = number of entries,
+;     BX = first help string, CX = second help string
+;     DI = key/display callback, SI = entry callback (see os_cb_list_dialog)
+; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
+
+os_cb_list_dialog_tooltip:
+	push di
+
 	mov word [0089h], 37
 	
-	mov [.callbackaddr], si
-	
-	mov word [os_list_dialog.callback], .callback
-	call os_list_dialog
-	mov word [os_list_dialog.callback], 0
+	mov [.callbackaddr], di
+
+	mov di, .callback
+	call os_cb_list_dialog
+
 	mov word [0089h], 76
+	pop di
 	ret
 	
 .callback:
+	pusha
 	; Draw the box on the right
 	mov bl, [57001]		; Color from RAM
 	mov16 dx, 41, 2		; Start X/Y position
@@ -651,6 +680,7 @@ os_list_dialog_tooltip:
 
 	mov16 dx, 42, 3
 	call os_move_cursor
+	popa
 
 	jmp [.callbackaddr]
 	
@@ -664,63 +694,33 @@ os_list_dialog_tooltip:
 
 os_list_dialog:
 	pusha
+	push cx
+	call os_string_callback_tokenizer
+	mov ax, cx
+	pop cx
 
-	push ax				; Store string list for now
+	clr di
+	jmp os_cb_list_dialog.no_pusha
+
+; ------------------------------------------------------------------
+; os_cb_list_dialog -- Show a dialog with a list of options
+; IN: SI = entry callback (accepts CX as entry ID, prints out result),
+;     DI = key/display callback (accepts AX as entry ID, CX as keypress) AX = number of entries,
+;     BX = first help string, CX = second help string
+; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
+
+os_cb_list_dialog:
+	pusha
+
+.no_pusha:
+	mov [.displaycb], di
+	mov [.parsercb], si
+	mov [.num_of_entries], ax
 
 	push cx				; And help strings
 	push bx
 
 	call os_hide_cursor
-
-	; Are we calling from the file selector?
-
-	cmp byte [os_file_selector.file_selector_calling], 1
-	jne .normal_count
-
-	test ax, ax
-	jz .empty_list
-
-	mov cx, ax
-
-	jmp .done_count
-
-.normal_count:
-	mov si, ax
-	cmp byte [si], 0
-	jne .count_entries
-
-.empty_list:
-	add sp, 6
-
-	mov ax, .nofilesmsg
-	clr bx
-	clr cx
-	clr dx
-	call os_dialog_box
-
-	popa
-	stc
-	ret
-
-	.nofilesmsg	db "There are no items to select.", 0
-	
-.count_entries:	
-	clr cl				; Count the number of entries in the list
-	
-.count_inc:
-	inc cl
-
-.count_loop:
-	lodsb
-
-	cmp al, ','
-	je .count_inc
-
-	test al, al
-	jnz .count_loop
-
-.done_count:
-	mov byte [.num_of_entries], cl
 
 	; Draw the window
 
@@ -742,292 +742,61 @@ os_list_dialog:
 	pop si				; ...and the second
 	call os_print_string
 
-
-	pop si				; SI = location of option list string (pushed earlier)
-	mov word [.list_string], si
-
-
-	; Now that we've drawn the list, highlight the currently selected
-	; entry and let the user move up and down using the cursor keys
-
-	mov byte [.skip_num], 0		; Not skipping any lines at first showing
-
-	mov16 dx, 25, 6			; Set up starting position for selector
-
-	cmp byte [os_file_selector.file_selector_calling], 1
-	jne .no_load_position
-	
-	cmp cl, [os_file_selector.file_selector_numofentries]
-	jne .no_load_position
-	
-	mov dh, [os_file_selector.file_selector_cursorpos]
-	mov al, [os_file_selector.file_selector_skipnum]
-	mov [.skip_num], al
-	
-.no_load_position:
-	call os_move_cursor
-
-.more_select:
-	pusha
+	mov al, [0089h]
+	sub al, 6
+	mov ah, 15
 	mov bl, 11110000b		; Black on white for option list box
 	mov16 dx, 3, 5
-	mov si, [0089h]
-	sub si, 2
-	mov di, 22
-	call os_draw_block
-	popa
+	mov cx, [.num_of_entries]
+	mov si, .callbackroutine
+	clr di
+	jmp os_select_list.no_pusha
+
+.callbackroutine:
+	jc .cbdisplay
+
+	jmp word [.parsercb]
+
+.cbdisplay:
+	test ax, ax
+	jnz .cbexit
 
 	pusha
-	mov dl, 4
-	mov bl, 00001111b		; White on black for the selection
-	mov si, [0089h]
-	sub si, 4
-	movzx di, dh
-	inc di
-	call os_draw_block
+	xchg ax, cx
+	call word [.displaycb]
 	popa
 
-	mov word si, [.list_string]
- 	call .draw_list
-
-.another_key:
-	call os_wait_for_key		; Move / select option
-	cmp al, 'j'
-	je .go_down
-	cmp al, 'k'
-	je .go_up
-	cmp al, 'l'
-	je .option_selected
-	cmp al, 'h'
-	je .esc_pressed
-
-	cmp ah, 48h			; Up pressed?
-	je .go_up
-	cmp ah, 50h			; Down pressed?
-	je .go_down
-	cmp al, 13			; Enter pressed?
-	je .option_selected
-	cmp al, 27			; Esc pressed?
-	je .esc_pressed
-	cmp al, 9			; Tab pressed?
-	je .tab_pressed
-	jmp .another_key	; If not, wait for another key
-
-.tab_pressed:
-	mov dh, 6
-	mov byte [.skip_num], 0
-	jmp .more_select
-	
-.go_up:
-	cmp dh, 6			; Already at top?
-	jg .no_hit_top
-
-	cmp byte [.skip_num], 0	; Any lines to scroll up?
-	jne .no_skip_to_bottom			; If not, jump to the bottom
-
-.skip_to_bottom:
-	mov al, [.num_of_entries]
-	cmp al, 15
-	jbe .basic_skip
-	
-.no_basic_skip:
-	mov dh, 20
-	sub al, 15
-	mov [.skip_num], al
-	jmp .more_select
-	
-.basic_skip:
-	mov dh, al
-	add dh, 5
-	jmp .more_select
-	
-.no_skip_to_bottom:
-	dec byte [.skip_num]		; If so, decrement lines to skip
-	inc dh
-
-.no_hit_top:
-	dec dh				; Row to select (increasing down)
-	jmp .more_select
-
-.go_down:
-	clr cx				; Check if there are more entries
-	mov byte cl, dh
-
-	sub cl, 5
-	add cl, [.skip_num]
-
-	mov byte al, [.num_of_entries]
-	cmp cl, al
-	jne .no_hit_list_bottom
-
-	mov byte [.skip_num], 0 ; Reset the cursor back up
-	mov dh, 6 - 1
-
-.no_hit_list_bottom:
-	cmp dh, 20				; Already at bottom of list?
-	jne .no_hit_bottom
-
-	inc byte [.skip_num]		; If so, increment lines to skip
-	dec dh
-
-.no_hit_bottom:
-	inc dh
-	jmp .more_select
-
-.option_selected:
-	call .dialog_end
-	
-	sub dh, 6 - 1	; Options start from 1
-	add dh, [.skip_num]	; Add any lines skipped from scrolling
-	shr dx, 8
-
-	mov bx, sp
-	mov [ss:bx + 14], dx
-
-	popa
-	clc				; Clear carry as Esc wasn't pressed
-	ret
-
-.esc_pressed:
-	call .dialog_end
-	popa
-	stc				; Set carry for Esc
-	ret
-
-.dialog_end:
-	call os_show_cursor
-
-	cmp byte [os_file_selector.file_selector_calling], 1
-	jne .no_store_position_on_exit
-	
-	mov [os_file_selector.file_selector_cursorpos], dh
-	mov al, [.skip_num]
-	mov [os_file_selector.file_selector_skipnum], al
-	mov al, [.num_of_entries]
-	mov [os_file_selector.file_selector_numofentries], al
-	
-.no_store_position_on_exit:
-	ret
-
-.draw_list:
-	pusha
-
-	mov16 dx, 5, 6		; Get into position for option list text
-	call os_move_cursor
-
-	movzx cx, byte [.skip_num]	; Skip lines scrolled off the top of the dialog
-
-	cmp byte [os_file_selector.file_selector_calling], 1
-	je .file_draw_list
-
-.skip_loop:
-	test cx, cx
-	jz .skip_loop_finished
-
-.more_lodsb:
-	lodsb
-	cmp al, ','
-	jne .more_lodsb
-	dec cx
-	jmp .skip_loop
-
-.skip_loop_finished:
-	clr bx				; Counter for total number of options
-
-.more:
-	lodsb				; Get next character in name, increment pointer
-	
-	test al, al			; End of string?
-	jz .done_list
-
-	cmp al, ','			; Next option? (String is comma-separated)
-	je .newline
-
-	call os_putchar
-	jmp .more
-
-.newline:
-	mov dl, 5			; Go back to starting X position
-	inc dh				; But jump down a line
-	call os_move_cursor
-
-	inc bx				; Update the number-of-options counter
-	cmp bx, 15			; Limit to one screen of options
-	jl .more
-
-.done_list:
-	popa
-
-	pusha
-	push dx
 	mov16 dx, 5, 22
 	call os_move_cursor
-	pop dx
 
 	mov al, '('
 	call os_putchar
 
-	call .get_selected_id
+	mov ax, cx
 	call os_print_int
 	
 	mov al, '/'
 	call os_putchar
 	
-	movzx ax, byte [.num_of_entries]
+	mov ax, [.num_of_entries]
 	call os_print_int
 	
 	mov si, .str_pos_end
 	call os_print_string
 	
-	call .get_selected_id
-	call [.callback] ; Address 0 always contains RET, so that's fine
-	
-	popa
+.cbexit
 	ret
 
-.get_selected_id:
-	mov al, [.skip_num]
-	add al, dh
-	sub al, 5
-	clr ah
-	ret
-
-.file_draw_list:
-	clr bx
-
-.f_more:
-	push cx
-	mov ax, cx
-	inc ax
-	call os_file_selector.get_filename
-	mov si, os_file_selector.filename
-	call os_print_string
-	pop cx
-
-	mov dl, 5			; Go back to starting X position
-	inc dh				; But jump down a line
-	call os_move_cursor
-
-	inc cx
-	cmp cl, [.num_of_entries]
-	je .done_list
-
-	inc bx				; Update the number-of-options counter
-	cmp bx, 15			; Limit to one screen of options
-	jl .f_more
-	jmp .done_list
-
-	.num_of_entries	db 0
-	.skip_num		db 0
-	.list_string	dw 0
+	.num_of_entries	dw 0
+	.parsercb		dw 0
+	.displaycb		dw 0
 	.str_pos_end	db ')  ', 0
-	.callback		dw 0
-	
+
 ; ------------------------------------------------------------------
 ; os_select_list -- Draws a list of entries (defined by a callback) to select from.
 ; IN: AX = width/height, BL = color, CX = number of entries, DX = X/Y pos,
 ;     SI = callback (if C clear = accepts an entry ID in CX, returns a string in SI,
-;     if C set = accepts key input in AX & entry ID in CX; not required to preserve regs),
+;     if C set = accepts key input in AX, entry ID in CX; not required to preserve regs),
 ;     DI = pointer to a history struct (word .num_of_entries, word .skip_num, byte .cursor) or 0 if none
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
@@ -1151,6 +920,12 @@ os_select_list:
 .no_draw_bottom_arrow:
 	popa
 
+	pusha
+	clr ax
+	stc
+	call .call_callback
+	popa
+
 .another_key:
 	call os_wait_for_key	; Move / select option
 	cmp al, 'j'
@@ -1195,7 +970,7 @@ os_select_list:
 	add cx, [.skip_num]
 	popf
 
-	call [.callback]
+	call word [.callback]
 	ret
 
 .go_up:
@@ -1887,12 +1662,9 @@ os_color_selector:
 	mov bx, .colormsg0
 	mov cx, .colormsg1
 
-	mov word [0089h], 37
-	mov word [os_list_dialog.callback], .callback
-	call os_list_dialog
+	mov si, .callback
+	call os_list_dialog_tooltip
 	pushf
-	mov word [os_list_dialog.callback], 0
-	mov word [0089h], 76
 	
 	dec al						; Output from os_list_dialog starts with 1, so decrement it
 	mov bx, sp
@@ -2141,7 +1913,7 @@ os_option_menu:
 
 	mov ah, 20			; If so, shrink it to fit on the screen
 
-.good
+.good:
 	mov16 dx, 1, 1
 	mov bl, [57072]
 	clr di
