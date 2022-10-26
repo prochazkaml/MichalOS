@@ -1170,6 +1170,10 @@ os_select_list:
 	je .home_pressed
 	cmp ah, 4Fh				; End pressed?
 	je .end_pressed
+	cmp ah, 49h				; PgUp pressed?
+	je .pgup_pressed
+	cmp ah, 51h				; PgDn pressed?
+	je .pgdn_pressed
 	cmp al, 13				; Enter pressed?
 	je .option_selected
 	cmp al, 27				; Esc pressed?
@@ -1195,18 +1199,52 @@ os_select_list:
 	ret
 
 .go_up:
-	dec dh					; Move the cursor up
-	cmp dh, [.ypos]			; Have we reached the top?
-	jg .redraw
+	call .move_up
+	jmp .redraw
 
-	cmp word [.skip_num], 0	; Are we at the top of the list?
-	je .end_pressed
+.go_down:
+	call .move_down
+	jmp .redraw
 
-	dec word [.skip_num]	; If not, then just move the selection window up
-	inc dh
+.home_pressed:
+	call .jump_up
 	jmp .redraw
 
 .end_pressed:
+	call .jump_down
+	jmp .redraw
+
+.pgup_pressed:
+	mov si, .move_up
+	jmp .pgxx_start
+
+.pgdn_pressed:
+	mov si, .move_down
+
+.pgxx_start:
+	mov cx, 16
+
+.pgxx_loop:
+	push cx
+	call si
+	pop cx
+	loop .pgxx_loop
+
+	jmp .redraw
+
+.move_up:
+	dec dh					; Move the cursor up
+	cmp dh, [.ypos]			; Have we reached the top?
+	jg .sub_exit
+
+	cmp word [.skip_num], 0	; Are we at the top of the list?
+	je .jump_down
+
+	dec word [.skip_num]	; If not, then just move the selection window up
+	inc dh
+	ret
+
+.jump_down:
 	mov ax, [.num_of_entries]
 	movzx cx, byte [.height]
 	cmp ax, cx				; Is the dialog smaller than its allowed number of entries?
@@ -1214,7 +1252,7 @@ os_select_list:
 
 	add al, [.ypos]			; Set the cursor position to the last visible value
 	mov dh, al
-	jmp .redraw
+	ret
 
 .transpose_skip_num:
 	sub ax, cx
@@ -1223,29 +1261,31 @@ os_select_list:
 	mov dh, [.height]		; Scroll the list all the way down
 	add dh, [.ypos]
 
-	jmp .redraw
+	ret
 
-.go_down:
+.move_down:
 	inc dh					; Move the cursor down
 	cmp dh, [.endypos]		; Have we reached the bottom?
-	jl .redraw
+	jl .sub_exit
 
 	mov ax, [.skip_num]		; Check if the list is scrolled all the way down
 	movzx cx, byte [.height]
 	add ax, cx
 
 	cmp ax, [.num_of_entries]
-	jge .home_pressed
+	jge .jump_up
 
 	inc word [.skip_num]	; If not, then scroll the list down
 	dec dh
-	jmp .redraw
+	ret
 
-.home_pressed:
+.jump_up:
 	mov word [.skip_num], 0
 	mov dh, [.ypos]
 	inc dh
-	jmp .redraw
+
+.sub_exit:
+	ret
 
 .option_selected:
 	call .dialog_end
