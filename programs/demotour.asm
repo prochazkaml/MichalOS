@@ -401,8 +401,8 @@ os_demotour:
 	.t3output1			db 'Greetings, ', 0
 	.t3output2			db '!', 0
 
-	.t4l0				db 'This is a list dialog. Choose an option with the arrow keys', 0
-	.t4l1				db 'and use the Enter key to select it. The Tab key returns to the top.', 0
+	.t4l0				db 'This is a list dialog. Choose an option with the arrow keys and press', 0
+	.t4l1				db 'Enter to select it. You may also navigate with Home, End, PgUp and PgDn.', 0
 	.t4list				db "1. Choose me!,2. No - choose me!,3. It doesn't matter...,4. I'm also an option!", 0
 	
 	.t5l0				db 'We will now have to go through some', 0
