@@ -254,7 +254,7 @@ os_main:
 	mov ax, font_name
 	mov cx, SYSTEM_FONT
 	call os_load_file
-	
+
 	pop es
 	
 	cli
@@ -421,6 +421,8 @@ finish:
 	call os_stop_adlib		; Reset everything (in case the app crashed or something)
 	call os_return_app_timer
 	call os_speaker_off
+
+	sti
 
 	pusha
 	mov ax, cs
