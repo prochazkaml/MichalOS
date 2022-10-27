@@ -258,12 +258,6 @@ start:
 
 	.err_file_exists		db 'File with this name already exists!', 0
 
-	.failure0msg			db 'Filename is too long!', 0
-	.failure1msg			db 'Filename is empty!', 0
-	.failure2msg			db 'Filename has no extension!', 0
-	.failure3msg			db 'Filename has no basename!', 0
-	.failure4msg			db 'Extension is too short!', 0
-
 	.dk_error				db 'Disk error!', 0
 	
 	.load_segment			dw 0

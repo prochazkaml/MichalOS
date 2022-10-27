@@ -32,8 +32,8 @@
 ;   - 0500h - 05FFh = AdLib register buffer
 ;   - 0600h - 15FFh = Desktop background (BG.ASC)
 ;   - 1600h - 25FFh = System font (FONT.SYS)
-;   - 2600h - 35FFh = File manager (FILEMAN.APP)
-; Segment 0360h:
+;   - 2600h - 2DFFh = File manager (FILEMAN.APP)
+; Segment 02E0h:
 ;   - 0000h - 00FFh = System variables
 ;      - 0000h = RET instruction
 ;      - 0001h - 0050h = Footer buffer
