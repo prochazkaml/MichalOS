@@ -25,12 +25,11 @@
 start:
 	call .draw_background
 
-.start:
 	mov ax, .command_list			; Draw list of settings
 	mov bx, .help_msg1
 	mov cx, .help_msg2
-
-	call os_list_dialog
+	mov si, startlist
+	call .list_dialog
 
 	jc .exit					; User pressed Esc?
 
@@ -58,7 +57,7 @@ start:
 
 	call os_list_dialog
 
-	jc .start					; User pressed Esc?
+	jc start					; User pressed Esc?
 
 	cmp ax, 1
 	je .bg_change
@@ -334,7 +333,7 @@ start:
 
 	call os_list_dialog
 
-	jc .start					; User pressed Esc?
+	jc start					; User pressed Esc?
 
 	cmp ax, 1
 	je .stack_size
@@ -377,7 +376,7 @@ start:
 
 	call os_list_dialog
 
-	jc .start					; User pressed Esc?
+	jc start					; User pressed Esc?
 
 	cmp ax, 1
 	je .enable_sound
@@ -418,7 +417,7 @@ start:
 	mov cx, .help_msg2
 	call os_list_dialog
 	
-	jc .start
+	jc start
 	
 	cmp ax, 1
 	je .change_name
@@ -467,22 +466,29 @@ start:
 	call .update_config
 	jmp .password
 	
-.fail:
-	call .draw_background
-
-	mov ax, .permerrmsg1
-	clr bx
-	clr cx
-	clr dx
-	call os_dialog_box
-
-	jmp .password
-	
 .exit:
 	call os_clear_screen
 	ret
 
 ;------------------------------------------
+
+.list_dialog:
+	mov [.selectedlist], si
+
+	mov si, .callback
+	jmp os_list_dialog_tooltip
+
+.callback:
+	dec ax
+	shl ax, 1
+	mov bx, ax
+	
+	mov si, [.selectedlist]
+
+	mov si, [si + bx]
+	mov dl, 42
+	call os_print_string_box
+	ret
 
 .reset_password:
 	mov di, 57003	
@@ -574,11 +580,63 @@ start:
 	.errmsg1			db 'Error writing to the disk!', 0
 	.errmsg2			db 'Make sure it is not read only!', 0
 
-	.permerrmsg1		db 'Authentication failed!', 0
-
 	.scrnsaveerr		db 'Max. 60 minutes!', 0
 	
-	driversgmt	dw 0
+	.selectedlist		dw 0
+
+startlist:
+	dw .listitem0, .listitem1, .listitem2, .listitem3, .listitem4
+
+	.listitem0	db 'Options for changing the visual', 13, 10
+				db 'appearance of the system.', 13, 10
+				db 10
+				db 'These may include:', 13, 10
+				db '- Setting the background', 13, 10
+				db '- Changing system colors', 13, 10
+				db '- Selecting the system font', 13, 10
+				db '- Screensaver settings', 13, 10
+				db '- etc.', 0
+
+	.listitem1	db 'Options for controlling audio.', 13, 10
+				db 10
+				db 'Currently, the only supported', 13, 10
+				db 'audio devices are your computer', 27h, 's', 13, 10
+				db 'PC speaker and a YM3812-equipped', 13, 10
+				db 'synthesizer device (such as', 13, 10
+				db 'the AdLib sound card).', 0
+
+	.listitem2	db 'Options for changing personal', 13, 10
+				db 'information:', 13, 10
+				db '- Changing the user name displayed', 13, 10
+				db '  on the welcome screen', 13, 10
+				db '- Changing or resetting the user', 13, 10
+				db '  password', 0
+
+	.listitem3	db 'If the displayed time in the top', 13, 10
+				db 'right-hand corner does not match', 13, 10
+				db 'reality, it may be possible that', 13, 10
+				db 'your BIOS time is not set according', 13, 10
+				db 'to your actual timezone.', 13, 10
+				db 10
+				db 'To mitigate this, you can set a', 13, 10
+				db 'time offset (negative or positive),', 13, 10
+				db 'which the system will add to the', 13, 10
+				db 'current time reported by the BIOS.', 13, 10
+				db 10
+				db 'This way, you may keep the current', 13, 10
+				db 'BIOS time intact (some OSes need', 13, 10
+				db 'this) as well as have the correct', 13, 10
+				db 'time displayed in MichalOS.', 0
+
+	.listitem4	db 'Options only for advanced users.', 13, 10
+				db 10
+				db 'If these are set incorrectly, they', 13, 10
+				db 'might cause system instability or', 13, 10
+				db 'frequent crashes.', 13, 10
+				db 10
+				db 'However, if used correctly, they', 13, 10
+				db 'may in certain instances help in', 13, 10
+				db 'fixing some system issues.', 0
 	
 buffer:
 	
