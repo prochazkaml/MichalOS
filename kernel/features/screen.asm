@@ -230,12 +230,26 @@ os_draw_block:
 
 ; ------------------------------------------------------------------
 ; os_file_selector -- Show a file selection dialog
-; IN: If [0087h] = 1, then BX = location of file extension list
+; IN: None
 ; OUT: AX = location of filename string (or carry set if Esc pressed)
 
 os_file_selector:
+	pusha
+	clr bx
+	jmp os_file_selector_filtered.no_pusha
+
+; ------------------------------------------------------------------
+; os_file_selector_filtered -- Show a file selection dialog only 
+; with files mathing the filter
+; IN: BX = location of file extension list (0 if none)
+; OUT: AX = location of filename string (or carry set if Esc pressed)
+
+os_file_selector_filtered:
+	pusha
+
+.no_pusha:
 	; Get volume name
-	
+
 	pusha
 	mov cx, 1					; Load first disk sector into RAM
 	movzx dx, byte [0084h]
@@ -252,7 +266,6 @@ os_file_selector:
 	rep movsb
 	popa
 	
-	pusha
 	mov word [.filename], 0		; Terminate string in case user leaves without choosing
 
 	call os_report_free_space
@@ -263,11 +276,11 @@ os_file_selector:
 
 	mov byte [0051h], 0
 	
-	cmp byte [0087h], 1
-	jne .no_filter
-	
 	mov [.extension_list], bx
 
+	test bx, bx
+	jz .no_filter
+	
 	mov si, .filter_msg
 	mov di, 0051h
 	call os_string_copy
@@ -317,10 +330,11 @@ os_file_selector:
 
 	pusha
 
-	cmp byte [0087h], 1	; Check if we are supposed to filter the filenames
-	jne .no_extension_check
-
 	mov bx, [.extension_list]
+
+	test bx, bx			; Check if we are supposed to filter the filenames
+	jz .no_extension_check
+
 	movzx cx, byte [bx]	; Cycle through all filters
 
 	mov di, bx

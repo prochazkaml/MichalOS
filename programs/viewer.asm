@@ -19,10 +19,8 @@ start:
 .no_param_passed:
 	call .draw_background
 	
-	mov byte [0087h], 1
 	mov bx, extension_number
-	call os_file_selector		; Get filename
-	mov byte [0087h], 0
+	call os_file_selector_filtered		; Get filename
 	
 	jc .exit
 

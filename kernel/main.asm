@@ -46,7 +46,6 @@
 ;         - 1 if sound enabled
 ;      - 0084h = Default boot device (byte)
 ;      - 0085h = Default button for os_dialog_box (0 = OK, 1 = Cancel) (byte)
-;      - 0087h = Flag for os_file_selector input (byte)
 ;      - 0088h = Maximum number of characters that os_input_string can input (byte)
 ;      - 0089h = Width of os_list_dialog (word)
 ;      - 00E0h - 00EFh - parameters for an app (eg. a file to open when an app launches)
@@ -191,6 +190,7 @@ os_call_vectors:
 	jmp os_cb_list_dialog		; 815Fh
 	jmp os_cb_list_dialog_tooltip	; 8162h
 	jmp os_input_string_ex		; 8165h
+	jmp os_file_selector_filtered	; 8168h
 
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE

@@ -104,8 +104,7 @@ os_read_root:
 
 ; ------------------------------------------------------------------
 ; os_get_file_list -- Generate comma-separated string of files on floppy
-; IN/OUT: AX = location to store zero-terminated filename string,
-;         If [0087h] = 1, then BX = location of file extension list
+; IN/OUT: AX = location to store zero-terminated filename string
 
 os_get_file_list:
 	pusha
@@ -191,33 +190,6 @@ os_get_file_list:
 
 .gotfilename:				; Got a filename that passes testing
 	mov si, dx			; DX = where getting string
-
-	cmp byte [0087h], 1
-	jne .no_extension_check
-	
-	mov bx, [.extension_list]
-	movzx cx, byte [bx]
-
-.extension_loop:
-	pusha
-	add si, 8
-	
-	dec cx
-	mov di, cx
-	shl di, 2	; Each entry is 4 bytes long
-	inc di		; The entry list starts with a 1-byte header
-	add di, [.extension_list]	
-	
-	mov cx, 3
-	rep cmpsb
-	popa
-	je .no_extension_check
-	
-	loop .extension_loop
-	
-	jmp .nxtdirentry
-	
-.no_extension_check:
 	xor cx, cx
 	
 .loopy:

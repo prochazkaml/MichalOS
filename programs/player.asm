@@ -48,10 +48,8 @@ start:
 	je .exit
 	
 .play_file:
-	mov byte [0087h], 1
 	mov bx, .extension_number
-	call os_file_selector		; Get filename
-	mov byte [0087h], 0
+	call os_file_selector_filtered		; Get filename
 	jc start
 
 .file_chosen:
@@ -120,10 +118,8 @@ start:
 
 	call .draw_background
 	
-	mov byte [0087h], 1
 	mov bx, .poly_mmf_num
-	call os_file_selector		; Get the first filename
-	mov byte [0087h], 0
+	call os_file_selector_filtered		; Get the first filename
 	jc start
 
 	mov si, ax
@@ -141,10 +137,8 @@ start:
 
 	call .draw_background
 
-	mov byte [0087h], 1
 	mov bx, .poly_mmf_num
-	call os_file_selector		; Get the second filename
-	mov byte [0087h], 0
+	call os_file_selector_filtered		; Get the second filename
 	jc start
 
 	pusha

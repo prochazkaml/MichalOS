@@ -763,10 +763,8 @@ move_all_chars_backward:
 
 load_file:
 	popa
-	mov byte [0087h], 1
 	mov bx, extension_filter
-	call os_file_selector		; Get filename
-	mov byte [0087h], 0
+	call os_file_selector_filtered		; Get filename
 	jc render_text
 
 	mov si, ax				; Save it for later usage

@@ -93,6 +93,7 @@ os_select_list			equ 815Ch
 os_cb_list_dialog		equ 815Fh
 os_cb_list_dialog_tooltip	equ 8162h
 os_input_string_ex		equ 8165h
+os_file_selector_filtered	equ 8168h
 
 ; Keyboard handling
 
