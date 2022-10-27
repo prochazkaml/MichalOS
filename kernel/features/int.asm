@@ -133,16 +133,6 @@ os_compat_int05:
 
 	.msg db 'User triggered crash', 0
 
-os_compat_int0C:
-	cli
-	mov sp, 0FFFEh
-	sti
-	
-	mov ax, .msg
-	jmp os_fatal_error
-	
-	.msg db 'Stack overflow', 0
-	
 ; Invalid opcode handler
 os_compat_int06:
 	mov ax, .msg

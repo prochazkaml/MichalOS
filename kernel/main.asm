@@ -265,10 +265,6 @@ first_init_stack_done:
 	mov si, os_compat_int00
 	call os_modify_int_handler
 
-	mov cl, 0Ch					; Stack overflow
-	mov si, os_compat_int0C
-	call os_modify_int_handler
-
 	mov cl, 05h					; Debugger
 	mov si, os_compat_int05
 	call os_modify_int_handler
