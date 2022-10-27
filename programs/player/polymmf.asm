@@ -177,14 +177,11 @@ start_poly_mmf:
 	ret
 	
 .adliberror:
-	mov byte [0085h], 1
-	
 	mov ax, start.adlib_msg1
 	mov bx, start.adlib_msg2
 	clr cx
-	mov dx, 1
+	mov dx, 2
 	call os_dialog_box
-	mov byte [0085h], 0
 	
 	test ax, ax
 	jz .error_bypass

@@ -1356,8 +1356,9 @@ int_input_dialog:
 ; ------------------------------------------------------------------
 ; os_dialog_box -- Print dialog box in middle of screen, with button(s)
 ; IN: AX, BX, CX = string locations (set registers to 0 for no display),
-; IN: DX = 0 for single 'OK' dialog, 1 for two-button 'OK' and 'Cancel'
-; IN: [0085h] = Default button for 2-button dialog (0 or 1)
+; IN: DX = 0 for single 'OK' dialog,
+;          1 for two-button 'OK' and 'Cancel' ('OK' selected by default),
+;          2 for two-button 'OK' and 'Cancel' ('Cancel' selected by default)
 ; OUT: If two-button mode, AX = 0 for OK and 1 for cancel
 ; NOTE: Each string is limited to 40 characters
 
@@ -1373,7 +1374,7 @@ os_dialog_box:
 
 	pusha
 	cmp dx, 1
-	je .two_button
+	jge .two_button
 
 .one_button:
 	mov16 dx, 35, 14
@@ -1391,7 +1392,7 @@ os_dialog_box:
 	jmp os_show_cursor.no_pusha
 
 .two_button:
-	cmp byte [0085h], 1
+	cmp dx, 2
 	je .draw_right
 	jne .draw_left
 	

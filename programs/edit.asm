@@ -64,13 +64,11 @@ file_chosen:
 	rep cmpsb
 	je valid_extension
 
-	mov byte [0085h], 1
-	mov dx, 1
 	mov ax, wrong_ext_msg
 	mov bx, wrong_ext_msg2
 	clr cx
+	mov dx, 2
 	call os_dialog_box
-	mov byte [0085h], 0
 
 	test ax, ax
 	jz valid_extension
@@ -793,13 +791,11 @@ load_file:
 	rep cmpsb
 	je valid_extension
 
-	mov byte [0085h], 1
-	mov dx, 1
 	mov ax, wrong_ext_msg
 	mov bx, wrong_ext_msg2
 	clr cx
+	mov dx, 2
 	call os_dialog_box
-	mov byte [0085h], 0
 
 	test ax, ax
 	jz valid_extension

@@ -45,7 +45,6 @@
 ;         - 0 if sound disabled
 ;         - 1 if sound enabled
 ;      - 0084h = Default boot device (byte)
-;      - 0085h = Default button for os_dialog_box (0 = OK, 1 = Cancel) (byte)
 ;      - 0088h = Maximum number of characters that os_input_string can input (byte)
 ;      - 0089h = Width of os_list_dialog (word)
 ;      - 00E0h - 00EFh - parameters for an app (eg. a file to open when an app launches)
@@ -444,7 +443,6 @@ finish:
 	call os_init_text_mode
 
 .skip_gfx:
-	mov byte [0085h], 0
 	popa
 	
 	cmp byte [7FFFh], 1
