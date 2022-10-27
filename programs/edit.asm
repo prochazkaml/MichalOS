@@ -15,7 +15,7 @@ start:
 	call os_string_uppercase
 	
 	mov si, ax
-	mov di, userfile
+	mov di, filename
 	call os_string_copy
 
 	jmp file_chosen
@@ -32,7 +32,7 @@ start:
 
 .no_param_passed:
 	mov si, untitled
-	mov di, userfile
+	mov di, filename
 	call os_string_copy
 	clr bx
 	jmp file_load_success
@@ -773,10 +773,6 @@ load_file:
 	mov di, filename
 	call os_string_copy
 
-	mov si, ax
-	mov di, userfile
-	call os_string_copy
-
 	; Now we need to make sure that the file extension is TXT or BAS...
 
 	mov di, ax
@@ -816,7 +812,7 @@ load_file:
 ; SAVE FILE
 
 save_file:
-	mov si, userfile
+	mov si, filename
 	mov di, untitled
 	call os_string_compare
 	jc save_new_file
@@ -824,7 +820,7 @@ save_file:
 	mov ax, filename			; Delete the file if it already exists
 	call os_remove_file
 	jc .no_delete
-	
+
 	mov ax, filename
 	mov word cx, [filesize]
 	mov bx, 4096
@@ -844,7 +840,7 @@ save_file:
 .no_delete:
 	mov ax, .delete_failed
 	mov bx, file_save_fail_msg2
-	clr cx
+	mov cx, file_save_fail_msg3
 	clr dx
 	call os_dialog_box
 
@@ -854,7 +850,7 @@ save_file:
 .failure:
 	mov ax, file_save_fail_msg1
 	mov bx, file_save_fail_msg2
-	clr cx
+	mov cx, file_save_fail_msg3
 	clr dx
 	call os_dialog_box
 
@@ -881,7 +877,7 @@ save_new_file:
 	jc .failure				; If we couldn't save file...
 
 	mov si, newname
-	mov di, userfile
+	mov di, filename
 
 	call os_string_copy
 	mov ax, file_save_succeed_msg
@@ -895,60 +891,15 @@ save_new_file:
 
 
 .failure:
-	clr ax
-	clr bx
-	clr cx
-	clr dx
-
-	cmp byte [0086h], 0
-	je .failure0
-	cmp byte [0086h], 1
-	je .failure1
-	cmp byte [0086h], 2
-	je .failure2
-	cmp byte [0086h], 3
-	je .failure3
-	cmp byte [0086h], 4
-	je .failure4
-	
 	mov ax, file_save_fail_msg1
 	mov bx, file_save_fail_msg2
+	mov cx, file_save_fail_msg3
+	clr dx
 	call os_dialog_box
 
 	popa
 	jmp render_text
-
-.failure0:
-	mov ax, failure0msg
-	call os_dialog_box
-	popa
-	jmp render_text
-	
-.failure1:
-	mov ax, failure1msg
-	call os_dialog_box
-	popa
-	jmp render_text
-	
-.failure2:
-	mov ax, failure2msg
-	call os_dialog_box
-	popa
-	jmp render_text
-	
-.failure3:
-	mov ax, failure3msg
-	call os_dialog_box
-	popa
-	jmp render_text
-	
-.failure4:
-	mov ax, failure4msg
-	call os_dialog_box
-	popa
-	jmp render_text
-	
-	
+		
 	
 ; ------------------------------------------------------------------
 ; NEW FILE
@@ -988,9 +939,6 @@ new_file:
 	mov bx, new_file_msg
 	call os_input_dialog
 	call os_string_uppercase
-	mov si, filename
-	mov di, userfile
-	call os_string_copy
 
 	mov ax, filename			; Delete the file if it already exists
 	call os_remove_file
@@ -1009,7 +957,7 @@ new_file:
 .failure:
 	mov ax, file_save_fail_msg1
 	mov bx, file_save_fail_msg2
-	clr cx
+	mov cx, file_save_fail_msg3
 	clr dx
 	call os_dialog_box
 
@@ -1040,7 +988,7 @@ setup_screen:
 
 	mov16 dx, 24, 0
 	call os_move_cursor
-	mov si, userfile
+	mov si, filename
 	call os_print_string
 	
 	popa
@@ -1057,16 +1005,16 @@ update_screen:
 	
 	mov16 dx, 24, 0
 	call os_move_cursor
-	mov si, userfile
+	mov si, filename
 	call os_print_string
 	
-	mov si, userfile
+	mov si, filename
 	mov di, untitled
 	call os_string_compare
 	
 	jc .exit
 	
-	mov ax, userfile
+	mov ax, filename
 	call os_string_length
 	
 	mov16 dx, 24, 0
@@ -1131,19 +1079,13 @@ showbytepos:
 	file_load_fail_msg		db 'Error loading the file!', 0
 	new_file_msg			db 'Choose a new filename (DOCUMENT.TXT):', 0
 	file_save_fail_msg1		db 'Error saving the file!', 0
-	file_save_fail_msg2		db '(Invalid filename/disk is read-only?)', 0
+	file_save_fail_msg2		db '(Disk is read-only/file already exists/', 0
+	file_save_fail_msg3		db 'an invalid filename was entered)?', 0
 	file_save_succeed_msg	db 'File saved.', 0
 
-	failure0msg				db 'Filename is too long!', 0
-	failure1msg				db 'Filename is empty!', 0
-	failure2msg				db 'Filename has no extension!', 0
-	failure3msg				db 'Filename has no basename!', 0
-	failure4msg				db 'Extension is too short!', 0
-	
 	chooselist				db 'New,Open...,Save,Save as...,Exit', 0
 	
 	untitled				db 'Unnamed document', 0
-	userfile				times 60 db 0
 	newname					times 60 db 0
 	
 	extension_filter	db 2

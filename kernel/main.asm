@@ -46,12 +46,6 @@
 ;         - 1 if sound enabled
 ;      - 0084h = Default boot device (byte)
 ;      - 0085h = Default button for os_dialog_box (0 = OK, 1 = Cancel) (byte)
-;      - 0086h = int_filename_convert error status (byte)
-;         - 0 if filename too long
-;         - 1 if filename empty
-;         - 2 if no extension found
-;         - 3 if no basename found
-;         - 4 if extension too short
 ;      - 0087h = Flag for os_file_selector input (byte)
 ;      - 0088h = Maximum number of characters that os_input_string can input (byte)
 ;      - 0089h = Width of os_list_dialog (word)

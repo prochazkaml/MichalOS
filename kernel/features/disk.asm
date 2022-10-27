@@ -1287,10 +1287,10 @@ int_filename_convert:
 
 	call os_string_length
 	cmp ax, 12			; Filename too long?
-	jg .failure0			; Fail if so
+	jg .failure			; Fail if so
 
 	test ax, ax
-	jz .failure1			; Similarly, fail if zero-char string
+	jz .failure			; Similarly, fail if zero-char string
 
 	mov dx, ax			; Store string length for now
 
@@ -1304,12 +1304,12 @@ int_filename_convert:
 	stosb
 	inc cx
 	cmp cx, dx
-	jg .failure2			; No extension found = wrong
+	jg .failure			; No extension found = wrong
 	jmp .copy_loop
 
 .extension_found:
 	test cx, cx
-	jz .failure3			; Fail if extension dot is first char
+	jz .failure			; Fail if extension dot is first char
 
 	cmp cx, 8
 	je .do_extension		; Skip spaces if first bit is 8 chars
@@ -1328,15 +1328,15 @@ int_filename_convert:
 .do_extension:
 	lodsb				; 3 characters
 	test al, al
-	jz .failure4
+	jz .failure
 	stosb
 	lodsb
 	test al, al
-	jz .failure4
+	jz .failure
 	stosb
 	lodsb
 	test al, al
-	jz .failure4
+	jz .failure
 	stosb
 
 	mov byte [di], 0		; Zero-terminate filename
@@ -1345,26 +1345,6 @@ int_filename_convert:
 	mov ax, .dest_string
 	clc				; Clear carry for success
 	ret
-
-
-.failure0:
-	mov byte [0086h], 0
-	jmp .failure
-	
-.failure1:
-	mov byte [0086h], 1
-	jmp .failure
-	
-.failure2:
-	mov byte [0086h], 2
-	jmp .failure
-	
-.failure3:
-	mov byte [0086h], 3
-	jmp .failure
-	
-.failure4:
-	mov byte [0086h], 4
 
 .failure:	
 	popa

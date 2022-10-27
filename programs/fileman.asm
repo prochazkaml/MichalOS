@@ -177,8 +177,6 @@ start:
 	mov cx, [.load_offset]
 	call os_load_file
 	
-	mov byte [0086h], 5
-	
 	mov cx, bx
 	mov bx, [.load_offset]
 	mov ax, .filename_tmp2
@@ -201,48 +199,10 @@ start:
 
 	call .draw_background
 
-	clr bx
-	clr cx
-	clr dx
-
-	cmp byte [0086h], 0
-	je .failure0
-	cmp byte [0086h], 1
-	je .failure1
-	cmp byte [0086h], 2
-	je .failure2
-	cmp byte [0086h], 3
-	je .failure3
-	cmp byte [0086h], 4
-	je .failure4
-
 	mov ax, .error_msg
 	mov bx, .error_msg2
-	call os_dialog_box
-	jmp start
-
-.failure0:
-	mov ax, .failure0msg
-	call os_dialog_box
-	jmp start
-	
-.failure1:
-	mov ax, .failure1msg
-	call os_dialog_box
-	jmp start
-	
-.failure2:
-	mov ax, .failure2msg
-	call os_dialog_box
-	jmp start
-	
-.failure3:
-	mov ax, .failure3msg
-	call os_dialog_box
-	jmp start
-	
-.failure4:
-	mov ax, .failure4msg
+	mov cx, .error_msg3
+	clr dx
 	call os_dialog_box
 	jmp start
 
@@ -293,7 +253,8 @@ start:
 	.filename_tmp2			times 60 db 0
 
 	.error_msg				db 'Error writing to the disk!', 0
-	.error_msg2				db '(Disk is read-only/file already exists)?', 0
+	.error_msg2				db '(Disk is read-only/file already exists/', 0
+	.error_msg3				db 'an invalid filename was entered)?', 0
 
 	.err_file_exists		db 'File with this name already exists!', 0
 
