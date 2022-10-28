@@ -1778,22 +1778,20 @@ os_temp_box:
 	ret
 
 ; ------------------------------------------------------------------
-; os_print_footer -- Prints a message to the screen footer if possible.
-; IN: SI = Message location(if 0, then it restores the previous message)
-; OUT: None, registers preserved
+; int_save_footer -- Saves the current footer & prepares cursor, if applicable.
+; IN: None
+; OUT: DX = cursor position where to return, CF = 1 if no message should be printed
 
-os_print_footer:
+int_save_footer:
 	pusha
 	cmp byte [0082h], 1
+	stc
 	je int_popa_ret
-	
+
 	call os_get_cursor_pos
-	push dx
-	
-	mov di, 1
-	test si, si
-	jz .restore
-	
+	mov [int_footer_cursor], dx
+
+	mov di, int_footer_data
 	mov16 dx, 0, 24
 	
 .loop:
@@ -1806,12 +1804,26 @@ os_print_footer:
 	stosb
 	
 	inc dl
-	cmp di, 81
-	jnge .loop
-	
-	mov byte [80], 0
+	cmp dl, 79
+	jl .loop
 
-.print:
+	mov16 dx, 1, 24
+	call os_move_cursor
+
+	clc
+	popa
+	ret
+
+; ------------------------------------------------------------------
+; int_restore_footer -- Restores the saved footer, if applicable.
+; IN: DX = cursor position where to return
+; OUT: None, registers preserved
+
+int_restore_footer:
+	pusha
+	cmp byte [0082h], 1
+	je int_popa_ret
+
 	mov16 dx, 0, 24
 	call os_move_cursor
 	
@@ -1820,14 +1832,14 @@ os_print_footer:
 	mov cx, 80
 	int 10h
 	
+	mov si, int_footer_data
 	call os_print_string
-	
-	pop dx
+
+	mov dx, [int_footer_cursor]
 	jmp os_move_cursor.no_pusha
 
-.restore:
-	mov si, 1
-	jmp .print
+	int_footer_data		times 80 db 0	; 80 chars + zero term.
+	int_footer_cursor	dw 0
 
 ; ------------------------------------------------------------------
 ; os_reset_font -- Resets the font to the selected default.

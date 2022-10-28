@@ -36,7 +36,6 @@
 ; Segment 02E0h:
 ;   - 0000h - 00FFh = System variables
 ;      - 0000h = RET instruction
-;      - 0001h - 0050h = Footer buffer
 ;      - 0051h - 0081h = File selector filter buffer
 ;      - 0082h = System state (byte)
 ;         - 0 if a GUI application is running
@@ -169,7 +168,7 @@ os_call_vectors:
 	jmp os_color_selector		; 8123h
 	jmp os_modify_int_handler	; 8126h
 	jmp os_32int_to_string		; 8129h
-	jmp os_print_footer			; 812Ch
+	jmp os_illegal_call			; 812Ch ; FREE!!!!!!!!!!!!!!!!!!!
 	jmp os_print_8hex			; 812Fh
 	jmp os_string_to_32int		; 8132h
 	jmp os_math_power			; 8135h

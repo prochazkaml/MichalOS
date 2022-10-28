@@ -112,9 +112,13 @@ os_get_file_list:
 	mov byte [.num_entries], 0
 	mov [.extension_list], bx
 	
+	call int_save_footer
+	jc .no_msg
+
 	mov si, .msg_load
-	call os_print_footer
-	
+	call os_print_string
+
+.no_msg:
 	mov word [.file_list_tmp], ax
 
 	clr eax				; Needed for some older BIOSes
@@ -233,10 +237,7 @@ os_get_file_list:
 .no_dec:
 	mov byte [es:di], 0		; Zero-terminate string (gets rid of final comma)
 
-	pusha
-	xor si, si
-	call os_print_footer
-	popa
+	call int_restore_footer
 
 	popa
 
@@ -263,15 +264,15 @@ os_load_file:
 	
 	call os_string_uppercase
 
-	pusha							; Message display routine
-	mov bx, ax
-	mov ax, .msg_load
-	mov cx, 82
-	call os_string_join
-	mov si, 82
-	call os_print_footer
-	popa
-	
+	call int_save_footer			; Message display routine
+	jc .no_msg
+
+	mov si, .msg_load
+	call os_print_string
+	mov si, ax
+	call os_print_string
+
+.no_msg:
 	call int_filename_convert
 
 	mov [.filename_loc], ax		; Store filename location
@@ -462,10 +463,7 @@ os_load_file:
 	popa
 
 	mov ebx, [.file_size]		; Get file size to pass back in BX
-	pusha
-	xor si, si
-	call os_print_footer
-	popa
+	call int_restore_footer
 
 	clc				; Carry clear = good load
 	ret
@@ -498,15 +496,15 @@ os_write_file:
 	push cs
 	pop es
 		
-	pusha							; Message display routine
-	mov bx, ax
-	mov ax, .msg_save
-	mov cx, 82
-	call os_string_join
-	mov si, 82
-	call os_print_footer
-	popa
+	call int_save_footer			; Message display routine
+	jc .no_msg
 
+	mov si, .msg_save
+	call os_print_string
+	mov si, ax
+	call os_print_string
+
+.no_msg:
 	mov si, ax
 	call os_string_length
 	test ax, ax
@@ -781,10 +779,7 @@ os_write_file:
 	call int_write_root_dir
 
 .finished:
-	popa
-	pusha
-	xor si, si
-	call os_print_footer
+	call int_restore_footer
 	popa
 	mov es, [.old_segment]
 
@@ -792,10 +787,7 @@ os_write_file:
 	ret
 
 .failure:
-	popa
-	pusha
-	clr si
-	call os_print_footer
+	call int_restore_footer
 	popa
 	mov es, [.old_segment]
 
