@@ -53,6 +53,9 @@ start:
 	jc start
 
 .file_chosen:
+	call os_file_exists
+	jc .load_error
+
 	mov bx, ax			; Save filename for now
 
 	mov di, ax
@@ -187,11 +190,7 @@ start:
 	
 .exit:
 	mov byte [0E0h], 0
-
-	call os_clear_screen
 	ret
-		
-	jmp .play_file
 
 .callback:
 	dec ax
@@ -202,7 +201,15 @@ start:
 	mov dl, 42
 	call os_print_string_box
 	ret
-	
+
+.load_error:
+	mov ax, .err_msg
+	clr bx
+	clr cx
+	clr dx
+	call os_dialog_box
+	jmp .exit
+
 	.choice_msg1		db 'Choose an option...', 0
 	.choice_msg2		db 0
 	.choice				db 'Monophonic piano (PC speaker),Polyphonic piano (Adlib),Play a file,Play duo (Adlib),Quit', 0
@@ -265,6 +272,8 @@ start:
 	.err_string			db 'Invalid file type!', 0
 	.err_string2		db 'MMF, DRO 2.0 or RAD only!', 0
 	
+	.err_msg			db 'File not found!', 0
+
 	.extension_number	db 4
 	.mmf_extension		db 'MMF', 0
 	.dro_extension		db 'DRO', 0
