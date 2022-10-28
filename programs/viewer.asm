@@ -25,6 +25,9 @@ start:
 	jc .exit
 
 .check_file:
+	call os_file_exists
+	jc .load_error
+
 	mov bx, ax			; Save filename for now
 
 	mov di, ax
@@ -129,8 +132,18 @@ start:
 	jmp start
 	
 .exit:
+	mov byte [0E0h], 0
 	ret
 	
+.load_error:
+	mov ax, err_msg
+	clr bx
+	clr cx
+	clr dx
+	call os_dialog_box
+	jmp .exit
+	
+
 	extension_number	db 1
 	pcx_extension		db 'PCX', 0
 	
@@ -138,7 +151,9 @@ start:
 	
 	err_string	db 'Invalid file type!', 0
 	err_string2	db '320x200x8bpp PCX only!', 0
-	
+
+	err_msg		db 'File not found!', 0
+
 	title_msg	db 'MichalOS Image Viewer', 0
 	footer_msg	db '', 0
 
