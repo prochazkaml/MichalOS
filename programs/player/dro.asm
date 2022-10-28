@@ -273,16 +273,6 @@ start_dro:
 	
 	ret
 
-.not_enough_ram:
-	popa
-	mov ax, .no_ram
-	clr bx
-	clr cx
-	clr dx
-	call os_dialog_box
-	
-	jmp start
-
 .int_handler:
 	cmp byte [.play], 1
 	je .no_dec_timer
@@ -324,7 +314,6 @@ start_dro:
 	.timer				dw 0
 	.play				db 0
 	
-	.no_ram				db 'Not enough memory!', 0
 	.millilength_msg	db 'Song length (in milliseconds): ', 0
 	.position_msg		db 'Current position (milliseconds): ', 0
 	.playmsg1			db 'Now playing:', 0

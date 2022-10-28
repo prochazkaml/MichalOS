@@ -57,9 +57,6 @@ start:
 	jmp start			; And retry
 
 .valid_pcx_extension:
-	call os_get_memory
-	cmp ax, 192				; Do we have enough RAM?
-	jl .not_enough_ram
 	popa
 		
 	push ds
@@ -121,16 +118,6 @@ start:
 	call os_draw_background
 	ret
 
-.not_enough_ram:
-	popa
-	mov ax, no_ram
-	clr bx
-	clr cx
-	clr dx
-	call os_dialog_box
-	
-	jmp start
-	
 .exit:
 	mov byte [0E0h], 0
 	ret
@@ -142,12 +129,10 @@ start:
 	clr dx
 	call os_dialog_box
 	jmp .exit
-	
+
 
 	extension_number	db 1
 	pcx_extension		db 'PCX', 0
-	
-	no_ram		db 'Not enough RAM!', 0
 	
 	err_string	db 'Invalid file type!', 0
 	err_string2	db '320x200x8bpp PCX only!', 0
