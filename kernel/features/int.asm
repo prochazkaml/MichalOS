@@ -170,7 +170,7 @@ os_compat_int1C:
 	dec word [pause_timer]
 	
 .no_update_pause_timer:
-	cmp byte [0082h], 1
+	cmp byte [system_ui_state], 1
 	je .no_update
 	
 	mov ah, 02h			; Get the time

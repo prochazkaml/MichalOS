@@ -23,7 +23,7 @@ os_wait_for_key:
 	
 	mov byte [.scrn_active], 0	; Reset all the screensaver variables
 
-	mov al, [0082h]				; Save the current screen state, for later
+	mov al, [system_ui_state]				; Save the current screen state, for later
 	mov [.gfx_state], al
 	mov ah, 03h
 	clr bh
@@ -43,7 +43,7 @@ os_wait_for_key:
 	int 10h
 	
 	mov al, [.gfx_state]
-	mov [0082h], al
+	mov [system_ui_state], al
 	mov cx, [.orig_crsr]
 	mov ah, 01h
 	int 10h
@@ -72,7 +72,7 @@ os_wait_for_key:
 	jne .good
 	
 	pusha
-	mov byte [0082h], 1
+	mov byte [system_ui_state], 1
 	mov ax, 0501h
 	int 10h
 	call os_hide_cursor
@@ -189,7 +189,7 @@ int_special_keys:
 	call os_speaker_off
 
 .display_speaker:
-	cmp byte [0082h], 1
+	cmp byte [system_ui_state], 1
 	je .no_display_spkr
 
 	call os_get_cursor_pos

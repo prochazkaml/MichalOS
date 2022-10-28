@@ -19,7 +19,7 @@
 ; is passed in SI and copied into the first string, unless SI = 0
 
 os_run_basic:
-	mov byte [0082h], 1
+	call os_clear_screen
 	
 	mov word [orig_stack], sp		; Save stack pointer -- we might jump to the
 						; error printing code and quit in the middle

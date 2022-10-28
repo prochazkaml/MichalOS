@@ -36,9 +36,6 @@
 ; Segment 02E0h:
 ;   - 0000h - 00FFh = System variables
 ;      - 0000h = RET instruction
-;      - 0082h = System state (byte)
-;         - 0 if a GUI application is running
-;         - 1 if a non-GUI application is running (no header/footer)
 ;      - 0083h = Sound state (byte)
 ;         - 0 if sound disabled
 ;         - 1 if sound enabled
@@ -60,7 +57,7 @@
 ;   - DEA8h - DFFFh = Configuration file (SYSTEM.CFG)
 ;      - described in CONFIG.ASM
 ;   - E000h - FFFFh = Disk buffer
-; End of memory: 2048 bytes stack
+; End of memory: 4k-64k bytes stack
 ; ------------------------------------------------------------------
 
 ; ------------------------------------------------------------------
@@ -520,6 +517,9 @@ systemfilemissing:
 
 	app_running		db 0		; Is a program running?
 	
+	system_ui_state	db 0		; 0 if a GUI application is running
+								; 1 if a non-GUI application is running (no header/footer)
+
 ;	program_drawn	db 0		; Is the program already drawn by os_draw_background?
 	
 ; ------------------------------------------------------------------

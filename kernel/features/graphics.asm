@@ -9,7 +9,7 @@
 
 os_init_graphics_mode:
 	pusha
-	mov byte [0082h], 1
+	mov byte [system_ui_state], 1
 
 	mov ax, 13h
 	int 10h
