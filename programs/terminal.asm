@@ -11,14 +11,6 @@ start:
 	mov di, 00F0h
 	call os_string_copy
 	
-	cmp byte [7FFEh], 0
-	je .no_return
-	
-	mov byte [7FFEh], 0
-	
-	jmp get_cmd
-	
-.no_return:
 	call os_get_os_name
 	call os_print_string
 	mov si, version_msg
@@ -152,9 +144,6 @@ get_cmd:				; Main processing loop
 	jmp total_fail
 	
 execute_bin:
-	mov byte [32767], 1
-	mov byte [32766], 1
-	
 	mov word si, [param_list]
 	call os_string_parse
 	test ax, ax
@@ -165,15 +154,14 @@ execute_bin:
 	mov si, ax
 	mov di, 0E0h
 	call os_string_copy
-	mov ax, command
-	
-	ret
-	
+	jmp .execute
+
 .no_parameters:
 	mov byte [0E0h], 0
+
+.execute:
 	mov ax, command
-	
-	ret
+	call os_exit
 	
 bas_file:
 	mov ax, command

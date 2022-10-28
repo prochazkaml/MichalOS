@@ -9,8 +9,6 @@ start:
 
 	call .draw_background
 
-	mov byte [32767], 0
-	
 	call os_file_selector
 	jc .exit
 
@@ -54,10 +52,8 @@ start:
 	jmp start
 	
 .launch_file:
-	mov al, 1
-	mov [32767], al
 	pop ax
-	ret
+	call os_exit
 
 .create_file:
 	pop ax

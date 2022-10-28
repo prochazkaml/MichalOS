@@ -15,6 +15,25 @@ os_run_zx7_module:
 	jmp 100h
 
 ; ------------------------------------------------------------------
+; os_exit -- Exits the application, launches another one (if possible)
+; IN: AX = if not 0, then ptr to filename of application to be launched,
+;     BX = 1 if the application calling os_exit should be re-launched after
+;     the requested application exits
+; OUT: None, register preserved
+
+os_exit:
+	; Mark special exit
+
+	mov byte [app_exit_special], 1
+
+	; Exit the application
+
+	mov sp, [origstack]
+	jmp finish
+
+	app_exit_special	db 0
+
+; ------------------------------------------------------------------
 ; os_clear_registers -- Clear all registers
 ; IN: None
 ; OUT: Cleared registers

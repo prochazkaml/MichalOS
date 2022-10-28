@@ -44,15 +44,7 @@
 ;      - 0089h = Width of os_list_dialog (word)
 ;      - 00E0h - 00EFh - parameters for an app (eg. a file to open when an app launches)
 ;      - 00F0h - 00FFh - temporary buffer for storing apps' filenames
-;   - 0100h - 7FFDh = Application
-;   - 7FFEh - Application return flag
-;      - 0 = return to the desktop after an application quits
-;      - 1 = launch another application (00F0h-00FFh) after an application quits
-;      (example: when a user opens an app through Terminal, then terminal stores its name to 00F0h-00FFh so it starts after the requested application exits)
-;   - 7FFFh - Application launch flag
-;      - 0 = return to the desktop after an application quits
-;      - 1 = launch another application (filename passed in AX) after an application quits
-;         - Note: after launching another application this flag is set to 0
+;   - 0100h - 7FFFh = Application
 ;   - 8000h - DEA7h = MichalOS kernel
 ;   - DEA8h - DFFFh = Configuration file (SYSTEM.CFG)
 ;      - described in CONFIG.ASM
@@ -68,7 +60,7 @@ os_call_vectors:
 	jmp os_print_string			; 8003h
 	jmp os_move_cursor			; 8006h
 	jmp os_clear_screen			; 8009h
-	jmp os_illegal_call			; 800Ch ; FREE!!!!!!!!!!!!!!!!!!!
+	jmp os_exit					; 800Ch
 	jmp os_print_newline		; 800Fh
 	jmp os_wait_for_key			; 8012h
 	jmp os_check_for_key		; 8015h
@@ -319,7 +311,8 @@ start_desktop:
 	jz load_fileman
 
 launch_program:
-	mov byte [7FFFh], 0
+	test ax, ax				; If an application returns a non-valid ptr, ignore it
+	jz checkformenu
 
 	pusha
 	mov si, ax
@@ -408,6 +401,7 @@ start_binary:
 	call os_clear_screen	; Clear the screen before running
 	
 	mov byte [app_running], 1
+	mov byte [app_exit_special], 0
 
 	mov [origstack], sp
 	
@@ -440,11 +434,8 @@ finish:
 .skip_gfx:
 	popa
 	
-	cmp byte [7FFFh], 1
+	cmp byte [app_exit_special], 1
 	je launch_program
-	
-	cmp byte [7FFEh], 1
-	je return_to_app
 	ret
 
 load_binary_no_compression:
@@ -453,7 +444,7 @@ load_binary_no_compression:
 	jmp start_binary
 
 load_binary_decompress:
-	mov di, 7FFEh
+	mov di, 8000h
 	sub di, cx
 
 	push di

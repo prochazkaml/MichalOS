@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 
     fputc(0xC3, ofp);
     fwrite("MiOS", sizeof(char), 4, ofp); // Signature
-    if(input_size <= output_size || (8 + 0x100 + input_size + output_size) >= 0x7FFE) {
+    if(input_size <= output_size || (8 + 0x100 + input_size + output_size) >= 0x8000) {
         // Compressed output is larger or it doesn't fit in the memory space for decompression
 
         fputc(0, ofp); // Flags - not compressed
