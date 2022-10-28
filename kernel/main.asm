@@ -36,7 +36,6 @@
 ; Segment 02E0h:
 ;   - 0000h - 00FFh = System variables
 ;      - 0000h = RET instruction
-;      - 0051h - 0081h = File selector filter buffer
 ;      - 0082h = System state (byte)
 ;         - 0 if a GUI application is running
 ;         - 1 if a non-GUI application is running (no header/footer)

@@ -34,6 +34,8 @@ os_put_chars:
 	call os_putchar
 	
 	loop .loop
+	popa
+	ret
 
 ; ------------------------------------------------------------------
 ; os_print_string -- Displays text
@@ -272,36 +274,10 @@ os_file_selector_filtered:
 	shr ax, 1					; Sectors -> kB
 	mov [.freespace], ax
 	
-	; Add the filters, if desired
+	; Remember the filter list for later
 
-	mov byte [0051h], 0
-	
 	mov [.extension_list], bx
 
-	test bx, bx
-	jz .no_filter
-	
-	mov si, .filter_msg
-	mov di, 0051h
-	call os_string_copy
-
-	pusha
-	mov di, 0051h + 9
-	mov si, bx
-	movzx cx, byte [si]
-	inc si
-	
-.filter_loop:
-	call os_string_copy
-	mov byte [di + 3], ' '
-	add di, 4
-	add si, 4
-	loop .filter_loop
-	
-	mov byte [di], 0
-	popa
-	
-.no_filter:
 	; Create the filename index list
 
 	call int_read_root_dir		; Get the files into the buffer
@@ -374,7 +350,7 @@ os_file_selector_filtered:
 	test cx, cx
 	jz .empty_list
 	mov bx, .root
-	mov cx, 0051h
+	mov cx, .help_msg2
 	mov dx, .history
 	mov di, .callback
 	mov si, .print_filename
@@ -453,6 +429,41 @@ os_file_selector_filtered:
 	ret
 
 .callback:
+	pusha
+
+	; Display if there are any filters
+
+	mov bx, [.extension_list]
+
+	test bx, bx
+	jz .no_filter
+
+	mov16 dx, 3, 4
+	call os_move_cursor
+	
+	mov si, .filter_msg
+	call os_print_string
+
+	mov si, bx
+	movzx cx, byte [si]
+	inc si
+	
+.filter_loop:
+	push cx
+	clr bl
+	mov cx, 3
+	call os_put_chars
+	pop cx
+
+	add si, 4
+
+	call os_print_space
+
+	loop .filter_loop
+	
+.no_filter:
+	popa
+
 	; Draw the box on the right
 	mov bl, [57001]		; Color from RAM
 	mov16 dx, 41, 2		; Start X/Y position
