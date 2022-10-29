@@ -4,17 +4,28 @@ A 16-bit keyboard controlled operating system based on MikeOS 4.5, aimed to be m
 
 ## New features
 
-- Screensaver with customizable timeout
-- Customizable user interface (custom background, window colors etc.)
-- Custom font
+- Many applications/kernel API calls have been improved/rewritten (both in UI and under the hood) + many new custom applications
+- Customizable user interface (custom background, window colors, selectable font, screensaver etc.)
 - On-screen clock with timezone support
-- AdLib synthesizer support
-- Built-in graphics drawing functions
+- AdLib synthesizer support (including primitive PWM emulation via PC speaker) - music file player included (as well as a bunch of example files)
+- Lots of new kernel API calls
+  - ZX7 decompression
+  - flexible UI elements with keyboard input callbacks
+  - VGA graphics drawing functions (lines, boxes, polygons, circles)
+  - interrupt handling (including a friendly timer interrupt handler)
+  - math functions
+  - sound abstraction layer (for both PC speaker and the AdLib)
+- Loading of compressed applications (ZX7 compressed)
+- Certain kernel modules are decompressed at runtime, saving precious memory (also ZX7 compressed)
+- System-wide keyboard shortcuts
+- etc.
+
+Please check out the [gallery](https://github.com/prochazkaml/MichalOS/blob/master/misc/gallery.md) to see the words above in action.
 
 ## System requirements
 
 - Intel 80386 or higher, Pentium recommended
-- At least 80 kB RAM, 256 kB recommended
+- At least 80-ish kB RAM, 256 kB recommended
 - A VGA video card
 - A keyboard
 
