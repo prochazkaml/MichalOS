@@ -148,7 +148,7 @@ os_get_file_list:
 	call int_reset_floppy		; Error = reset controller and try again
 	jnc .read_root_dir
 
-	mov ax, .error
+	mov ax, floppyreseterror
 	call os_fatal_error
 	
 .show_dir_init:
@@ -246,8 +246,8 @@ os_get_file_list:
 	.num_entries		db 0
 	.extension_list		dw 0
 	.file_list_tmp		dw 0
-	.msg_load			db ' Reading directory contents...', 0
-	.error				db 'os_get_file_list: Floppy reset fail', 0
+	.msg_load			db 'Reading directory contents...', 0
+	floppyreseterror	db 'Floppy reset fail', 0
 	
 ; ------------------------------------------------------------------
 ; os_load_file -- Load a file into RAM
@@ -283,8 +283,7 @@ os_load_file:
 	call int_reset_floppy		; In case floppy has been changed
 	jnc .floppy_ok			; Did the floppy reset OK?
 
-	mov ax, .err_msg_floppy_reset	; If not, bail out
-	jmp os_fatal_error
+	jmp .root_problem
 
 
 .floppy_ok:				; Ready to read first block of data
@@ -423,8 +422,7 @@ os_load_file:
 	call int_reset_floppy		; Otherwise, reset floppy and retry
 	jnc .load_file_sector
 
-	mov ax, .err_msg_floppy_reset	; Reset failed, bail out
-	jmp os_fatal_error
+	jmp .root_problem
 
 
 .calculate_next_cluster:
@@ -477,11 +475,9 @@ os_load_file:
 	.load_position			dw 0		; Where we'll load the file
 	.file_size				dd 0		; Size of the file
 
-	.err_msg_floppy_reset	db 'os_load_file: Floppy reset fail', 0
-
 	.old_segment			dw 0
 	
-	.msg_load				db ' Loading ', 0
+	.msg_load				db 'Loading ', 0
 	
 ; --------------------------------------------------------------------------
 ; os_write_file -- Save (max 64K) file to disk
@@ -808,7 +804,7 @@ os_write_file:
 
 	.old_segment			dw 0
 
-	.msg_save				db ' Saving ', 0
+	.msg_save				db 'Saving ', 0
 	
 ; --------------------------------------------------------------------------
 ; os_file_exists -- Check for presence of file on the floppy
@@ -816,7 +812,6 @@ os_write_file:
 
 os_file_exists:
 	call os_string_uppercase
-	call int_filename_convert	; Make FAT12-style filename
 
 	push ax
 	call os_string_length
@@ -827,15 +822,14 @@ os_file_exists:
 	push ax
 	call int_read_root_dir
 
-	pop ax				; Restore filename
-
 	mov di, disk_buffer
 
+	call int_filename_convert	; Make FAT12-style filename
+	jc .failure
+
 	call int_get_root_entry	; Set or clear carry flag
+	pop ax
 
-	pushf
-
-	popf
 	ret
 
 .failure:
