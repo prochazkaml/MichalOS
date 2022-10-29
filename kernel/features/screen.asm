@@ -1818,7 +1818,15 @@ int_save_footer:
 	cmp dl, 79
 	jl .loop
 
-	mov16 dx, 1, 24
+	mov16 dx, 0, 24
+	call os_move_cursor
+	
+	mov ax, 0920h
+	mov bx, 70h
+	mov cx, 80
+	int 10h
+	
+	inc dl
 	call os_move_cursor
 
 	clc
