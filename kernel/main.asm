@@ -68,7 +68,7 @@ os_call_vectors:
 	jmp os_speaker_off			; 801Eh
 	jmp os_load_file			; 8021h
 	jmp os_pause				; 8024h
-	jmp os_illegal_call			; 8027h ; FREE!!!!!!!!!!!!!!
+	jmp os_fast_draw_line		; 8027h
 	jmp os_draw_background		; 802Ah
 	jmp os_string_length		; 802Dh
 	jmp os_string_uppercase		; 8030h

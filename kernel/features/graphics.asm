@@ -89,6 +89,22 @@ os_fast_set_pixel:
 ; OUT: None, registers preserved
 
 os_draw_line:
+	push ax
+	push es
+	mov ax, 0A000h
+	mov es, ax
+	call os_fast_draw_line
+	pop es
+	pop ax
+	ret
+
+; ------------------------------------------------------------------
+; os_fast_draw_line -- Draws a line with the Bresenham's line algorithm.
+; Translated from an implementation in C (http://www.edepot.com/linebresenham.html)
+; IN: ES = destination memory segment, CX=X1, DX=Y1, SI=X2, DI=Y2, BL=colour
+; OUT: None, registers preserved
+
+os_fast_draw_line:
 	pusha				; Save parameters
 	
 	xor ax, ax			; Clear variables
@@ -98,10 +114,6 @@ os_draw_line:
 	
 	popa				; Restore and save parameters
 	pusha
-	push es
-
-	mov ax, 0A000h
-	mov es, ax
 
 	mov [.x1], cx			; Save points
 	mov [.x], cx
@@ -260,7 +272,6 @@ os_draw_line:
 	mov bl, [.colour]
 	call os_fast_set_pixel
 	
-	pop es
 	popa
 	ret
 	
@@ -386,12 +397,12 @@ os_draw_polygon:
 	dec bh
 	mov byte [.points], bh
 	
-	mov word ax, [fs:si]
+	mov word ax, [ds:si]
 	add si, 2
 	mov word [.xi], ax
 	mov word [.xl], ax
 	
-	mov word ax, [fs:si]
+	mov word ax, [ds:si]
 	add si, 2
 	mov word [.yi], ax
 	mov word [.yl], ax
@@ -400,11 +411,11 @@ os_draw_polygon:
 		mov cx, [.xl]
 		mov dx, [.yl]
 		
-		mov word ax, [fs:si]
+		mov word ax, [ds:si]
 		add si, 2
 		mov word [.xl], ax
 		
-		mov word ax, [fs:si]
+		mov word ax, [ds:si]
 		add si, 2
 		mov word [.yl], ax
 		
