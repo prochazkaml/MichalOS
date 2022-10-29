@@ -148,7 +148,7 @@ start:
 	call os_convert_l2hts		; Entered number -> HTS
 	mov bx, DISK_BUFFER		; Read the sector
 	mov16 ax, 1, 2
-	mov dl, [0084h]
+	call os_get_boot_disk
 	stc
 	int 13h
 	jc .error

@@ -114,6 +114,7 @@ os_read_root			equ 814Ah	; IN: SI = where to put the directory	OUT: CF set if er
 os_convert_l2hts		equ 8156h	; IN: AX = logical sector				OUT: correct registers for int 13h
 os_report_free_space	equ 8081h	;										OUT: AX = number of free sectors
 os_get_file_datetime	equ 80F9h
+os_get_boot_disk		equ 812Ch
 
 ; Sound
 

@@ -17,7 +17,7 @@ start:
 	je .exit
 
 	call os_clear_screen
-	mov dl, [0084h]
+	call os_get_boot_disk
 
 	clr ax
 	

@@ -1551,6 +1551,15 @@ int_reset_floppy:
 
 
 ; --------------------------------------------------------------------------
+; os_get_boot_disk -- Returns the boot disk number.
+; IN: None
+; OUT: DL = boot disk number for use in INT 13h calls
+
+os_get_boot_disk:
+	mov dl, [bootdev]
+	ret
+
+; --------------------------------------------------------------------------
 ; os_convert_l2hts -- Calculate head, track and sector for int 13h
 ; IN: logical sector in AX; OUT: correct registers for int 13h
 

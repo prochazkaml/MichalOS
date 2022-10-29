@@ -254,7 +254,7 @@ os_file_selector_filtered:
 
 	pusha
 	mov cx, 1					; Load first disk sector into RAM
-	movzx dx, byte [0084h]
+	movzx dx, byte [bootdev]
 	mov bx, disk_buffer
 
 	mov16 ax, 1, 2

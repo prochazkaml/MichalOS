@@ -39,7 +39,6 @@
 ;      - 0083h = Sound state (byte)
 ;         - 0 if sound disabled
 ;         - 1 if sound enabled
-;      - 0084h = Default boot device (byte)
 ;      - 0088h = Maximum number of characters that os_input_string can input (byte)
 ;      - 0089h = Width of os_list_dialog (word)
 ;      - 00E0h - 00EFh - parameters for an app (eg. a file to open when an app launches)
@@ -156,7 +155,7 @@ os_call_vectors:
 	jmp os_color_selector		; 8123h
 	jmp os_modify_int_handler	; 8126h
 	jmp os_32int_to_string		; 8129h
-	jmp os_illegal_call			; 812Ch ; FREE!!!!!!!!!!!!!!!!!!!
+	jmp os_get_boot_disk		; 812Ch
 	jmp os_print_8hex			; 812Fh
 	jmp os_string_to_32int		; 8132h
 	jmp os_math_power			; 8135h
@@ -208,7 +207,6 @@ first_init_stack_done:
 	clr al
 	rep stosb
 
-	mov [0084h], dl
 	mov byte [0000h], 0xC3
 	mov byte [0088h], 255
 	mov word [0089h], 76
