@@ -33,6 +33,15 @@ build/images/isoroot:
 build/images/iso288root:
 	mkdir -p $@
 
+misc/zx7/app_zx7: misc/zx7/appzx7.c misc/zx7/optimize.c misc/zx7/compress.c
+	cc $^ -o $@
+
+misc/zx7/raw_zx7: misc/zx7/rawzx7.c misc/zx7/optimize.c misc/zx7/compress.c
+	cc $^ -o $@
+
+misc/zx7/segmented_zx7: misc/zx7/zx7.c misc/zx7/optimize.c misc/zx7/compress.c
+	cc $^ -o $@
+
 # Default target: builds the image and boots it.
 retail: build/images/michalos.flp
 	dosbox -conf misc/dosbox.conf -c "boot build/images/michalos.flp"
@@ -58,7 +67,7 @@ build/boot.bin: boot/boot.asm | build
 	nasm -O2 -w+all -f bin -o $@ -l build/boot.lst boot/boot.asm
 
 # Compressed kernel asset target
-build/%.zx7: kernel/compressed/%.asm .git/refs/heads/master | build
+build/%.zx7: kernel/compressed/%.asm .git/refs/heads/master misc/zx7/raw_zx7 | build
 	nasm $< -o $@.raw
 	misc/zx7/raw_zx7 $@.raw $@
 
@@ -70,7 +79,7 @@ build/kernel.sys: kernel/main.asm kernel/features/*.asm .git/refs/heads/master $
 
 # Assembles all programs.
 # Note: % means file name prefix, $@ means output file and $< means source file.
-build/%.app: build/%.app.bin
+build/%.app: build/%.app.bin misc/zx7/app_zx7
 	misc/zx7/app_zx7 $< $@
 
 .PRECIOUS: build/%.app.bin
@@ -95,7 +104,7 @@ build/%.app.bin: programs/%.asm programs/michalos.inc .git/refs/heads/master | b
 build/%.mmf: files/src/%.mus files/src/notelist.txt | build
 	nasm -O2 -w+all -f bin -I files/src/ -o $@ $<
 
-build/%.drz: files/src/%.dro | build
+build/%.drz: files/src/%.dro misc/zx7/segmented_zx7 | build
 	misc/zx7/segmented_zx7 $< $@
 
 # Builds the image.
@@ -128,4 +137,4 @@ build/images/michalos288.iso: build/images/michalos288.flp | build/images/iso288
 
 # Removes all of the built pieces.
 clean:
-	-rm -rf build
+	-rm -rf build misc/zx7/*_zx7

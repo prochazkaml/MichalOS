@@ -33,6 +33,4 @@ On Debian GNU/Linux (and its derivates, such as Linux Mint or Ubuntu), these req
 
 On macOS, first install [Homebrew](https://brew.sh/) and then run ```brew install nasm mtools dosbox``` from the Terminal.
 
-It is also necessary to compile a ZX7 data compressor with ```cd misc/zx7 && ./build.sh```, which requires gcc/clang.
-
 Then, you can simply build the image by running ```make```.
