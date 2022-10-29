@@ -7,10 +7,6 @@
 start:
 	call os_clear_screen
 	
-	mov si, terminal_name
-	mov di, 00F0h
-	call os_string_copy
-	
 	call os_get_os_name
 	call os_print_string
 	mov si, version_msg
@@ -723,8 +719,6 @@ exit:
 	date_help		db 'DATE    : Tell the date', 13, 10
 	ver_help		db 'VER     : MichalOS version', 13, 10
 	exit_help		db 'EXIT    : Quit', 13, 10, 0
-	
-	terminal_name		db 'TERMINAL.APP', 0
 	
 	invalid_msg			db 'Invalid command', 13, 10, 0
 	nofilename_msg		db 'Filaname missing', 13, 10, 0
