@@ -53,3 +53,7 @@ Here are some screenshots, which may give you an idea of the feel of MichalOS.
 ## About MichalOS
 
 ![2022-10-29-214832_640x400_scrot](https://user-images.githubusercontent.com/41787099/198850137-33f25533-0430-45cc-b9cf-df9c1664afb6.png)
+
+## When things don't go particularly well...
+
+![2022-10-29-220305_640x400_scrot](https://user-images.githubusercontent.com/41787099/198850727-12de36bf-e038-4d16-8f94-9793906329fd.png)
