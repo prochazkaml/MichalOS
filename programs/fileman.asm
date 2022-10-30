@@ -23,12 +23,8 @@ start:
 	mov bx, cx
 	
 .commands:
-	mov ax, .command_list			; Draw list of disk operations
-	mov cx, .helpmsg
-	
-	mov word [0089h], 37
-	call os_list_dialog
-	mov word [0089h], 76
+	mov bx, .params_struct			; Draw list of disk operations
+	call os_list_dialog_ex
 
 	jc .clearstack				; User pressed Esc?
 
@@ -232,7 +228,19 @@ start:
 	
 	jmp start
 
-	
+	.params_struct:
+		dw 0				; No entry display callback
+		dw .command_list	; Comma-separated list
+		dw 0				; No key/entry change callback
+		dw 0				; Auto-calculate number of entries
+		dw .screenstring	; First help string
+		dw .helpmsg			; Second help string
+		dw 0				; No history data
+		db 2				; X position
+		db 2				; Y position
+		db 37				; Width
+		db 21				; Height
+
 	.command_list			db 'Run application,Create file,Delete file,Rename,Copy file', 0
 
 	.root					db 'A:/'

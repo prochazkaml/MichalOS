@@ -346,15 +346,20 @@ os_file_selector_filtered:
 .done:
 	; Let the user select a file
 
-	mov ax, cx			; Pass the number of files
+	mov dx, cx			; Pass the number of files
 	test cx, cx
 	jz .empty_list
+
+	mov word [list_dialog_sample_struct + 00Ch], .history
+
+	clr ax
 	mov bx, .root
 	mov cx, .help_msg2
-	mov dx, .history
-	mov di, .callback
-	mov si, .print_filename
-	call os_cb_list_dialog_tooltip
+	mov si, .callback
+	mov di, .print_filename
+	call os_list_dialog_tooltip
+
+	mov word [list_dialog_sample_struct + 00Ch], 0
 
 	jc .esc_pressed
 
@@ -640,50 +645,29 @@ os_file_selector_filtered:
 ; to change the tooltip's contents.
 ; IN: AX = comma-separated list of strings to show (zero-terminated),
 ;     BX = first help string, CX = second help string
-;     SI = key/display callback (see os_cb_list_dialog)
+;     SI = key/display callback (see os_list_dialog_ex)
+;     if AX = 0: DI = entry display callback, DX = number of entries
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_list_dialog_tooltip:
-	push di
-	push si
-	push dx
+	pusha
 
-	mov di, si
-	push cx
-	call os_string_callback_tokenizer
-	mov ax, cx
-	pop cx
+	mov [.callbackaddr], si
 
-	clr dx
-	call os_cb_list_dialog_tooltip
+	call int_init_list_struct
 
-	pop dx
-	pop si
-	pop di
-	ret
+	test ax, ax
+	jnz .no_entry_callback
 
-; ------------------------------------------------------------------
-; os_cb_list_dialog_tooltip -- Show a dialog with a list of options and a tooltip.
-; That means, when the user changes the selection, the application will be called back
-; to change the tooltip's contents.
-; IN: AX = number of entries,
-;     BX = first help string, CX = second help string, DX = history data (ptr to 5 bytes)
-;     DI = key/display callback, SI = entry callback (see os_cb_list_dialog)
-; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
+	mov [list_dialog_sample_struct + 000h], di
+	mov [list_dialog_sample_struct + 006h], dx
 
-os_cb_list_dialog_tooltip:
-	push di
-
-	mov word [0089h], 37
+.no_entry_callback:
+	mov word [list_dialog_sample_struct + 004h], .callback
+	mov byte [list_dialog_sample_struct + 010h], 37
 	
-	mov [.callbackaddr], di
-
-	mov di, .callback
-	call os_cb_list_dialog
-
-	mov word [0089h], 76
-	pop di
-	ret
+	mov bx, list_dialog_sample_struct
+	jmp os_list_dialog_ex.no_pusha
 	
 .callback:
 	pusha
@@ -710,63 +694,117 @@ os_cb_list_dialog_tooltip:
 
 os_list_dialog:
 	pusha
-	push cx
-	call os_string_callback_tokenizer
-	mov ax, cx
-	pop cx
 
-	clr di
-	jmp os_cb_list_dialog.no_pusha
+	call int_init_list_struct
 
+	mov byte [list_dialog_sample_struct + 010h], 76
+	mov [list_dialog_sample_struct + 004h], bx
+
+	mov bx, list_dialog_sample_struct
+	jmp os_list_dialog_ex.no_pusha
+
+int_init_list_struct:
+	mov [list_dialog_sample_struct + 002h], ax
+	mov [list_dialog_sample_struct + 008h], bx
+	mov [list_dialog_sample_struct + 00Ah], cx
+	clr bx
+	mov [list_dialog_sample_struct + 006h], bx
+	ret
+
+list_dialog_sample_struct:
+	dw 0	; No entry display callback
+	dw 0	; Comma-separated list - will be filled in
+	dw 0	; No key/entry change callback
+	dw 0	; Auto-calculate number of entries
+	dw 0	; First help string - will be filled in
+	dw 0	; Second help string - will be filled in
+	dw 0	; No history data
+	db 2	; X position
+	db 2	; Y position
+	db 76	; Width
+	db 21	; Height
+	
 ; ------------------------------------------------------------------
-; os_cb_list_dialog -- Show a dialog with a list of options
-; IN: SI = entry callback (accepts CX as entry ID, prints out result),
-;     DI = key/display callback (accepts AX as entry ID, CX as keypress) AX = number of entries,
-;     BX = first help string, CX = second help string, DX = history data (ptr to 5 bytes)
+; os_list_dialog_ex -- Show a dialog with a list of options
+; IN: BX = pointer to setup struct
+;       Addr Size Description
+;       000h word Pointer to entry display callback (accepts CX as entry ID, prints out result) - valid only if ptr to list is zero
+;       002h word Pointer to comma-separated list of strings to show (zero-terminated)
+;       004h word Pointer to key/entry change callback (accepts AX as entry ID, CX as keypress),
+;       006h word Number of entries (if 0, then it is automatically calculated from 002h)
+;       008h word Pointer to first help string (if 0, then the list will fill the whole dialog)
+;       00Ah word Pointer to second help string
+;       00Ch word Pointer to history data (points to a 5 byte array)
+;       00Eh byte Screen X position
+;       00Fh byte Screen Y position
+;       010h byte Dialog width
+;       011h byte Dialog height
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
-os_cb_list_dialog:
+os_list_dialog_ex:
 	pusha
 
 .no_pusha:
-	push dx
-	mov [.displaycb], di
-	mov [.parsercb], si
+	; Save these for later
+
+	mov ax, [bx + 006h]					; Number of entries
 	mov [.num_of_entries], ax
 
-	push cx				; And help strings
-	push bx
+	mov dx, [bx + 000h]					; Entry display callback
+	
+	mov ax, [bx + 002h]					; Entry list
+	test ax, ax							; Check if callback is used instead
+	jz .no_setup_tokenizer_callback
 
-	call os_hide_cursor
+	call os_string_callback_tokenizer	; Create a tokenizer callback from the list
+
+	mov ax, [bx + 006h]					; Check if the number of entries is expected to be calculated
+	test ax, ax
+	jnz .no_tokenizer_length_detect
+
+	mov [.num_of_entries], cx			; If so, store it for later
+
+.no_tokenizer_length_detect:
+	mov dx, si
+
+.no_setup_tokenizer_callback:
+	mov [.parsercb], dx					; Store the entry display callback (whatever it ends up being)
+
+	mov ax, [bx + 004h]					; Key/Entry change callback
+	mov [.displaycb], ax
 
 	; Draw the window
 
-	mov bl, [57001]		; Color from RAM
-	mov16 dx, 2, 2		; Start X/Y position
-	mov si, [0089h]		; Width
-	mov di, 23			; Finish Y position
-	call os_draw_block	; Draw option selector window
+	push bx
+	mov dx, [bx + 00Eh]			; Start X/Y position
+	movzx di, byte [bx + 011h]	; Finish Y position
+	movzx ax, byte [bx + 00Fh]
+	add di, ax
+	movzx si, byte [bx + 010h]	; Width
+	mov bl, [57001]				; Color from RAM
+	call os_draw_block			; Draw option selector window
+	pop bx
 
-	mov16 dx, 3, 3		; Show first line of help text...
+	mov16 dx, 3, 3				; Show first line of help text...
 	call os_move_cursor
 
-	pop si				; Get back first string
+	mov si, [bx + 008h]
 	call os_print_string
 
 	inc dh
 	call os_move_cursor
 
-	pop si				; ...and the second
+	mov si, [bx + 00Ah]			; ...and the second
 	call os_print_string
 
-	mov al, [0089h]
-	sub al, 6
-	mov ah, 15
-	mov bl, 11110000b		; Black on white for option list box
-	mov16 dx, 3, 5
-	mov cx, [.num_of_entries]
-	mov si, .callbackroutine
-	pop di
+	mov ax, [bx + 010h]			; Width/height
+	sub ax, 606h
+	mov dx, [bx + 00Eh]			; X/Y
+	add dx, 301h
+	mov cx, [.num_of_entries]	; Number of entries
+	mov si, .callbackroutine	; Callback routine
+	mov di, [bx + 00Ch]			; Ptr to history data
+	mov bl, 11110000b			; Black on white for option list box
 	jmp os_select_list.no_pusha
 
 .callbackroutine:
@@ -812,7 +850,7 @@ os_cb_list_dialog:
 ; ------------------------------------------------------------------
 ; os_select_list -- Draws a list of entries (defined by a callback) to select from.
 ; IN: AX = width/height, BL = color, CX = number of entries, DX = X/Y pos,
-;     SI = callback (if C clear = accepts an entry ID in CX, returns a string in SI,
+;     SI = callback (if C clear = accepts an entry ID in CX, prints an appropriate string,
 ;     if C set = accepts key input in AX, entry ID in CX; not required to preserve regs),
 ;     DI = pointer to a history struct (word .num_of_entries, word .skip_num, byte .cursor) or 0 if none
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed

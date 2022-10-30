@@ -40,7 +40,6 @@
 ;         - 0 if sound disabled
 ;         - 1 if sound enabled
 ;      - 0088h = Maximum number of characters that os_input_string can input (byte)
-;      - 0089h = Width of os_list_dialog (word)
 ;      - 00E0h - 00EFh - parameters for an app (eg. a file to open when an app launches)
 ;      - 00F0h - 00FFh - temporary buffer for storing apps' filenames
 ;   - 0100h - 7FFFh = Application
@@ -172,8 +171,8 @@ os_call_vectors:
 	jmp os_convert_l2hts		; 8156h
 	jmp os_speaker_raw_period	; 8159h
 	jmp os_select_list			; 815Ch
-	jmp os_cb_list_dialog		; 815Fh
-	jmp os_cb_list_dialog_tooltip	; 8162h
+	jmp os_list_dialog_ex		; 815Fh
+	jmp os_illegal_call			; 8162h ; FREE!!!!!!!!!!!!
 	jmp os_input_string_ex		; 8165h
 	jmp os_file_selector_filtered	; 8168h
 
@@ -209,7 +208,6 @@ first_init_stack_done:
 
 	mov byte [0000h], 0xC3
 	mov byte [0088h], 255
-	mov word [0089h], 76
 ;	mov byte [00E0h], 0
 
 	; Load the files
