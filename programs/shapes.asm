@@ -13,6 +13,9 @@ start:
 
 	call os_init_graphics_mode
 	
+	mov ax, 0A000h
+	mov es, ax
+
 .loop:
 	clr ax
 	

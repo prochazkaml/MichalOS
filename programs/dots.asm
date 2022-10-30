@@ -22,7 +22,7 @@ start:
 	mov cx, si
 	mov ax, di
 	
-	call os_fast_set_pixel
+	call os_set_pixel
 	
 	inc si
 	cmp si, 320

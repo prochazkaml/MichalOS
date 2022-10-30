@@ -14,8 +14,15 @@ os_init_graphics_mode:
 	mov ax, 13h
 	int 10h
 
+	push es
+	
+	mov ax, 0xA000
+	mov es, ax
+
 	mov bl, 0
 	call os_clear_graphics
+
+	pop es
 	popa
 	ret
 
@@ -41,29 +48,10 @@ os_init_text_mode:
 
 ; ------------------------------------------------------------------
 ; os_set_pixel -- Sets a pixel on the screen to a given value.
-; IN: CX = X coordinate, DX = Y coordinate, BL = color
-; OUT: None, registers preserved
-
-os_set_pixel:
-	pusha
-	push es
-
-	mov ax, 0A000h
-	mov es, ax
-
-	mov ax, dx
-	call os_fast_set_pixel
-
-	pop es
-	popa
-	ret
-
-; ------------------------------------------------------------------
-; os_fast_set_pixel -- Sets a pixel on the screen to a given value.
 ; IN: ES = destination memory segment, CX = X coordinate, AX = Y coordinate, BL = color
 ; OUT: None, registers preserved
 
-os_fast_set_pixel:
+os_set_pixel:
 	cmp cx, 320
 	ja .exit
 
@@ -81,30 +69,14 @@ os_fast_set_pixel:
 
 .exit:
 	ret
-	
+
 ; ------------------------------------------------------------------
 ; os_draw_line -- Draws a line with the Bresenham's line algorithm.
-; Translated from an implementation in C (http://www.edepot.com/linebresenham.html)
-; IN: CX=X1, DX=Y1, SI=X2, DI=Y2, BL=colour
-; OUT: None, registers preserved
-
-os_draw_line:
-	push ax
-	push es
-	mov ax, 0A000h
-	mov es, ax
-	call os_fast_draw_line
-	pop es
-	pop ax
-	ret
-
-; ------------------------------------------------------------------
-; os_fast_draw_line -- Draws a line with the Bresenham's line algorithm.
 ; Translated from an implementation in C (http://www.edepot.com/linebresenham.html)
 ; IN: ES = destination memory segment, CX=X1, DX=Y1, SI=X2, DI=Y2, BL=colour
 ; OUT: None, registers preserved
 
-os_fast_draw_line:
+os_draw_line:
 	pusha				; Save parameters
 	
 	xor ax, ax			; Clear variables
@@ -185,7 +157,7 @@ os_fast_draw_line:
 	mov cx, [.x]
 	mov ax, [.y]
 	mov bl, [.colour]
-	call os_fast_set_pixel
+	call os_set_pixel
 	
 	xor si, si
 	mov di, [.balance]
@@ -236,7 +208,7 @@ os_fast_draw_line:
 	mov cx, [.x]
 	mov ax, [.y]
 	mov bl, [.colour]
-	call os_fast_set_pixel
+	call os_set_pixel
 	
 	xor si, si
 	mov di, [.balance]
@@ -270,7 +242,7 @@ os_fast_draw_line:
 	mov cx, [.x]
 	mov ax, [.y]
 	mov bl, [.colour]
-	call os_fast_set_pixel
+	call os_set_pixel
 	
 	popa
 	ret
@@ -293,7 +265,7 @@ os_fast_draw_line:
 
 ; ------------------------------------------------------------------
 ; os_draw_rectangle -- Draws a rectangle.
-; IN: CX=X1, DX=Y1, SI=X2, DI=Y2, BL=colour, CF = set if filled or clear if not
+; IN: ES = destination memory segment, CX=X1, DX=Y1, SI=X2, DI=Y2, BL=colour, CF = set if filled or clear if not
 ; OUT: None, registers preserved
 
 os_draw_rectangle:
@@ -342,11 +314,6 @@ os_draw_rectangle:
 	jmp .finished_fill
 		
 .fill_shape:
-	push es
-
-	mov ax, 0A000h
-	mov es, ax
-
 	mov ax, dx
 
 	cmp cx, si		; Is X1 smaller than X2?
@@ -362,7 +329,7 @@ os_draw_rectangle:
 	mov [.x1], cx
 
 .x_loop:
-	call os_fast_set_pixel
+	call os_set_pixel
 	inc cx
 	
 	cmp cx, si
@@ -374,8 +341,6 @@ os_draw_rectangle:
 	cmp ax, di
 	jl .x_loop
 
-	pop es
-		
 .finished_fill:
 	popa
 	ret
@@ -387,7 +352,7 @@ os_draw_rectangle:
 
 ; ------------------------------------------------------------------
 ; os_draw_polygon -- Draws a freeform shape.
-; IN: BH = number of points, BL = colour, SI = location of shape points data
+; IN: ES = destination memory segment, BH = number of points, BL = colour, SI = location of shape points data
 ; OUT: None, registers preserved
 ; DATA FORMAT: x1, y1, x2, y2, x3, y3, etc
 
@@ -450,29 +415,22 @@ os_draw_polygon:
 
 ; ------------------------------------------------------------------
 ; os_clear_graphics -- Clears the graphics screen with a given color.
-; BL = colour to set
+; IN: ES = destination memory segment, BL = colour to set
 ; OUT: None, registers preserved
 
 os_clear_graphics:
 	pusha
-	push es
-	
-	mov ax, 0xA000
-	mov es, ax
-
 	mov al, bl
 	clr di
 	mov cx, 64000
 	rep stosb
-
-	pop es
 	popa
 	ret
 	
 	
 ; ----------------------------------------
 ; os_draw_circle -- draw a circular shape
-; IN: AL = colour, BX = radius, CX = middle X, DX = middle y
+; IN: ES = destination memory segment, AL = colour, BX = radius, CX = middle X, DX = middle y
 ; OUT: None, registers preserved
 
 os_draw_circle:
@@ -573,7 +531,7 @@ os_draw_circle:
 	add ax, [.x0]
 	add bx, [.y0]
 	mov cx, ax
-	mov dx, bx
+	mov ax, bx
 	mov bl, [.colour]
 	call os_set_pixel
 	popa
