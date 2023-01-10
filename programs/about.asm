@@ -109,7 +109,7 @@ start:
 							db '  If you find a bug, or you just have a feature request, please leave a ticket', 13, 10
 							db '  in the Issues section on GitHub. I welcome all kinds of feedback.', 13, 10, 10, 
 							db '  https://github.com/prochazkaml/MichalOS', 13, 10, 10
-							db '  https://www.prochazka.ml/', 0
+							db '  https://www.prochazkaml.eu/', 0
 	
 	.hoftext				db '  Special thanks to: (in alphabetical order)', 13, 10
 							db '    Einar Saukas for the ZX7 compression method & decompression routine', 13, 10
