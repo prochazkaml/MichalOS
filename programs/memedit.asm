@@ -5,6 +5,8 @@
 	%INCLUDE "michalos.inc"
 
 start:
+	mov [.segment], cs
+
 	call .draw_background
 	
 	mov byte [0088h], 30
