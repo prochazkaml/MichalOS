@@ -2,7 +2,7 @@
 ; MichalOS Font Editor
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	push ds

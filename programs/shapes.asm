@@ -2,7 +2,7 @@
 ; MichalOS Shapes Test
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	mov ax, .msg1

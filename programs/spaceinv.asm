@@ -2,7 +2,7 @@
 ; Space Inventors
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 	jmp start
 	

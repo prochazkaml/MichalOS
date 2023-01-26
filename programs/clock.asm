@@ -2,7 +2,7 @@
 ; MichalOS Clock
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	mov cx, 11932

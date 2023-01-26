@@ -2,7 +2,7 @@
 ; About MichalOS
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	mov bx, .footer_msg

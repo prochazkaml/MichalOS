@@ -13,7 +13,7 @@
 ; make big
 ; ------------------------------------------------------------------
 
-	%include "michalos.inc"
+	%include "include/program.inc"
 	bits    16
 	org     100h
 

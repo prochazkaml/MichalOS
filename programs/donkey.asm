@@ -3,7 +3,7 @@
 ;              FASM.EXE sorryass.asm
 ;---------------------------------------------------
 
-    %INCLUDE "michalos.inc"
+    %INCLUDE "include/program.inc"
 
 donkey:
     mov [ogstack], sp

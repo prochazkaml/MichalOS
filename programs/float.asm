@@ -1,4 +1,4 @@
-	%include "michalos.inc"
+	%include "include/program.inc"
 	
 start:
 	finit				; Initialize the FPU

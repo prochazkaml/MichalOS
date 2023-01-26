@@ -5,7 +5,7 @@
 ; target OS: DOS (.COM file extension)
 ; use: nasm snake.asm -o snake.com -f bin
 
-	%include "michalos.inc"
+	%include "include/program.inc"
 
 section .text
 		mov [startstack], sp

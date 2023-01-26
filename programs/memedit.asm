@@ -2,7 +2,7 @@
 ; MichalOS Memory Editor
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	mov [.segment], cs

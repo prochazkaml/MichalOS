@@ -1,6 +1,6 @@
 	BITS 16
 	ORG 100h
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	call .draw_background

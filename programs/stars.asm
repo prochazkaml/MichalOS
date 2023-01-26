@@ -3,7 +3,7 @@
 ; Backported from MichalOS 2.2 to work on standard VGA
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 	%DEFINE STARCOUNT 512
 	%DEFINE MAX_DEPTH 360
 

@@ -2,7 +2,7 @@
 ; MichalOS VESA mode checker
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 	
 %define one_button 0
 %define two_buttons 1

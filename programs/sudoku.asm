@@ -2,7 +2,7 @@
 ; MichalOS Sudoku
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	call draw_background

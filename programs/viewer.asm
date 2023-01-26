@@ -2,7 +2,7 @@
 ; MichalOS Image Viewer
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	cmp byte [0E0h], 0				; Were we passed a filename?

@@ -36,7 +36,7 @@
 
 
 
-        %include "michalos.inc" ;MikeOS Include file
+        %include "include/program.inc" ;MikeOS Include file
 
 start:  call init               ;initialize game
 

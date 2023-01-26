@@ -20,7 +20,7 @@
 ; 77 - 80 - Unused *******************************
 ; 81 - Minute time offset (WORD)
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	call .draw_background

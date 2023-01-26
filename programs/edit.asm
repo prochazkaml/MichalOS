@@ -2,7 +2,7 @@
 ; MichalOS Text Editor
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	call setup_screen

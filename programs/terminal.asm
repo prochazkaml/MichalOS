@@ -2,7 +2,7 @@
 ; MichalOS Terminal
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	call os_clear_screen

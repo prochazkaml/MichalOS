@@ -14,7 +14,7 @@
 ; draw more of the hanging man. Poor bloke.
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	call os_hide_cursor

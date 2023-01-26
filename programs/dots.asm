@@ -2,7 +2,7 @@
 ; MichalOS Dots Test
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	call os_init_graphics_mode

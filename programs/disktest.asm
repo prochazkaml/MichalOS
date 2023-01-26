@@ -2,7 +2,7 @@
 ; MichalOS Disk test
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	mov dx, 65535

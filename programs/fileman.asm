@@ -2,7 +2,7 @@
 ; MichalOS File Manager
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	mov [.load_segment], gs

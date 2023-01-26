@@ -2,7 +2,7 @@
 ; MichalOS Demo tour & initial setup
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 os_demotour:
 	mov si, .test_data_bgcolor

@@ -2,7 +2,7 @@
 ; MichalOS INT 00 crash test
 ; ------------------------------------------------------------------
 
-	%include "michalos.inc"
+	%include "include/program.inc"
 	
 start:
 	mov ax, 9

@@ -2,7 +2,7 @@
 ; MichalOS Music Player
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 	%INCLUDE "notelist.txt"
 
 start:

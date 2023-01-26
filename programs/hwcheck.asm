@@ -2,7 +2,7 @@
 ; MichalOS Hardware checker
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	clr eax			; Get the maximum parameter for basic CPUID

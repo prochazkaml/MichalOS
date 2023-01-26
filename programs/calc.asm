@@ -2,7 +2,7 @@
 ; MichalOS Calculator (32-bit)
 ; ------------------------------------------------------------------
 
-	%INCLUDE "michalos.inc"
+	%INCLUDE "include/program.inc"
 
 start:
 	call .draw_background
