@@ -1567,11 +1567,8 @@ os_convert_l2hts:
 	div word [SecsPerTrack]		; Sectors per track
 	add dl, 01h			; Physical sectors start at 1
 	mov cl, dl			; Sectors belong in CL for int 13h
-	mov ax, bx
 
 	clr dx				; Now calculate the head
-	div word [SecsPerTrack]		; Sectors per track
-	clr dx
 	div word [Sides]		; Floppy sides
 	mov dh, dl			; Head/side
 	mov ch, al			; Track
@@ -1589,6 +1586,5 @@ os_convert_l2hts:
 	SecsPerTrack dw 18
 	
 	bootdev db 0			; Boot device number
-
 
 ; ==================================================================
