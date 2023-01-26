@@ -60,7 +60,6 @@ os_create_file			equ	809Ch	; IN: AX = filename
 os_remove_file			equ	809Fh	; IN: AX = filename
 os_rename_file			equ	80A2h	; IN: AX = filename, BX = new filename
 os_get_file_size		equ	80A5h	; IN: AX = filename						OUT: EBX = bytes (4G max)
-os_read_root			equ 814Ah	; IN: SI = where to put the directory	OUT: CF set if error
 os_convert_l2hts		equ 8156h	; IN: AX = logical sector				OUT: correct registers for int 13h
 os_report_free_space	equ 8081h	;										OUT: AX = number of free sectors
 os_get_file_datetime	equ 80F9h

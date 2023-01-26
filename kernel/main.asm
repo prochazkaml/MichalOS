@@ -147,7 +147,7 @@ os_call_vectors:
 	jmp os_get_os_name			; 8141h
 	jmp os_temp_box				; 8144h
 	jmp os_adlib_unmute			; 8147h
-	jmp os_read_root			; 814Ah
+	jmp os_illegal_call			; 814Ah ; FREE!!!!!!!!!!!!
 	jmp os_init_text_mode		; 814Dh
 	jmp os_illegal_call			; 8150h ; FREE!!!!!!!!!!!!
 	jmp os_print_int			; 8153h
@@ -508,6 +508,8 @@ systemfilemissing:
 	%INCLUDE "features/int.asm"
 	%INCLUDE "features/graphics.asm"
 	%INCLUDE "features/zx7.asm"
+	%INCLUDE "features/disk/lowlevel.asm"
+	%INCLUDE "features/disk/cache.asm"
 
 ; ==================================================================
 ; END OF KERNEL

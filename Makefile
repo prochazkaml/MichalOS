@@ -72,7 +72,7 @@ build/%.zx7: kernel/compressed/%.asm include/*.* .git/refs/heads/master misc/zx7
 	misc/zx7/raw_zx7 $@.raw $@
 
 # Kernel target
-build/kernel.sys: kernel/main.asm kernel/features/*.asm include/*.* .git/refs/heads/master $(CKA) | build
+build/kernel.sys: kernel/main.asm kernel/features/*.asm kernel/features/*/*.asm include/*.* .git/refs/heads/master $(CKA) | build
 	nasm -O2 -w+all -f bin -I . -I kernel/ -I build/ -o $@ -l build/kernel.lst kernel/main.asm \
 	-dVERMIN="'`expr $$(git rev-list --all --count) - $(VERCOMMIT)`'" \
 	-dVERMAJ="'$(VER)'"

@@ -52,55 +52,6 @@ os_report_free_space:
 	
 	.counter		dw 0
 	.sectors_read	dw 0
-	
-; --------------------------------------------------------------------------
-; os_read_root -- Get the root directory contents
-; IN: SI = where to store the root directory; OUT: carry set if error
-
-os_read_root:
-	pusha
-
-	mov ax, 19			; Root dir starts at logical sector 19
-	call os_convert_l2hts
-
-	mov bx, ds
-	mov es, bx
-	mov bx, si
-
-	mov ah, 2			; Params for int 13h: read floppy sectors
-	mov al, 14			; And read 14 of them (from 19 onwards)
-
-	pusha				; Prepare to enter loop
-
-
-.read_root_dir_loop:
-	popa
-	pusha
-
-	stc				; A few BIOSes do not set properly on error
-	int 13h				; Read sectors
-
-	jnc .root_dir_finished
-	call int_reset_floppy		; Reset controller and try again
-	jnc .read_root_dir_loop		; Floppy reset OK?
-
-	popa
-	jmp .read_failure		; Fatal double error
-
-
-.root_dir_finished:
-	popa				; Restore registers from main loop
-
-	popa				; And restore from start of this system call
-
-	clc				; Clear carry (for success)
-	ret
-
-.read_failure:
-	popa
-
-	stc				; Set carry flag (for failure)
-	ret
 
 ; ------------------------------------------------------------------
 ; os_get_file_list -- Generate comma-separated string of files on floppy
@@ -121,39 +72,13 @@ os_get_file_list:
 .no_msg:
 	mov word [.file_list_tmp], ax
 
-	clr eax				; Needed for some older BIOSes
-
-	call int_reset_floppy		; Just in case disk was changed
-
-	mov ax, 19			; Root dir starts at logical sector 19
-	call os_convert_l2hts
-
-	mov si, DISK_BUFFER		; ES:BX should point to our buffer
-	mov bx, si
-
-	mov ax, 2 * 256 + 14	; Params for int 13h: read floppy sectors
-
-	pusha				; Prepare to enter loop
-
-
-.read_root_dir:
-	popa
-	pusha
-
-	stc
-	int 13h				; Read sectors
-	call int_reset_floppy		; Check we've read them OK
+	call int_read_root_dir
 	jnc .show_dir_init		; No errors, continue
-
-	call int_reset_floppy		; Error = reset controller and try again
-	jnc .read_root_dir
 
 	mov ax, floppyreseterror
 	call os_fatal_error
 	
 .show_dir_init:
-	popa
-
 	clr ax
 	mov si, DISK_BUFFER		; Data reader from start of filenames
 
@@ -287,35 +212,10 @@ os_load_file:
 
 
 .floppy_ok:				; Ready to read first block of data
-	mov ax, 19			; Root dir starts at logical sector 19
-	call os_convert_l2hts
-
-	mov si, DISK_BUFFER		; ES:BX should point to our buffer
-	mov bx, si
-
-	mov ax, 2 * 256 + 14	; Params for int 13h: read floppy sectors
-
-	pusha				; Prepare to enter loop
-
-
-.read_root_dir:
-	popa
-	pusha
-
-	stc				; A few BIOSes clear, but don't set properly
-	
-	int 13h				; Read sectors
-	jnc .search_root_dir		; No errors = continue
-
-	call int_reset_floppy		; Problem = reset controller and try again
-	jnc .read_root_dir
-
-	popa
-	jmp .root_problem		; Double error = exit
+	call int_read_root_dir
+	jc .root_problem		; Double error = exit
 
 .search_root_dir:
-	popa
-
 	mov cx, 224		; Search all entries in root dir
 	mov bx, -32			; Begin searching at offset 0 in root dir
 
@@ -371,48 +271,18 @@ os_load_file:
 	mov ax, [di+26]			; Now fetch cluster and load FAT into RAM
 	mov word [.cluster], ax
 
-	mov ax, 1			; Sector 1 = first sector of first FAT
-	call os_convert_l2hts
-
-	mov bx, DISK_BUFFER		; ES:BX points to our buffer
-
-	mov ah, 2			; int 13h params: read sectors
-	mov al, 9			; And read 9 of them
-
-	pusha
-
-.read_fat:
-	popa				; In case registers altered by int 13h
-	pusha
-
-	stc
-	int 13h
-	jnc .read_fat_ok
-
-	call int_reset_floppy
-	jnc .read_fat
-
-	popa
-	jmp .root_problem
-
-
-.read_fat_ok:
-	popa
-
+	call int_read_fat
+	jc .root_problem
 
 .load_file_sector:
-	mov ax, word [.cluster]		; Convert sector to logical
-	add ax, 31
+	movzx eax, word [.cluster]		; Convert sector to logical
+	add eax, 31
 
-	call os_convert_l2hts		; Make appropriate params for int 13h
-
-	mov bx, [.load_position]
+	mov si, [.load_position]
 	mov es, [.old_segment]
+	mov dl, [bootdev]
 
-	mov ax, 0201h			; AH = read sectors, AL = just read 1
-
-	stc
-	int 13h
+	call os_disk_read_sector
 
 	push cs
 	pop es
@@ -723,23 +593,19 @@ os_write_file:
 .save_loop:
 	mov di, .free_clusters
 	add di, cx
-	mov word ax, [di]
+	movzx eax, word [di]
 
-	test ax, ax
+	test eax, eax
 	jz .write_root_entry
 
 	pusha
 
-	add ax, 31
-
-	call os_convert_l2hts
-
-	mov word bx, [.location]
+	add eax, 31
+	mov si, [.location]
 	mov es, [.old_segment]
+	mov dl, [bootdev]
 	
-	mov ax, 0301h
-	stc
-	int 13h
+	call os_disk_write_sector
 
 	push cs
 	pop es
@@ -800,7 +666,7 @@ os_write_file:
 
 	.filename				dw 0
 
-	.free_clusters			equ 65280
+	.free_clusters			equ DISK_BUFFER + 7936 ; THIS IS A KLUDGE!!!
 
 	.old_segment			dw 0
 
@@ -1370,78 +1236,50 @@ int_get_root_entry:
 ; OUT: carry set if failure
 
 int_read_fat:
-	pusha
+	pushad
 
-	mov ax, 1			; FAT starts at logical sector 1 (after boot sector)
-	call os_convert_l2hts
-
-	mov si, DISK_BUFFER		; Set ES:BX to point to 8K OS buffer
-	mov bx, cs
-	mov es, bx
-	mov bx, si
-
-	mov ah, 2			; Params for int 13h: read floppy sectors
-	mov al, 9			; And read 9 of them for first FAT
-
-	pusha				; Prepare to enter loop
-
+	mov eax, 1
+	mov cx, 9
+	mov si, DISK_BUFFER
+	mov dl, [bootdev]
 
 .read_fat_loop:
-	popa
-	pusha
-
-	stc				; A few BIOSes do not set properly on error
-	int 13h				; Read sectors
-
+	call os_disk_read_multiple_sectors		; Read sectors
 	jnc .fat_done
+
 	call int_reset_floppy		; Reset controller and try again
 	jnc .read_fat_loop		; Floppy reset OK?
 
-	popa
-	jmp .read_failure		; Fatal double error
-
-.fat_done:
-	popa				; Restore registers from main loop
-
-	popa				; And restore registers from start of system call
-	clc
-	ret
-
-.read_failure:
-	popa
+	popad
 	stc				; Set carry flag (for failure)
 	ret
 
+.fat_done:
+	popad				; And restore registers from start of system call
+	clc
+	ret
 
 ; --------------------------------------------------------------------------
 ; int_write_fat -- Save FAT contents from DISK_BUFFER in RAM to disk
 ; IN: FAT in DISK_BUFFER; OUT: carry set if failure
 
 int_write_fat:
-	pusha
+	pushad
 
-	mov ax, 1			; FAT starts at logical sector 1 (after boot sector)
-	call os_convert_l2hts
+	mov eax, 1
+	mov cx, 9
+	mov si, DISK_BUFFER
+	mov dl, [bootdev]
 
-	mov si, DISK_BUFFER		; Set ES:BX to point to 8K OS buffer
-	mov bx, ds
-	mov es, bx
-	mov bx, si
-
-	mov ah, 3			; Params for int 13h: write floppy sectors
-	mov al, 9			; And write 9 of them for first FAT
-
-	stc				; A few BIOSes do not set properly on error
-	int 13h				; Write sectors
-
+	call os_disk_write_multiple_sectors		; Write sectors
 	jc .write_failure		; Fatal double error
 
-	popa				; And restore from start of system call
+	popad				; And restore from start of system call
 	clc
 	ret
 
 .write_failure:
-	popa
+	popad
 	stc				; Set carry flag (for failure)
 	ret
 
@@ -1452,47 +1290,27 @@ int_write_fat:
 ; OUT: root directory contents in DISK_BUFFER, carry set if error
 
 int_read_root_dir:
-	pusha
+	pushad
 
-	mov ax, 19			; Root dir starts at logical sector 19
-	call os_convert_l2hts
-
-	mov si, DISK_BUFFER		; Set ES:BX to point to OS buffer
-	mov bx, ds
-	mov es, bx
-	mov bx, si
-
-	mov ah, 2			; Params for int 13h: read floppy sectors
-	mov al, 14			; And read 14 of them (from 19 onwards)
-
-	pusha				; Prepare to enter loop
-
+	mov eax, 19
+	mov cx, 14
+	mov si, DISK_BUFFER
+	mov dl, [bootdev]
 
 .read_root_dir_loop:
-	popa
-	pusha
-
-	stc				; A few BIOSes do not set properly on error
-	int 13h				; Read sectors
-
+	call os_disk_read_multiple_sectors		; Read sectors
 	jnc .root_dir_finished
+
 	call int_reset_floppy		; Reset controller and try again
 	jnc .read_root_dir_loop		; Floppy reset OK?
 
-	popa
-	jmp .read_failure		; Fatal double error
-
-
-.root_dir_finished:
-	popa				; Restore registers from main loop
-
-	popa				; And restore from start of this system call
-	clc				; Clear carry (for success)
+	popad
+	stc				; Set carry flag (for failure)
 	ret
 
-.read_failure:
-	popa
-	stc				; Set carry flag (for failure)
+.root_dir_finished:
+	popad				; And restore from start of this system call
+	clc				; Clear carry (for success)
 	ret
 
 ; --------------------------------------------------------------------------
@@ -1500,29 +1318,22 @@ int_read_root_dir:
 ; IN: root dir copy in DISK_BUFFER; OUT: carry set if error
 
 int_write_root_dir:
-	pusha
+	pushad
 
-	mov ax, 19			; Root dir starts at logical sector 19
-	call os_convert_l2hts
+	mov eax, 19
+	mov cx, 14
+	mov si, DISK_BUFFER
+	mov dl, [bootdev]
 
-	mov si, DISK_BUFFER		; Set ES:BX to point to OS buffer
-	mov bx, ds
-	mov es, bx
-	mov bx, si
-
-	mov ah, 3			; Params for int 13h: write floppy sectors
-	mov al, 14			; And write 14 of them (from 19 onwards)
-
-	stc				; A few BIOSes do not set properly on error
-	int 13h				; Write sectors
+	call os_disk_write_multiple_sectors		; Write sectors
 	jc .write_failure
 
-	popa				; And restore from start of this system call
+	popad				; And restore from start of this system call
 	clc
 	ret
 
 .write_failure:
-	popa
+	popad
 	stc				; Set carry flag (for failure)
 	ret
 
@@ -1537,8 +1348,7 @@ int_reset_floppy:
 ; ******************************************************************
 	mov dl, [bootdev]
 ; ******************************************************************
-	stc
-	int 13h
+	call os_int13
 	pop dx
 	pop ax
 	ret
