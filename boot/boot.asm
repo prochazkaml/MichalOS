@@ -50,7 +50,7 @@ bootloader_start:
 	mov ax, 07C0h			; Set data segment to where we're loaded
 	mov ds, ax
 
-	mov ax, 02E0h			; Move the bootloader to the start of memory
+	mov ax, 0360h			; Move the bootloader to the start of memory
 	mov es, ax
 	
 	clr si
@@ -59,7 +59,7 @@ bootloader_start:
 	mov cx, 512
 	rep movsb
 	
-	jmp 02E0h:entrypoint
+	jmp 0360h:entrypoint
 	
 entrypoint:
 	mov ds, ax
