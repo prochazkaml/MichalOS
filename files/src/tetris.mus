@@ -1,6 +1,6 @@
 ; MichalOS Music Format File
 
-	%INCLUDE "notelist.txt"
+	%INCLUDE "include/constants.asm"
 
 start:
 	.pit_data	dw 0

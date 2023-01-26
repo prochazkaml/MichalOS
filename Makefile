@@ -101,8 +101,8 @@ build/%.app.bin: programs/%.asm include/*.* .git/refs/heads/master | build
 	-dGIT="'(`git log -1 --format="commit %h from %cd" --date=format:"%Y/%m/%d %H:%M:%S %z"`)'"
 	
 # Assembles all songs.
-build/%.mmf: files/src/%.mus files/src/notelist.txt | build
-	nasm -O2 -w+all -f bin -I files/src/ -o $@ $<
+build/%.mmf: files/src/%.mus include/constants.asm | build
+	nasm -O2 -w+all -f bin -I . -I files/src/ -o $@ $<
 
 build/%.drz: files/src/%.dro misc/zx7/segmented_zx7 | build
 	misc/zx7/segmented_zx7 $< $@

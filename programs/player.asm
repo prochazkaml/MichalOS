@@ -3,7 +3,6 @@
 ; ------------------------------------------------------------------
 
 	%INCLUDE "include/program.inc"
-	%INCLUDE "notelist.txt"
 
 start:
 	cmp byte [terminalflag], 1		; Were we passed a filename and ended the playback?
