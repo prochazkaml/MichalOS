@@ -36,7 +36,7 @@ logoinput:
 	mov si, greetingmsg
 	call os_print_string
 
-	mov si, 57036
+	mov si, CONFIG_USERNAME
 	call os_print_string
 
 	mov al, '!'
@@ -56,7 +56,7 @@ logoinput:
 	
 enterpressed:
 	call os_show_cursor
-	cmp byte [57002], 0				; Is the password disabled?
+	cmp byte [CONFIG_PASSWORD_ENABLED], 0	; Is the password disabled?
 	je checkformenu				; If it is, continue
 
 .try:	
@@ -82,7 +82,7 @@ enterpressed:
 	mov si, buffer
 	call os_string_encrypt
 
-	mov di, 57003
+	mov di, CONFIG_PASSWORD
 	call os_string_compare
 	jnc .try
 	
@@ -217,7 +217,7 @@ background:
 
 menu_background:
 	pusha
-	cmp byte [57071], 1
+	cmp byte [CONFIG_MENU_DIMMING], 1
 	je .done
 	
 	call background

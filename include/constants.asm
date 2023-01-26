@@ -48,6 +48,61 @@
 %define CONFIG_FILE 57000
 
 ; ------------------------------------------------------------------
+; CONFIG FILE LOCATIONS
+
+%define CONFIG(x) (CONFIG_FILE + x)
+
+; 0 = Desktop background color (BYTE)
+%define CONFIG_DESKTOP_BG_COLOR CONFIG(0)
+
+; 1 = Window background color (BYTE)
+%define CONFIG_WINDOW_BG_COLOR CONFIG(1)
+
+; 2 = Password enabled (BYTE)
+%define CONFIG_PASSWORD_ENABLED CONFIG(2)
+
+; 3 - 35 = Password data (STRING, 32 chars + '\0')
+%define CONFIG_PASSWORD CONFIG(3)
+%define CFG_PASSWORD_MAX_INPUT_LENGTH 32
+%define CFG_PASSWORD_MAX_LENGTH 33
+
+; 36 - 68 = Username (STRING, 32 chars + '\0')
+%define CONFIG_USERNAME CONFIG(36)
+%define CFG_USERNAME_MAX_INPUT_LENGTH 32
+%define CFG_USERNAME_MAX_LENGTH 33
+
+; 69 - Sound enabled on startup (BYTE)
+%define CONFIG_SOUND_ENABLED CONFIG(69)
+
+; 70 - Adlib driver number
+%define CONFIG_ADLIB_DRIVER CONFIG(70)
+%define CFG_ADLIB_STD_DRIVER 0
+%define CFG_ADLIB_PWM_DRIVER 1
+%define CFG_ADLIB_PWM_LOUD_DRIVER 2
+
+; 71 - Menu screen dimming enabled (BYTE)
+%define CONFIG_MENU_DIMMING CONFIG(71)
+
+; 72 - Menu color (BYTE)
+%define CONFIG_MENU_BG_COLOR CONFIG(72)
+
+; 73 - "DOS" font enabled (BYTE)
+%define CONFIG_FONT CONFIG(73)
+%define CFG_FONT_MICHALOS 0
+%define CFG_FONT_BIOS 1
+
+; 74 - Minutes to wait for screensaver (BYTE)
+%define CONFIG_SCREENSAVER_MINUTES CONFIG(74)
+
+; 75 - System stack size in 16-byte blocks (WORD)
+%define CONFIG_STACKSGMT_SIZE CONFIG(75)
+
+; 77 - 80 - Unused *******************************
+
+; 81 - Minute time offset (WORD)
+%define CONFIG_TIMEZONE_OFFSET CONFIG(81)
+
+; ------------------------------------------------------------------
 ; MUSICAL NOTE FREQUENCY LIST
 
 A2		equ 110

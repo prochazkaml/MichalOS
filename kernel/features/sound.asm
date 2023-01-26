@@ -118,7 +118,7 @@ os_start_adlib:
 	pusha
 	mov byte [adlib_running], 1
 
-	cmp byte [57070], 1
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	clr ax
@@ -172,7 +172,7 @@ os_stop_adlib:
 	pusha
 	call os_return_app_timer
 
-	cmp byte [57070], 1
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	clr ah
@@ -216,7 +216,7 @@ os_stop_adlib:
 
 os_check_adlib:
 	pusha
-	cmp byte [57070], 1
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .ok
 
 	mov ax, 0460h
@@ -277,7 +277,7 @@ os_adlib_regread:
 int_adlib_regwrite:
 	pusha
 
-	cmp byte [57070], 1
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 
 	cmp byte [adlib_running], 0
@@ -381,7 +381,7 @@ int_adlib_regwrite:
 os_adlib_mute:
 	pusha
 	
-	cmp byte [57070], 1
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	mov si, adlib_volume_registers
@@ -411,7 +411,7 @@ os_adlib_mute:
 os_adlib_unmute:
 	pusha
 
-	cmp byte [57070], 1
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	mov si, adlib_volume_registers
@@ -468,7 +468,7 @@ pwm_handler:
 	
 	mov dl, [pwm_channel_amplitude]
 	
-	cmp byte [57070], 2
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_LOUD_DRIVER
 	jne .handler_loop
 	
 	; Max volume mode, count the number of active channels
@@ -548,7 +548,7 @@ pwm_handler:
 os_adlib_calcfreq:
 	pushad
 
-	cmp byte [57070], 1
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 
 	mov [.channel], cl
@@ -615,7 +615,7 @@ os_adlib_calcfreq:
 ; OUT: None, registers preserved
 
 os_adlib_noteoff:
-	cmp byte [57070], 1
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	pusha

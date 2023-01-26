@@ -1,24 +1,6 @@
 ; ------------------------------------------------------------------
-; MichalOS Configuration
+; MichalOS Settings
 ; ------------------------------------------------------------------
-
-; SYSTEM.CFG map:
-; 0 = Desktop background color (BYTE)
-; 1 = Window background color (BYTE)
-; 2 = Password enabled (BYTE)
-; 3 - 35 = Password data (STRING, 32 chars + '\0')
-; 36 - 68 = Username (STRING, 32 chars + '\0')
-; 69 - Sound enabled on startup (BYTE)
-; 70 - Adlib driver number
-;		- 0: Standard Adlib (ports 0x388-0x389)
-;		- 1: PC speaker PWM
-; 71 - Menu screen dimming enabled (BYTE)
-; 72 - Menu color (BYTE)
-; 73 - "DOS" font enabled (BYTE)
-; 74 - Minutes to wait for screensaver (BYTE)
-; 75 - System stack size in 16-byte blocks (WORD)
-; 77 - 80 - Unused *******************************
-; 81 - Minute time offset (WORD)
 
 	%INCLUDE "include/program.inc"
 
@@ -154,25 +136,15 @@ start:
 	jmp .look
 	
 .enable_dimming:
-	mov byte [57071], 1
+	mov byte [CONFIG_MENU_DIMMING], 1
 	call .update_config
 	jmp .look
 	
 .disable_dimming:
-	mov byte [57071], 0
+	mov byte [CONFIG_MENU_DIMMING], 0
 	call .update_config
 	jmp .look
 
-.enable_graphics:
-	mov byte [57076], 1
-	call .update_config
-	jmp .look
-	
-.enable_text_mode:
-	mov byte [57076], 0
-	call .update_config
-	jmp .look
-	
 .screensaver_settings:
 	call .draw_background
 	
@@ -191,7 +163,7 @@ start:
 	je .screensaver_change_time
 	
 .disable_screensaver:
-	mov byte [57074], 0
+	mov byte [CONFIG_SCREENSAVER_MINUTES], 0
 	call .update_config
 	jmp .screensaver_settings
 
@@ -208,7 +180,7 @@ start:
 	cmp ax, 60
 	jg .screensaver_error
 	
-	mov [57074], al
+	mov [CONFIG_SCREENSAVER_MINUTES], al
 	
 	call .update_config
 	jmp .screensaver_settings
@@ -240,13 +212,13 @@ start:
 	je .bios_font
 	
 .michalos_font:
-	mov byte [57073], 0
+	mov byte [CONFIG_FONT], CFG_FONT_MICHALOS
 	call .update_config
 	call os_reset_font
 	jmp .look
 	
 .bios_font:
-	mov byte [57073], 1
+	mov byte [CONFIG_FONT], CFG_FONT_BIOS
 	call .update_config
 	mov ax, 3
 	int 10h
@@ -264,7 +236,7 @@ start:
 	add al, 0F0h
 .menu_confirm:
 	rol al, 4
-	mov [57072], al
+	mov [CONFIG_MENU_BG_COLOR], al
 	call .update_config
 	jmp .look
 	
@@ -277,7 +249,7 @@ start:
 	add al, 0F0h
 .bg_confirm:
 	rol al, 4
-	mov [57000], al
+	mov [CONFIG_DESKTOP_BG_COLOR], al
 	call .update_config
 	jmp .look
 
@@ -290,7 +262,7 @@ start:
 	add al, 240
 .window_confirm:
 	rol al, 4
-	mov [57001], al
+	mov [CONFIG_WINDOW_BG_COLOR], al
 	call .update_config
 	jmp .look
 
@@ -307,7 +279,7 @@ start:
 	je .negative_timezone
 	
 	call os_string_to_int
-	mov [57081], ax
+	mov [CONFIG_TIMEZONE_OFFSET], ax
 	
 	call .update_config
 	jmp start	
@@ -317,7 +289,7 @@ start:
 	
 	call os_string_to_int
 	neg ax
-	mov [57081], ax
+	mov [CONFIG_TIMEZONE_OFFSET], ax
 	
 	call .update_config
 	jmp start
@@ -354,7 +326,7 @@ start:
 	cmp ax, 4096
 	ja .stack_size_error
 
-	mov [57075], ax
+	mov [CONFIG_STACKSGMT_SIZE], ax
 
 	call .update_config
 	jmp .advanced
@@ -386,12 +358,12 @@ start:
 	je .adlib_drv
 	
 .enable_sound:
-	mov byte [57069], 1
+	mov byte [CONFIG_SOUND_ENABLED], 1
 	call .update_config
 	jmp .sound
 	
 .disable_sound:
-	mov byte [57069], 0
+	mov byte [CONFIG_SOUND_ENABLED], 0
 	call .update_config
 	jmp .sound
 	
@@ -404,7 +376,7 @@ start:
 	jc .sound
 	
 	dec al
-	mov [57070], al
+	mov [CONFIG_ADLIB_DRIVER], al
 	
 	call .update_config
 	jmp .sound
@@ -430,9 +402,9 @@ start:
 	call .draw_background
 	
 	call .reset_name
-	mov ax, 57036
+	mov ax, CONFIG_USERNAME
 	mov bx, .name_msg
-	mov byte [0088h], 32
+	mov byte [0088h], CFG_USERNAME_MAX_INPUT_LENGTH
 	call os_input_dialog
 	mov byte [0088h], 255
 
@@ -442,23 +414,23 @@ start:
 .disable_password:
 	call .draw_background
 
-	mov byte [57002], 0
+	mov byte [CONFIG_PASSWORD_ENABLED], 0
 	call .update_config
 	jmp .password
 	
 .set_password:
 	call .draw_background
 
-	mov byte [57002], 1
+	mov byte [CONFIG_PASSWORD_ENABLED], 1
 	call .reset_password
 
-	mov ax, 57003
+	mov ax, CONFIG_PASSWORD
 	mov bx, .password_msg
-	mov byte [0088h], 32
+	mov byte [0088h], CFG_PASSWORD_MAX_INPUT_LENGTH
 	call os_password_dialog
 	mov byte [0088h], 255
 	
-	mov si, 57003
+	mov si, CONFIG_PASSWORD
 	call os_string_encrypt
 	
 	call .update_config
@@ -489,20 +461,20 @@ start:
 	ret
 
 .reset_password:
-	mov di, 57003	
+	mov di, CONFIG_PASSWORD	
 	clr al
 .reset_password_loop:
 	stosb
-	cmp di, 57036
+	cmp di, CONFIG_PASSWORD + CFG_PASSWORD_MAX_LENGTH
 	jl .reset_password_loop
 	ret
 
 .reset_name:
-	mov di, 57036	
+	mov di, CONFIG_USERNAME	
 	clr al
 .reset_name_loop:
 	stosb
-	cmp di, 57069
+	cmp di, CONFIG_USERNAME + CFG_USERNAME_MAX_LENGTH
 	jl .reset_name_loop
 	ret
 
@@ -519,7 +491,7 @@ start:
 	mov ax, .config_name	; Replace the SYSTEM.CFG file with the new configuration...
 	call os_remove_file
 	mov ax, .config_name
-	mov bx, 57000
+	mov bx, CONFIG_FILE
 	mov cx, 83				; SYSTEM.CFG file size
 	call os_write_file
 	jc .write_error

@@ -16,7 +16,7 @@ os_wait_for_key:
 	call .screen_power
 
 	; Reset the screensaver tick
-	movzx eax, byte [57074]
+	movzx eax, byte [CONFIG_SCREENSAVER_MINUTES]
 	mov ebx, [current_timer_freq]	; Multiply by the number of ticks per minute
 	mul ebx
 	mov [screensaver_timer], eax	; See "int.asm"
@@ -62,7 +62,7 @@ os_wait_for_key:
 	cmp dword [screensaver_timer], 0
 	jne .good
 	
-	cmp byte [57074], 0
+	cmp byte [CONFIG_SCREENSAVER_MINUTES], 0
 	je .good
 	
 	mov ah, 0Fh

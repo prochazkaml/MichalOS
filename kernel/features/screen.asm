@@ -470,7 +470,7 @@ os_file_selector_filtered:
 	popa
 
 	; Draw the box on the right
-	mov bl, [57001]		; Color from RAM
+	mov bl, [CONFIG_WINDOW_BG_COLOR]		; Color from RAM
 	mov16 dx, 41, 2		; Start X/Y position
 	mov si, 37			; Width
 	mov di, 23			; Finish Y position
@@ -582,7 +582,7 @@ os_file_selector_filtered:
 	call os_move_cursor
 
 	mov ax, 09C4h
-	movzx bx, byte [57001]
+	movzx bx, byte [CONFIG_WINDOW_BG_COLOR]
 	mov cx, 35
 	int 10h
 	
@@ -672,7 +672,7 @@ os_list_dialog_tooltip:
 .callback:
 	pusha
 	; Draw the box on the right
-	mov bl, [57001]		; Color from RAM
+	mov bl, [CONFIG_WINDOW_BG_COLOR]		; Color from RAM
 	mov16 dx, 41, 2		; Start X/Y position
 	mov si, 37			; Width
 	mov di, 23			; Finish Y position
@@ -781,7 +781,7 @@ os_list_dialog_ex:
 	movzx ax, byte [bx + 00Fh]
 	add di, ax
 	movzx si, byte [bx + 010h]	; Width
-	mov bl, [57001]				; Color from RAM
+	mov bl, [CONFIG_WINDOW_BG_COLOR]				; Color from RAM
 	call os_draw_block			; Draw option selector window
 	pop bx
 
@@ -1230,7 +1230,7 @@ os_draw_background:
 	jmp os_move_cursor.no_pusha
 
 .draw_default_background:
-	mov bl, byte [57000] ; In case it is necessary
+	mov bl, byte [CONFIG_DESKTOP_BG_COLOR] ; In case it is necessary
 
 	cmp byte [fs:DESKTOP_BACKGROUND], 0
 	je .fill_bg
@@ -1363,7 +1363,7 @@ int_input_dialog:
 
 	push bx				; Save message to show
 
-	mov bl, [57001]		; Color from RAM
+	mov bl, [CONFIG_WINDOW_BG_COLOR]		; Color from RAM
 	mov16 dx, 12, 10			; First, draw red background box
 	mov si, 55
 	mov di, 16
@@ -1474,13 +1474,13 @@ os_dialog_box:
 .draw_left:
 	clr cl
 	mov bl, 11110000b
-	mov bh, [57001]
+	mov bh, [CONFIG_WINDOW_BG_COLOR]
 
 	jmp .draw_buttons
 
 .draw_right:
 	mov cl, 1
-	mov bl, [57001]
+	mov bl, [CONFIG_WINDOW_BG_COLOR]
 	mov bh, 11110000b
 
 	jmp .draw_buttons
@@ -1801,7 +1801,7 @@ os_temp_box:
 	
 	call os_hide_cursor
 
-	mov bl, [57001]		; Color from RAM
+	mov bl, [CONFIG_WINDOW_BG_COLOR]		; Color from RAM
 	mov16 dx, 19, 9			; First, draw red background box
 	mov si, 42
 	mov di, 16
@@ -1905,7 +1905,7 @@ int_restore_footer:
 os_reset_font:
 	pusha
 	
-	cmp byte [57073], 1
+	cmp byte [CONFIG_FONT], CFG_FONT_BIOS
 	je .bios
 	
 	push es
@@ -2000,7 +2000,7 @@ os_draw_icon:
 
 os_option_menu:
 	pusha
-	cmp byte [57071], 0	; "Blur" the background if requested
+	cmp byte [CONFIG_MENU_DIMMING], 0	; "Blur" the background if requested
 	je .skip
 	
 	mov16 dx, 0, 1
@@ -2033,7 +2033,7 @@ os_option_menu:
 
 .good:
 	mov16 dx, 1, 1
-	mov bl, [57072]
+	mov bl, [CONFIG_MENU_BG_COLOR]
 	clr di
 	jmp os_select_list.no_pusha
 

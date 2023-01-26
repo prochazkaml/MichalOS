@@ -368,7 +368,7 @@ start:
 	.save_ok_msg		db 'File saved.', 0
 	
 char_picker:
-	mov bl, [57001]
+	mov bl, [CONFIG_WINDOW_BG_COLOR]
 	mov dx, 2 * 256 + 11
 	mov si, 58
 	mov di, 23
@@ -436,7 +436,7 @@ char_picker:
 	call os_print_string
 	
 	mov al, [.selected_char]
-	mov bl, [57001]
+	mov bl, [CONFIG_WINDOW_BG_COLOR]
 	call sub_putchar
 	
 	mov dh, [.selected_char]

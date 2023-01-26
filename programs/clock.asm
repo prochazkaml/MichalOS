@@ -381,7 +381,7 @@ start:
 .draw_background:
 	mov ax, .title_msg
 	mov bx, .footer_msg
-	mov cx, [57000]
+	mov cx, [CONFIG_DESKTOP_BG_COLOR]
 	call os_draw_background
 	ret
 	

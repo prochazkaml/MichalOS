@@ -158,7 +158,7 @@ os_int_1Ah:
 	
 	; Calculate the time with the time offset
 	
-	mov ax, [57081]
+	mov ax, [CONFIG_TIMEZONE_OFFSET]
 	test ax, 8000h
 	jnz .subtract
 	

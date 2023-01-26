@@ -241,7 +241,7 @@ start:
 .finish_label:
 	mov ax, 0920h				; Clear the screen for the next input
 	clr bh
-	mov bl, [57000]
+	mov bl, [CONFIG_DESKTOP_BG_COLOR]
 	mov cx, 30
 	int 10h
 	
@@ -412,7 +412,7 @@ start:
 
 .adjust_sel_fmt:
 	pusha
-	mov bl, [57000]
+	mov bl, [CONFIG_DESKTOP_BG_COLOR]
 
 	cmp si, [.offset]
 	jne .no_adjust_sel_fmt
@@ -434,7 +434,7 @@ start:
 .draw_background:
 	mov ax, .title_msg
 	mov bx, .footer_msg
-	mov cx, [57000]
+	mov cx, [CONFIG_DESKTOP_BG_COLOR]
 	call os_draw_background
 	ret
 

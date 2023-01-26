@@ -6,7 +6,7 @@
 
 os_demotour:
 	mov si, .test_data_bgcolor
-	mov di, 57000
+	mov di, CONFIG_FILE
 	mov cx, .test_data_end - .test_data_bgcolor
 	rep movsb
 
@@ -34,11 +34,6 @@ os_demotour:
 	jmp os_demotour
 	
 .skip:
-	mov si, .test_data_bgcolor
-	mov di, 57000
-	mov cx, .test_data_end - .test_data_bgcolor
-	rep movsb
-	
 	call .update_config
 	jmp .exit
 	
@@ -126,7 +121,7 @@ os_demotour:
 	call .change_name
 	
 	mov ax, .t3output1
-	mov bx, 57036
+	mov bx, CONFIG_USERNAME
 	mov cx, 4096
 	call os_string_join
 	mov ax, cx
@@ -219,7 +214,7 @@ os_demotour:
 	jc .err
 	
 	dec al
-	mov [57070], al
+	mov [CONFIG_ADLIB_DRIVER], al
 
 .err:
 	ret
@@ -227,7 +222,7 @@ os_demotour:
 
 .change_name:
 	call .reset_name
-	mov ax, 57036
+	mov ax, CONFIG_USERNAME
 	mov bx, .name_msg
 	mov byte [0088h], 32
 	call os_input_dialog
@@ -236,20 +231,20 @@ os_demotour:
 	
 .disable_password:
 	clr al
-	mov [57002], al
+	mov [CONFIG_PASSWORD_ENABLED], al
 	ret
 	
 .set_password:
 	mov al, 1
-	mov [57002], al
+	mov [CONFIG_PASSWORD_ENABLED], al
 	call .reset_password
-	mov ax, 57003
+	mov ax, CONFIG_PASSWORD
 	mov bx, .password_msg
 	mov byte [0088h], 32
 	call os_password_dialog
 	mov byte [0088h], 255
 	
-	mov si, 57003
+	mov si, CONFIG_PASSWORD
 	call os_string_encrypt
 	ret
 	
@@ -258,20 +253,20 @@ os_demotour:
 	ret
 
 .reset_password:
-	mov di, 57003	
+	mov di, CONFIG_PASSWORD	
 	clr al
 .reset_password_loop:
 	stosb
-	cmp di, 57036
+	cmp di, CONFIG_PASSWORD + CFG_PASSWORD_MAX_LENGTH
 	jl .reset_password_loop
 	ret
 
 .reset_name:
-	mov di, 57036	
+	mov di, CONFIG_USERNAME	
 	clr al
 .reset_name_loop:
 	stosb
-	cmp di, 57069
+	cmp di, CONFIG_USERNAME + CFG_USERNAME_MAX_LENGTH
 	jl .reset_name_loop
 	ret
 
@@ -289,7 +284,7 @@ os_demotour:
 
 .update_config:
 	mov ax, .config_name
-	mov bx, 57000
+	mov bx, CONFIG_FILE
 	mov cx, 83				; SYSTEM.CFG file size
 	call os_write_file
 	jc .write_error

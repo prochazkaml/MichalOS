@@ -173,7 +173,7 @@ start:
 	pusha
 	mov ax, .title_msg
 	mov bx, .footer_msg_2
-	movzx cx, byte [57000]
+	movzx cx, byte [CONFIG_DESKTOP_BG_COLOR]
 	call os_draw_background
 	popa
 	ret

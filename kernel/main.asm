@@ -28,7 +28,7 @@
 ;   - 0100h - 7FFFh = Application
 ;   - 8000h - DEA7h = MichalOS kernel
 ;   - DEA8h - DFFFh = Configuration file (SYSTEM.CFG)
-;      - described in CONFIG.ASM
+;      - config file map described in include/constants.asm
 ;   - E000h - FFFFh = Disk buffer
 ; End of memory: 4k-64k bytes stack
 ; ------------------------------------------------------------------
@@ -248,10 +248,10 @@ first_init_stack_done:
 	int 16h
 	
 	mov ax, system_cfg			; Try to load SYSTEM.CFG
-	mov cx, 57000
+	mov cx, CONFIG_FILE
 	call os_load_file
 
-	mov al, [57069]				; Copy the default sound volume (on/off)
+	mov al, [CONFIG_SOUND_ENABLED]				; Copy the default sound volume (on/off)
 	mov [0083h], al
 	
 	jnc no_load_demotour		; If failed, it doesn't exist, so the system is run for the first time
@@ -266,7 +266,7 @@ no_load_demotour:
 	dec ax						; Some BIOSes round up, so we have to sacrifice 1 kB :(
 	shl ax, 6					; Convert kB to segments
 
-	mov bx, [57075]				; Set up the proper stack according to the config file
+	mov bx, [CONFIG_STACKSGMT_SIZE]				; Set up the proper stack according to the config file
 
 	cmp bx, 256
 	jb second_init_stack_done
