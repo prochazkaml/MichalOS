@@ -25,7 +25,7 @@ Please check out the [gallery](https://github.com/prochazkaml/MichalOS/blob/mast
 ## System requirements
 
 - Intel 80386 or higher, Pentium recommended
-- At least 80-ish kB RAM, 256 kB recommended
+- At least 128-ish kB RAM, 256 kB recommended
 - A VGA video card
 - A keyboard
 
