@@ -255,13 +255,13 @@ os_file_selector_filtered:
 	pusha
 	mov cx, 1					; Load first disk sector into RAM
 	movzx dx, byte [bootdev]
-	mov bx, disk_buffer
+	mov bx, DISK_BUFFER
 
 	mov16 ax, 1, 2
 	stc
 	int 13h						; BIOS load sector call
 
-	mov si, disk_buffer + 2Bh	; Disk label starts here
+	mov si, DISK_BUFFER + 2Bh	; Disk label starts here
 
 	mov di, .volname
 	mov cx, 11					; Copy 11 chars of it
@@ -282,7 +282,7 @@ os_file_selector_filtered:
 
 	call int_read_root_dir		; Get the files into the buffer
 
-	mov si, disk_buffer			; Raw directory buffer
+	mov si, DISK_BUFFER			; Raw directory buffer
 	mov di, 64512				; Buffer for indexes
 	clr cx						; Number of found files
 

@@ -13,7 +13,7 @@ os_report_free_space:
 	mov word [.sectors_read], 0
 	
 	call int_read_fat				; Read the FAT into memory
-	mov si, disk_buffer
+	mov si, DISK_BUFFER
 	
 .loop:
 	; 0 = nothing, 1 = 1st nibble, 2 = 2nd nibble, 3 = 3rd nibble, G = data we don't care about
@@ -128,7 +128,7 @@ os_get_file_list:
 	mov ax, 19			; Root dir starts at logical sector 19
 	call os_convert_l2hts
 
-	mov si, disk_buffer		; ES:BX should point to our buffer
+	mov si, DISK_BUFFER		; ES:BX should point to our buffer
 	mov bx, si
 
 	mov ax, 2 * 256 + 14	; Params for int 13h: read floppy sectors
@@ -155,7 +155,7 @@ os_get_file_list:
 	popa
 
 	clr ax
-	mov si, disk_buffer		; Data reader from start of filenames
+	mov si, DISK_BUFFER		; Data reader from start of filenames
 
 	mov word di, [.file_list_tmp]	; Name destination buffer
 
@@ -290,7 +290,7 @@ os_load_file:
 	mov ax, 19			; Root dir starts at logical sector 19
 	call os_convert_l2hts
 
-	mov si, disk_buffer		; ES:BX should point to our buffer
+	mov si, DISK_BUFFER		; ES:BX should point to our buffer
 	mov bx, si
 
 	mov ax, 2 * 256 + 14	; Params for int 13h: read floppy sectors
@@ -321,7 +321,7 @@ os_load_file:
 
 .next_root_entry:
 	add bx, 32			; Bump searched entries by 1 (offset + 32 bytes)
-	mov di, disk_buffer		; Point root dir at next entry
+	mov di, DISK_BUFFER		; Point root dir at next entry
 	add di, bx
 
 	mov al, [di]			; First character of name
@@ -374,7 +374,7 @@ os_load_file:
 	mov ax, 1			; Sector 1 = first sector of first FAT
 	call os_convert_l2hts
 
-	mov bx, disk_buffer		; ES:BX points to our buffer
+	mov bx, DISK_BUFFER		; ES:BX points to our buffer
 
 	mov ah, 2			; int 13h params: read sectors
 	mov al, 9			; And read 9 of them
@@ -431,7 +431,7 @@ os_load_file:
 	mul bx
 	mov bx, 2
 	div bx				; DX = [CLUSTER] mod 2
-	mov si, disk_buffer		; AX = word in FAT for the 12 bits
+	mov si, DISK_BUFFER		; AX = word in FAT for the 12 bits
 	add si, ax
 	mov ax, word [ds:si]
 
@@ -469,7 +469,7 @@ os_load_file:
 
 	.bootd					db 0 		; Boot device number
 	.cluster				dw 0 		; Cluster of the file we want to load
-	.pointer				dw 0 		; Pointer into disk_buffer, for loading 'file2load'
+	.pointer				dw 0 		; Pointer into DISK_BUFFER, for loading 'file2load'
 
 	.filename_loc			dw 0		; Temporary store of filename location
 	.load_position			dw 0		; Where we'll load the file
@@ -560,7 +560,7 @@ os_write_file:
 	jz .finished
 
 	call int_read_fat		; Get FAT copy into RAM
-	mov si, disk_buffer + 3		; And point SI at it (skipping first two clusters)
+	mov si, DISK_BUFFER + 3		; And point SI at it (skipping first two clusters)
 
 	mov bx, 2			; Current cluster counter
 	mov word cx, [.clusters_needed]
@@ -640,7 +640,7 @@ os_write_file:
 	mul bx
 	mov bx, 2
 	div bx				; DX = [.cluster] mod 2
-	mov si, disk_buffer
+	mov si, DISK_BUFFER
 	add si, ax			; AX = word in FAT for the 12 bit entry
 	mov ax, word [ds:si]
 
@@ -693,7 +693,7 @@ os_write_file:
 	mul bx
 	mov bx, 2
 	div bx				; DX = [.cluster] mod 2
-	mov si, disk_buffer
+	mov si, DISK_BUFFER
 	add si, ax			; AX = word in FAT for the 12 bit entry
 	mov ax, word [ds:si]
 
@@ -822,7 +822,7 @@ os_file_exists:
 	push ax
 	call int_read_root_dir
 
-	mov di, disk_buffer
+	mov di, DISK_BUFFER
 
 	call int_filename_convert	; Make FAT12-style filename
 	jc .failure
@@ -857,9 +857,9 @@ os_create_file:
 	jnc .exists_error
 
 
-	; Root dir already read into disk_buffer by os_file_exists
+	; Root dir already read into DISK_BUFFER by os_file_exists
 
-	mov di, disk_buffer		; So point DI at it!
+	mov di, DISK_BUFFER		; So point DI at it!
 
 	mov cx, 224			; Cycle through root dir entries
 .next_entry:
@@ -984,9 +984,9 @@ os_remove_file:
 
 	clc
 
-	call int_read_root_dir		; Get root dir into disk_buffer
+	call int_read_root_dir		; Get root dir into DISK_BUFFER
 
-	mov di, disk_buffer		; Point DI to root dir
+	mov di, DISK_BUFFER		; Point DI to root dir
 
 	pop ax				; Get chosen filename back
 
@@ -1012,8 +1012,8 @@ os_remove_file:
 	call int_write_root_dir	; Save back the root directory from RAM
 
 
-	call int_read_fat		; Now FAT is in disk_buffer
-	mov di, disk_buffer		; And DI points to it
+	call int_read_fat		; Now FAT is in DISK_BUFFER
+	mov di, DISK_BUFFER		; And DI points to it
 
 
 .more_clusters:
@@ -1026,7 +1026,7 @@ os_remove_file:
 	mul bx
 	mov bx, 2
 	div bx				; DX = [first_cluster] mod 2
-	mov si, disk_buffer		; AX = word in FAT for the 12 bits
+	mov si, DISK_BUFFER		; AX = word in FAT for the 12 bits
 	add si, ax
 	mov ax, word [ds:si]
 
@@ -1090,9 +1090,9 @@ os_rename_file:
 
 	clc
 
-	call int_read_root_dir		; Get root dir into disk_buffer
+	call int_read_root_dir		; Get root dir into DISK_BUFFER
 
-	mov di, disk_buffer		; Point DI to root dir
+	mov di, DISK_BUFFER		; Point DI to root dir
 
 	pop ax				; Get chosen filename back
 
@@ -1113,7 +1113,7 @@ os_rename_file:
 	
 	mov si, ax
 
-	mov cx, 11			; Copy new filename string into root dir entry in disk_buffer
+	mov cx, 11			; Copy new filename string into root dir entry in DISK_BUFFER
 	rep movsb
 
 	call int_write_root_dir	; Save root dir to disk
@@ -1155,7 +1155,7 @@ os_get_file_size:
 
 	pop ax
 
-	mov di, disk_buffer
+	mov di, DISK_BUFFER
 
 	call int_get_root_entry
 	jc .failure
@@ -1200,7 +1200,7 @@ os_get_file_datetime:
 
 	pop ax
 
-	mov di, disk_buffer
+	mov di, DISK_BUFFER
 
 	call int_get_root_entry
 	jc .failure
@@ -1314,7 +1314,7 @@ int_filename_convert:
 
 ; --------------------------------------------------------------------------
 ; int_get_root_entry -- Search RAM copy of root dir for file entry
-; IN: AX = filename; OUT: DI = location in disk_buffer of root dir entry,
+; IN: AX = filename; OUT: DI = location in DISK_BUFFER of root dir entry,
 ; or carry set if file not found
 
 int_get_root_entry:
@@ -1335,7 +1335,7 @@ int_get_root_entry:
 
 	add ax, 32			; Bump searched entries by 1 (32 bytes/entry)
 
-	mov di, disk_buffer		; Point to next root dir entry
+	mov di, DISK_BUFFER		; Point to next root dir entry
 	add di, ax
 
 	xchg dx, cx			; Get the original CX back
@@ -1365,7 +1365,7 @@ int_get_root_entry:
 
 
 ; --------------------------------------------------------------------------
-; int_read_fat -- Read FAT entry from floppy into disk_buffer
+; int_read_fat -- Read FAT entry from floppy into DISK_BUFFER
 ; IN: None
 ; OUT: carry set if failure
 
@@ -1375,7 +1375,7 @@ int_read_fat:
 	mov ax, 1			; FAT starts at logical sector 1 (after boot sector)
 	call os_convert_l2hts
 
-	mov si, disk_buffer		; Set ES:BX to point to 8K OS buffer
+	mov si, DISK_BUFFER		; Set ES:BX to point to 8K OS buffer
 	mov bx, cs
 	mov es, bx
 	mov bx, si
@@ -1414,8 +1414,8 @@ int_read_fat:
 
 
 ; --------------------------------------------------------------------------
-; int_write_fat -- Save FAT contents from disk_buffer in RAM to disk
-; IN: FAT in disk_buffer; OUT: carry set if failure
+; int_write_fat -- Save FAT contents from DISK_BUFFER in RAM to disk
+; IN: FAT in DISK_BUFFER; OUT: carry set if failure
 
 int_write_fat:
 	pusha
@@ -1423,7 +1423,7 @@ int_write_fat:
 	mov ax, 1			; FAT starts at logical sector 1 (after boot sector)
 	call os_convert_l2hts
 
-	mov si, disk_buffer		; Set ES:BX to point to 8K OS buffer
+	mov si, DISK_BUFFER		; Set ES:BX to point to 8K OS buffer
 	mov bx, ds
 	mov es, bx
 	mov bx, si
@@ -1449,7 +1449,7 @@ int_write_fat:
 ; --------------------------------------------------------------------------
 ; int_read_root_dir -- Get the root directory contents
 ; IN: None
-; OUT: root directory contents in disk_buffer, carry set if error
+; OUT: root directory contents in DISK_BUFFER, carry set if error
 
 int_read_root_dir:
 	pusha
@@ -1457,7 +1457,7 @@ int_read_root_dir:
 	mov ax, 19			; Root dir starts at logical sector 19
 	call os_convert_l2hts
 
-	mov si, disk_buffer		; Set ES:BX to point to OS buffer
+	mov si, DISK_BUFFER		; Set ES:BX to point to OS buffer
 	mov bx, ds
 	mov es, bx
 	mov bx, si
@@ -1496,8 +1496,8 @@ int_read_root_dir:
 	ret
 
 ; --------------------------------------------------------------------------
-; int_write_root_dir -- Write root directory contents from disk_buffer to disk
-; IN: root dir copy in disk_buffer; OUT: carry set if error
+; int_write_root_dir -- Write root directory contents from DISK_BUFFER to disk
+; IN: root dir copy in DISK_BUFFER; OUT: carry set if error
 
 int_write_root_dir:
 	pusha
@@ -1505,7 +1505,7 @@ int_write_root_dir:
 	mov ax, 19			; Root dir starts at logical sector 19
 	call os_convert_l2hts
 
-	mov si, disk_buffer		; Set ES:BX to point to OS buffer
+	mov si, DISK_BUFFER		; Set ES:BX to point to OS buffer
 	mov bx, ds
 	mov es, bx
 	mov bx, si

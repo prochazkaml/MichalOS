@@ -3,26 +3,8 @@
 ; ------------------------------------------------------------------
 
 	BITS 16
-	
 	ORG 32768
-	
-; ------------------------------------------------------------------
-; MACROS
-; ------------------------------------------------------------------
-	
-%macro clr 1
-	xor %1, %1
-%endmacro
-
-%macro mov16 3
-	mov %1, (%2 + %3 * 256)
-%endmacro
-
-%define ADLIB_BUFFER 0500h
-%define DESKTOP_BACKGROUND 0600h
-%define SYSTEM_FONT 1600h
-%define FILE_MANAGER 2600h
-%define disk_buffer 0E000h
+	%include "include/kernel.inc"
 
 ; ------------------------------------------------------------------
 ; MichalOS memory map:

@@ -2,7 +2,7 @@
 ; MichalOS Fatal error kill screen
 ; ==================================================================
 	
-	%include "programs/michalos.inc"
+	%include "include/program.inc"
 
 	mov [.ax], ax			; Store string location for now, ...
 	call os_clear_screen

@@ -1,7 +1,7 @@
 ; ------------------------------------------------------------------
-; Include file for MichalOS program development
+; Include file for MichalOS kernel development
 ; ------------------------------------------------------------------
 
-	%include "include/program.inc"
+	%include "include/constants.asm"
 
 ; -----------------------------------------------------------------

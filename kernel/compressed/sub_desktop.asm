@@ -2,7 +2,7 @@
 ; MichalOS Desktop
 ; ==================================================================
 
-	%include "programs/michalos.inc"
+	%include "include/program.inc"
 
 	; Input parameters:
 	; AX = 0 for displaying the login screen
