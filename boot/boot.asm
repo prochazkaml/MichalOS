@@ -300,7 +300,7 @@ l2hts:			; Calculate head, track and sector settings for int 13h
 	reboot_msg		db 13, 10, "Press any key to reboot" ; Carries over to the next string
 	point			db ".", 0
 
-	startmsg		db "Loading MichalOS kernel" ; Termination not needed, as 1st byte of pointer will be always 0 on startup
+	startmsg		db "Loading MichalOS ", VERMAJ, ".", VERMIN, " kernel" ; Termination not needed, as 1st byte of pointer will be always 0 on startup
 
 	bootdev		equ VolumeID		; Boot device number
 	cluster		equ VolumeID + 1	; Cluster of the file we want to load

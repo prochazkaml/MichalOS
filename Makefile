@@ -63,8 +63,10 @@ bigdebug: build/images/michalos288.flp
 bignoboot: build/images/michalos288.flp
 
 # Bootloader target
-build/boot.bin: boot/boot.asm | build
-	nasm -O2 -w+all -f bin -o $@ -l build/boot.lst boot/boot.asm
+build/boot.bin: boot/boot.asm .git/refs/heads/master | build
+	nasm -O2 -w+all -f bin -o $@ -l build/boot.lst boot/boot.asm \
+	-dVERMIN="'`expr $$(git rev-list --all --count) - $(VERCOMMIT)`'" \
+	-dVERMAJ="'$(VER)'"
 
 # Compressed kernel asset target
 build/%.zx7: kernel/compressed/%.asm include/*.* .git/refs/heads/master misc/zx7/raw_zx7 | build
