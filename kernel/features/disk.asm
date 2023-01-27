@@ -180,7 +180,7 @@ os_get_file_list:
 ; OUT: BX = file size (in bytes), carry set if file not found
 
 os_load_file:
-	pusha
+	pushad
 	push es
 	mov [.old_segment], es
 
@@ -254,7 +254,7 @@ os_load_file:
 
 .root_problem:
 	pop es
-	popa
+	popad
 	clr bx			; If file not found or major disk error,
 
 	stc				; return with size = 0 and carry set
@@ -328,7 +328,7 @@ os_load_file:
 
 .end:
 	pop es
-	popa
+	popad
 
 	mov ebx, [.file_size]		; Get file size to pass back in BX
 	call int_restore_footer
@@ -355,7 +355,7 @@ os_load_file:
 ; OUT: Carry clear if OK, set if failure
 
 os_write_file:
-	pusha
+	pushad
 	
 	mov [.old_segment], es
 	
@@ -598,7 +598,7 @@ os_write_file:
 	test eax, eax
 	jz .write_root_entry
 
-	pusha
+	pushad
 
 	add eax, 31
 	mov si, [.location]
@@ -610,7 +610,7 @@ os_write_file:
 	push cs
 	pop es
 		
-	popa
+	popad
 
 	add word [.location], 512
 	inc cx
@@ -642,7 +642,7 @@ os_write_file:
 
 .finished:
 	call int_restore_footer
-	popa
+	popad
 	mov es, [.old_segment]
 
 	clc
@@ -650,7 +650,7 @@ os_write_file:
 
 .failure:
 	call int_restore_footer
-	popa
+	popad
 	mov es, [.old_segment]
 
 	stc				; Couldn't write!
