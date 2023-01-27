@@ -19,7 +19,7 @@ start:
 	call os_clear_screen
 	call os_get_boot_disk
 
-	clr ax
+	clr eax
 	
 .loop:
 	call .sectorselect
@@ -47,12 +47,9 @@ start:
 	popa
 	
 	pusha
-	call os_convert_l2hts		; Entered number -> HTS
-	mov bx, DISK_BUFFER		; Read the sector
-	mov16 ax, 1, 2
-	mov dl, [.drive]
-	stc
-	int 13h
+	mov si, 4000h
+	call os_get_boot_disk
+	call os_disk_read_sector
 	jc .error
 	
 	mov si, .pass_msg

@@ -60,10 +60,13 @@ os_create_file			equ	809Ch	; IN: AX = filename
 os_remove_file			equ	809Fh	; IN: AX = filename
 os_rename_file			equ	80A2h	; IN: AX = filename, BX = new filename
 os_get_file_size		equ	80A5h	; IN: AX = filename						OUT: EBX = bytes (4G max)
-os_convert_l2hts		equ 8156h	; IN: AX = logical sector				OUT: correct registers for int 13h
 os_report_free_space	equ 8081h	;										OUT: AX = number of free sectors
 os_get_file_datetime	equ 80F9h
 os_get_boot_disk		equ 812Ch
+os_disk_read_sector		equ 814Ah
+os_disk_write_sector	equ 8150h
+os_disk_read_multiple_sectors	equ 8156h
+os_disk_write_multiple_sectors	equ 8162h
 
 ; Sound
 

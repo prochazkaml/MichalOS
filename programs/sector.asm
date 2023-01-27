@@ -6,7 +6,7 @@ start:
 	mov16 dx, 5, 4
 	call os_move_cursor
 
-	clr al
+	clr eax
 
 .hex2_title_loop:
 	call os_print_2hex
@@ -27,7 +27,7 @@ start:
 	jne .hex_title_loop
 
 	mov cx, 512
-	mov di, DISK_BUFFER
+	mov di, 4000h
 	mov al, 88
 	rep stosb
 	
@@ -36,7 +36,7 @@ start:
 	
 	mov16 dx, 5, 6
 	call os_move_cursor
-	mov si, DISK_BUFFER
+	mov si, 4000h
 	cmp byte [.halfnum], 0
 	je .zerohalf
 	add si, 256
@@ -110,9 +110,6 @@ start:
 	lodsb
 	call os_print_2hex
 	
-;	cmp si, disk_buffer+512
-;	je .draw_loop
-	
 	push si
 	mov si, .space
 	call os_print_string
@@ -145,12 +142,10 @@ start:
 .sectorselect:
 	call os_string_to_int	; Decode the entered number
 	mov [.sectornum], ax
-	call os_convert_l2hts		; Entered number -> HTS
-	mov bx, DISK_BUFFER		; Read the sector
-	mov16 ax, 1, 2
+
+	mov si, 4000h
 	call os_get_boot_disk
-	stc
-	int 13h
+	call os_disk_read_sector
 	jc .error
 	jmp .draw_loop
 	

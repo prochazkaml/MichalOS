@@ -252,21 +252,18 @@ os_file_selector_filtered:
 .no_pusha:
 	; Get volume name
 
-	pusha
-	mov cx, 1					; Load first disk sector into RAM
-	movzx dx, byte [bootdev]
-	mov bx, DISK_BUFFER
-
-	mov16 ax, 1, 2
-	stc
-	int 13h						; BIOS load sector call
+	pushad
+	mov eax, 0					; Load first disk sector into RAM
+	mov dl, [bootdev]
+	mov si, DISK_BUFFER
+	call os_disk_read_sector
 
 	mov si, DISK_BUFFER + 2Bh	; Disk label starts here
 
 	mov di, .volname
 	mov cx, 11					; Copy 11 chars of it
 	rep movsb
-	popa
+	popad
 	
 	mov word [.filename], 0		; Terminate string in case user leaves without choosing
 

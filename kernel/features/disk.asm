@@ -1362,38 +1362,6 @@ int_reset_floppy:
 os_get_boot_disk:
 	mov dl, [bootdev]
 	ret
-
-; --------------------------------------------------------------------------
-; os_convert_l2hts -- Calculate head, track and sector for int 13h
-; IN: logical sector in AX; OUT: correct registers for int 13h
-
-os_convert_l2hts:
-	push bx
-	push ax
-
-	mov bx, ax			; Save logical sector
-
-	clr dx				; First the sector
-	div word [SecsPerTrack]		; Sectors per track
-	add dl, 01h			; Physical sectors start at 1
-	mov cl, dl			; Sectors belong in CL for int 13h
-
-	clr dx				; Now calculate the head
-	div word [Sides]		; Floppy sides
-	mov dh, dl			; Head/side
-	mov ch, al			; Track
-	
-	pop ax
-	pop bx
-
-	mov dl, [bootdev]		; Set correct device
-
-	ret
-
-
-
-	Sides dw 2
-	SecsPerTrack dw 18
 	
 	bootdev db 0			; Boot device number
 

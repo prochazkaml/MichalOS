@@ -147,15 +147,15 @@ os_call_vectors:
 	jmp os_get_os_name			; 8141h
 	jmp os_temp_box				; 8144h
 	jmp os_adlib_unmute			; 8147h
-	jmp os_illegal_call			; 814Ah ; FREE!!!!!!!!!!!!
+	jmp os_disk_read_sector		; 814Ah
 	jmp os_init_text_mode		; 814Dh
-	jmp os_illegal_call			; 8150h ; FREE!!!!!!!!!!!!
+	jmp os_disk_write_sector	; 8150h
 	jmp os_print_int			; 8153h
-	jmp os_convert_l2hts		; 8156h
+	jmp os_disk_read_multiple_sectors	; 8156h
 	jmp os_speaker_raw_period	; 8159h
 	jmp os_select_list			; 815Ch
 	jmp os_list_dialog_ex		; 815Fh
-	jmp os_illegal_call			; 8162h ; FREE!!!!!!!!!!!!
+	jmp os_disk_write_multiple_sectors	; 8162h
 	jmp os_input_string_ex		; 8165h
 	jmp os_file_selector_filtered	; 8168h
 
@@ -181,8 +181,6 @@ first_init_stack_done:
 	mov gs, ax
 	
 	mov [bootdev], dl			; Save boot device number
-	mov [Sides], bx
-	mov [SecsPerTrack], cx
 
 	mov cx, 0x8000
 	clr di

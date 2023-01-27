@@ -28,12 +28,11 @@ start:
  	call os_draw_background
 	
 	;; Load data sector
-	mov bx, 8192
-	mov ax, 2880
-	call os_convert_l2hts
-	mov ah, 2
-	mov al, 8
-	int 13h
+	mov eax, 2880
+	mov si, 8192
+	mov cx, 8
+	call os_get_boot_disk
+	call os_disk_read_multiple_sectors
 	jnc .no_error
 
 	mov ax, .error_msg1
@@ -95,8 +94,8 @@ start:
 
 	mov [.previous_block], ax
 	xor ax, 0x1000
-	mov bx, 8192
-	add bx, ax
+	mov si, 8192
+	add si, ax
 	
 	mov ax, [.current_position]
 	cmp ax, 2880 * 2
@@ -107,10 +106,9 @@ start:
 	mov word [.loadedbuffers], 0
 
 .no_reset:
-	call os_convert_l2hts
-	mov ah, 2
-	mov al, 8
-	int 13h
+	mov cx, 8
+	call os_get_boot_disk
+	call os_disk_read_multiple_sectors
 
 	add word [.current_position], 8
 	inc word [.loadedbuffers]
