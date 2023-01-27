@@ -219,10 +219,7 @@ end:					; We've got the file to load!
 	call print_string
 	
 	mov dl, [bootdev]		; Provide kernel with boot device info
-	mov cx, [SectorsPerTrack]
-	mov bx, [Sides]
-	
-;	jmp $
+
 	jmp 8000h			; Jump to entry point of loaded kernel!
 
 ; ------------------------------------------------------------------
