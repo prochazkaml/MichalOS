@@ -191,6 +191,16 @@ first_init_stack_done:
 	mov byte [0088h], 255
 ;	mov byte [00E0h], 0
 
+	; Clear the disk params table
+
+	push es
+	mov es, [driversgmt]
+	mov di, DISK_PARAMS
+	mov al, 0FFh
+	mov cx, 8 * 256
+	rep stosb
+	pop es
+
 	; Load the files
 	
 	push es
