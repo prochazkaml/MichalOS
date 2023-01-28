@@ -33,6 +33,26 @@ os_int13:
 	ret
 
 ; --------------------------------------------------------------------------
+; os_int13_failsafe -- Performs a BIOS 13h call 3 times in case of error
+; IN/OUT: depends on function in AH (DL must be drive number), high 16 bits of all 32-bit registers preserved, carry set if error
+
+os_int13_failsafe:
+	call os_int13				; Attempt #1
+	jnc .ok
+
+	call os_disk_reset_device	; Reset device and try again
+
+	call os_int13				; Attempt #2
+	jnc .ok
+
+	call os_disk_reset_device	; Reset device and try again
+
+	call os_int13				; Third time's a charm!
+
+.ok:
+	ret
+
+; --------------------------------------------------------------------------
 ; os_disk_get_param_table -- Get the pointer to the disk param table
 ; IN: DL = drive number, OUT: DS:DI = pointer to param table
 
@@ -44,6 +64,28 @@ os_disk_get_param_table:
 
 	add di, DISK_PARAMS			; Add the offset to the table
 	ret
+
+; --------------------------------------------------------------------------
+; os_disk_reset_device -- Resets a given disk device
+; IN: DL = drive number, OUT: carry set if error
+
+os_disk_reset_device:
+	pusha
+	push ds
+	call os_disk_get_param_table
+
+	cmp byte [di + 1], 0
+	je .reset_chs
+
+.exit:
+	pop ds
+	popa
+	ret
+
+.reset_chs:
+	mov ah, 0				; Perform a reset via legacy CHS
+	call os_int13
+	jmp .exit				; Pass along the carry flag
 
 ; --------------------------------------------------------------------------
 ; os_disk_detect_drive -- Read basic information about the drive if a change occured
@@ -83,7 +125,7 @@ os_disk_detect_drive:
 
 .skip_chs_check:
 	mov ah, 8				; Get drive parameters
-	call os_int13
+	call os_int13_failsafe
 
 	jc .end
 
@@ -141,7 +183,7 @@ os_disk_detect_drive:
 	call os_disk_cache_alloc_sector
 
 	mov ah, 48h				; Get drive parameters (extended)
-	call os_int13
+	call os_int13_failsafe
 
 	jc .lba_end
 
@@ -194,7 +236,7 @@ os_disk_read_sector:
 ;	call os_dump_registers
 ;	pop ds
 
-	call os_int13				; Read the sector
+	call os_int13_failsafe		; Read the sector
 	jc .err
 
 	clc
@@ -252,7 +294,7 @@ os_disk_write_sector:
 ;	call os_dump_registers
 ;	pop ds
 
-	call os_int13				; Read the sector
+	call os_int13_failsafe		; Read the sector
 	jc .err
 
 	clc

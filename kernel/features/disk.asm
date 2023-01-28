@@ -203,17 +203,8 @@ os_load_file:
 	mov [.filename_loc], ax		; Store filename location
 	mov [.load_position], cx	; And where to load the file!
 
-	xor eax, eax			; Needed for some older BIOSes
-
-	call int_reset_floppy		; In case floppy has been changed
-	jnc .floppy_ok			; Did the floppy reset OK?
-
-	jmp .root_problem
-
-
-.floppy_ok:				; Ready to read first block of data
 	call int_read_root_dir
-	jc .root_problem		; Double error = exit
+	jc .root_problem
 
 .search_root_dir:
 	mov cx, 224		; Search all entries in root dir
@@ -287,12 +278,7 @@ os_load_file:
 	push cs
 	pop es
 	
-	jnc .calculate_next_cluster	; If there's no error...
-
-	call int_reset_floppy		; Otherwise, reset floppy and retry
-	jnc .load_file_sector
-
-	jmp .root_problem
+	jc .root_problem
 
 
 .calculate_next_cluster:
@@ -1237,27 +1223,14 @@ int_get_root_entry:
 
 int_read_fat:
 	pushad
-
 	mov eax, 1
 	mov cx, 9
 	mov si, DISK_BUFFER
 	mov dl, [bootdev]
-
-.read_fat_loop:
-	call os_disk_read_multiple_sectors		; Read sectors
-	jnc .fat_done
-
-	call int_reset_floppy		; Reset controller and try again
-	jnc .read_fat_loop		; Floppy reset OK?
-
+	call os_disk_read_multiple_sectors		; Read sectors, error status in CF
 	popad
-	stc				; Set carry flag (for failure)
 	ret
 
-.fat_done:
-	popad				; And restore registers from start of system call
-	clc
-	ret
 
 ; --------------------------------------------------------------------------
 ; int_write_fat -- Save FAT contents from DISK_BUFFER in RAM to disk
@@ -1265,22 +1238,12 @@ int_read_fat:
 
 int_write_fat:
 	pushad
-
 	mov eax, 1
 	mov cx, 9
 	mov si, DISK_BUFFER
 	mov dl, [bootdev]
-
-	call os_disk_write_multiple_sectors		; Write sectors
-	jc .write_failure		; Fatal double error
-
-	popad				; And restore from start of system call
-	clc
-	ret
-
-.write_failure:
+	call os_disk_write_multiple_sectors		; Write sectors, error status in CF
 	popad
-	stc				; Set carry flag (for failure)
 	ret
 
 
@@ -1291,27 +1254,14 @@ int_write_fat:
 
 int_read_root_dir:
 	pushad
-
 	mov eax, 19
 	mov cx, 14
 	mov si, DISK_BUFFER
 	mov dl, [bootdev]
-
-.read_root_dir_loop:
-	call os_disk_read_multiple_sectors		; Read sectors
-	jnc .root_dir_finished
-
-	call int_reset_floppy		; Reset controller and try again
-	jnc .read_root_dir_loop		; Floppy reset OK?
-
+	call os_disk_read_multiple_sectors		; Read sectors, error status in CF
 	popad
-	stc				; Set carry flag (for failure)
 	ret
 
-.root_dir_finished:
-	popad				; And restore from start of this system call
-	clc				; Clear carry (for success)
-	ret
 
 ; --------------------------------------------------------------------------
 ; int_write_root_dir -- Write root directory contents from DISK_BUFFER to disk
@@ -1319,38 +1269,12 @@ int_read_root_dir:
 
 int_write_root_dir:
 	pushad
-
 	mov eax, 19
 	mov cx, 14
 	mov si, DISK_BUFFER
 	mov dl, [bootdev]
-
-	call os_disk_write_multiple_sectors		; Write sectors
-	jc .write_failure
-
-	popad				; And restore from start of this system call
-	clc
-	ret
-
-.write_failure:
+	call os_disk_write_multiple_sectors		; Write sectors, error status in CF
 	popad
-	stc				; Set carry flag (for failure)
-	ret
-
-
-; --------------------------------------------------------------------------
-; Reset floppy disk
-
-int_reset_floppy:
-	push ax
-	push dx
-	clr ax
-; ******************************************************************
-	mov dl, [bootdev]
-; ******************************************************************
-	call os_int13
-	pop dx
-	pop ax
 	ret
 
 
