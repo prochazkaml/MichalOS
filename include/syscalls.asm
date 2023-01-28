@@ -128,7 +128,7 @@ os_get_via_serial		equ	8063h	;										OUT: AL = byte received
 
 os_run_basic			equ	80C6h	; IN: AX = code location in RAM, BX = size, SI = parameter string (or 0 if none)
 os_pause				equ	8024h	; IN: AX = 1/18.2 of second to wait
-os_clear_registers		equ 80E2h	;										OUT: all registers clear
+os_clear_registers		equ 80D2h	;										OUT: all registers clear
 os_get_memory			equ 8120h	;										OUT: AX = conventional memory (kB), BX = extended memory (kB)
 os_get_int_handler		equ 813Eh	; IN: CL = int number					OUT: DI:SI = code location
 os_draw_logo			equ 8057h	;										OUT: A very beautiful logo
