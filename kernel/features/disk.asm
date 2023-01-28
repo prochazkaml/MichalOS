@@ -1223,11 +1223,17 @@ int_get_root_entry:
 
 int_read_fat:
 	pushad
+	push es
+	
+	push cs
+	pop es
 	mov eax, 1
 	mov cx, 9
 	mov si, DISK_BUFFER
 	mov dl, [bootdev]
 	call os_disk_read_multiple_sectors		; Read sectors, error status in CF
+
+	pop es
 	popad
 	ret
 
@@ -1238,11 +1244,17 @@ int_read_fat:
 
 int_write_fat:
 	pushad
+	push es
+	
+	push cs
+	pop es
 	mov eax, 1
 	mov cx, 9
 	mov si, DISK_BUFFER
 	mov dl, [bootdev]
 	call os_disk_write_multiple_sectors		; Write sectors, error status in CF
+
+	pop es
 	popad
 	ret
 
@@ -1254,11 +1266,17 @@ int_write_fat:
 
 int_read_root_dir:
 	pushad
+	push es
+	
+	push cs
+	pop es
 	mov eax, 19
 	mov cx, 14
 	mov si, DISK_BUFFER
 	mov dl, [bootdev]
 	call os_disk_read_multiple_sectors		; Read sectors, error status in CF
+
+	pop es
 	popad
 	ret
 
@@ -1269,11 +1287,17 @@ int_read_root_dir:
 
 int_write_root_dir:
 	pushad
+	push es
+	
+	push cs
+	pop es
 	mov eax, 19
 	mov cx, 14
 	mov si, DISK_BUFFER
 	mov dl, [bootdev]
 	call os_disk_write_multiple_sectors		; Write sectors, error status in CF
+
+	pop es
 	popad
 	ret
 
