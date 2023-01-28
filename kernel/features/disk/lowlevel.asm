@@ -236,11 +236,7 @@ os_disk_read_sector:
 	call os_disk_init_int13		; Prepare the params
 	jc .err
 
-;	push ds
-;	push cs
-;	pop ds
 ;	call os_dump_registers
-;	pop ds
 
 	call os_int13_failsafe		; Read the sector
 	jc .err
@@ -294,11 +290,7 @@ os_disk_write_sector:
 
 	inc ah						; Select write operation (works for both CHS and LBA)
 
-;	push ds
-;	push cs
-;	pop ds
 ;	call os_dump_registers
-;	pop ds
 
 	call os_int13_failsafe		; Read the sector
 	jc .err

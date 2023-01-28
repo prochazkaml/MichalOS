@@ -1276,47 +1276,113 @@ os_print_newline:
 
 
 ; ------------------------------------------------------------------
-; os_dump_registers -- Displays register contents in hex on the screen
-; IN: EAX/EBX/ECX/EDX/ESI/EDI = registers to show
+; os_dump_registers -- Dumps all register contents in hex to the screen
+; IN: All registers
 ; OUT: None, registers preserved
 
 os_dump_registers:
-	pushad
+	; Push all registers
 
+	pushad
 	push edi
-	push .di_string
 	push esi
-	push .si_string
 	push edx
-	push .dx_string
 	push ecx
-	push .cx_string
 	push ebx
-	push .bx_string
 	push eax
-	push .ax_string
-	
+	push ss
+	push gs
+	push fs
+	push es
+	push ds
+	push cs
+	pushf
+
+	; Calculate the SP before the call
+
+	mov bx, sp
+	add bx, 32 + 7 * 2 + 6 * 4
+	push bx
+
+	; Get the return IP
+
+	mov dx, [ss:bx]
+	push dx
+
+	; Dump the 16 bit registers
+
+	push cs
+	pop ds
+
+	mov si, .ip_string
+
+	mov bx, sp
+	mov cx, 9
+
+.loop_16:
+	call .print_string
+
+	mov ax, [ss:bx]
+	call os_print_4hex
+
+	add bx, 2
+
+	loop .loop_16
+
+	; Dump the 32 bit registers
+
 	mov cx, 6
 	
-.loop:
-	pop si
-	call os_print_string
-	pop eax
+.loop_32:
+	call .print_string
+
+	mov eax, [ss:bx]
 	call os_print_8hex
-	loop .loop
+
+	add bx, 4
+
+	loop .loop_32
 	
 	call os_print_newline
 
+	; Pop necessary registers
+
+	add sp, 2 * 4			; IP, flags, SP, CS
+	pop ds
+	add sp, 2 * 4 + 4 * 6	; ES, FS, GS, SS, E**
 	popad
 	ret
 
+.print_string
+	lodsb
 
-	.ax_string		db 'EAX:', 0
-	.bx_string		db ' EBX:', 0
-	.cx_string		db ' ECX:', 0
-	.dx_string		db ' EDX:', 0
-	.si_string		db ' ESI:', 0
-	.di_string		db ' EDI:', 0
+	push ax
+	and al, 7Fh
+	call os_putchar
+	pop ax
+
+	test al, 80h
+	jz .print_string
+
+.print_string_end:
+	mov al, ':'
+	jmp os_putchar
+
+	.ip_string		db 'I', 'P' + 80h
+	.sp_string		db ' S', 'P' + 80h
+	.flags_string	db ' FLAG', 'S' + 80h
+	.cs_string		db ' C', 'S' + 80h
+	.ds_string		db ' D', 'S' + 80h
+	.es_string		db ' E', 'S' + 80h
+	.fs_string		db ' F', 'S' + 80h
+	.gs_string		db ' G', 'S' + 80h
+	.ss_string		db ' S', 'S' + 80h
+	.ax_string		db 13, 10, 'EA', 'X' + 80h
+	.bx_string		db ' EB', 'X' + 80h
+	.cx_string		db ' EC', 'X' + 80h
+	.dx_string		db ' ED', 'X' + 80h
+	.si_string		db ' ES', 'I' + 80h
+	.di_string		db ' ED', 'I' + 80h
 
 
 ; ------------------------------------------------------------------
