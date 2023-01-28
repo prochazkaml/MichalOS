@@ -1353,7 +1353,7 @@ os_dump_registers:
 	popad
 	ret
 
-.print_string
+.print_string:
 	lodsb
 
 	push ax
