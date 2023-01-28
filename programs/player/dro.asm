@@ -3,10 +3,6 @@
 ; ------------------------------------------------------------------
 
 start_drz:
-	call os_check_adlib
-	jc start_dro.adliberror
-
-.error_bypass:
 	popa
 
 	push bx
@@ -61,10 +57,6 @@ start_drz:
 	jmp start_dro.dro_post_load
 
 start_dro:
-	call os_check_adlib
-	jc .adliberror
-
-.error_bypass:
 	popa
 
 	push bx
@@ -286,19 +278,6 @@ start_dro:
 
 .no_dec_timer:
 	ret
-	
-.adliberror:
-	mov ax, start.adlib_msg1
-	mov bx, start.adlib_msg2
-	clr cx
-	mov dx, 2
-	call os_dialog_box
-	
-	test ax, ax
-	jz .error_bypass
-	
-	popa
-	jmp start.play_file
 
 	.short_delay		db 0
 	.long_delay			db 0

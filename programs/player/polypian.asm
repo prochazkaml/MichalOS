@@ -1,10 +1,6 @@
 polypiano:
 	call start.draw_background
 	
-	call os_check_adlib
-	jc .adliberror
-	
-.error_bypass:
 	mov ax, buffer
 	mov bx, .channelmsg
 	call os_input_dialog
@@ -156,19 +152,6 @@ polypiano:
 
 .dummyinterrupt:
 	ret
-	
-.adliberror:
-	mov ax, start.adlib_msg1
-	mov bx, start.adlib_msg2
-	clr cx
-	mov dx, 2
-	call os_dialog_box
-	
-	test ax, ax
-	jz .error_bypass
-	
-	popa
-	jmp start
 	
 .error:
 	mov ax, .channelerr

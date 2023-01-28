@@ -210,37 +210,6 @@ os_stop_adlib:
 	adlib_clear_regs	db 0x00, 0x00, 0x3F, 0xFF, 0xFF, 0x00, 0x00, 0x00
 	
 ; ------------------------------------------------------------------
-; os_check_adlib -- Checks if YM3812 is present in the system
-; IN: None
-; OUT: CF clear if YM3812 is present
-
-os_check_adlib:
-	pusha
-	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
-	jge .ok
-
-	mov ax, 0460h
-	call int_adlib_regwrite
-	
-	mov ax, 0480h
-	call int_adlib_regwrite
-	
-	mov dx, 388h
-	in al, dx
-	test al, al
-	jnz .error
-	
-.ok:
-	popa
-	clc
-	ret
-	
-.error:
-	popa
-	stc
-	ret
-	
-; ------------------------------------------------------------------
 ; os_adlib_regwrite -- Write to a YM3812 register
 ; IN: AH/AL - register address/value to write
 

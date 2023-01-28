@@ -79,7 +79,6 @@ os_adlib_regwrite		equ 804Eh
 os_adlib_calcfreq		equ 80C9h
 os_adlib_mute			equ 811Ah
 os_adlib_unmute			equ 8147h
-os_check_adlib			equ 80EAh
 os_adlib_noteoff		equ 810Bh
 os_speaker_raw_period	equ 8159h
 

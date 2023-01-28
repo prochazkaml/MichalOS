@@ -89,10 +89,6 @@
 %define FreqRange			FreqEnd-FreqStart
 
 start_rad:
-	call os_check_adlib
-	jc adliberror
-
-.error_bypass:
 	popa
 	
 	push bx
@@ -244,19 +240,6 @@ irq_handler:
 .no_play:
 	ret
 
-adliberror:
-	mov ax, start.adlib_msg1
-	mov bx, start.adlib_msg2
-	clr cx
-	mov dx, 2
-	call os_dialog_box
-	
-	test ax, ax
-	jz start_rad.error_bypass
-	
-	popa
-	jmp start.play_file
-	
 	toggleplaypause		db 0
 	playmsg2			db 'Order:   /   Line:', 0
 	playrequest			db 0

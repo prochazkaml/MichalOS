@@ -115,7 +115,7 @@ os_call_vectors:
 	jmp os_reset_font			; 80E1h
 	jmp os_print_string_box		; 80E4h
 	jmp os_put_chars			; 80E7h
-	jmp os_check_adlib			; 80EAh
+	jmp os_illegal_call			; 80EAh ; FREE!!!!!!!!!!!
 	jmp os_draw_line			; 80EDh
 	jmp os_draw_polygon			; 80F0h
 	jmp os_draw_circle			; 80F3h

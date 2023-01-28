@@ -7,10 +7,6 @@ start_poly_mmf:
 
 	call start.draw_player_background
 
-	call os_check_adlib
-	jc .adliberror
-	
-.error_bypass:
 	clr dx
 	mov ax, [buffer]
 	test ax, ax
@@ -174,18 +170,6 @@ start_poly_mmf:
 	
 .int_handler:
 	mov byte [.playreq], 1
-	ret
-	
-.adliberror:
-	mov ax, start.adlib_msg1
-	mov bx, start.adlib_msg2
-	clr cx
-	mov dx, 2
-	call os_dialog_box
-	
-	test ax, ax
-	jz .error_bypass
-	
 	ret
 	
 	.pointer	dw .track0
