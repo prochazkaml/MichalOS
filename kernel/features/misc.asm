@@ -4,13 +4,19 @@
 
 ; ------------------------------------------------------------------
 ; os_run_zx7_module -- Decompresses a kernel module and runs it
-; IN: SI = compressed data
+; IN: DS:SI = compressed data
 ; OUT: Whatever the module returns
 
 os_run_zx7_module:
 	pusha
+	push es
+
+	push cs
+	pop es
 	mov di, 100h
 	call os_decompress_zx7
+	
+	pop es
 	popa
 	jmp 100h
 
@@ -70,6 +76,8 @@ os_get_os_name:
 ; OUT: None, as it does not return
 
 os_fatal_error:
+	push cs
+	pop ds
 	mov si, .sub_fatalerr_data
 	jmp os_run_zx7_module
 
