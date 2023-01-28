@@ -203,6 +203,8 @@ first_init_stack_done:
 
 	; Load the files
 	
+	mov byte [CONFIG_FONT], CFG_FONT_BIOS		; If a fatal error occurs, use the default BIOS font
+
 	push es
 	mov es, [driversgmt]
 	
@@ -210,6 +212,8 @@ first_init_stack_done:
 	mov cx, FILE_MANAGER
 	call os_load_file
 	
+	jc systemfilemissing
+
 	mov ax, bg_name
 	mov cx, DESKTOP_BACKGROUND
 	call os_load_file
@@ -222,8 +226,11 @@ first_init_stack_done:
 	mov cx, SYSTEM_FONT
 	call os_load_file
 
+	jc systemfilemissing
 	pop es
 	
+	mov byte [CONFIG_FONT], CFG_FONT_MICHALOS	; Our custom font has loaded, so use it
+
 	cli
 
 	mov di, cs
@@ -465,7 +472,7 @@ load_fileman:
 
 systemfilemissing:
 	mov ax, noprogerror
-	call os_fatal_error
+	jmp os_fatal_error
 	
 	; And now data for the above code...
 
