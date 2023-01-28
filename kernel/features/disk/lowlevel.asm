@@ -33,6 +33,21 @@ os_int13:
 	ret
 
 ; --------------------------------------------------------------------------
+; os_int13_protected -- Performs a BIOS 13h call with all regs preserved
+; IN: depends on function in AH
+; OUT: None, registers preserved
+
+os_int13_protected:
+	pushad
+	push ds
+	push es
+	call os_int13
+	pop es
+	pop ds
+	popad
+	ret
+
+; --------------------------------------------------------------------------
 ; os_int13_failsafe -- Performs a BIOS 13h call 3 times in case of error
 ; IN/OUT: depends on function in AH (DL must be drive number), high 16 bits of all 32-bit registers preserved, carry set if error
 
@@ -56,6 +71,21 @@ os_int13_failsafe:
 
 .ok:
 	add sp, 16					; Restore stack without popping regs
+	ret
+
+; --------------------------------------------------------------------------
+; os_int13_failsafe_protected -- Performs a BIOS 13h call with all regs preserved 3 times in case of error
+; IN: depends on function in AH
+; OUT: None, registers preserved
+
+os_int13_failsafe_protected:
+	pushad
+	push ds
+	push es
+	call os_int13_failsafe
+	pop es
+	pop ds
+	popad
 	ret
 
 ; --------------------------------------------------------------------------
@@ -90,7 +120,7 @@ os_disk_reset_device:
 
 .reset_chs:
 	mov ah, 0				; Perform a reset via legacy CHS
-	call os_int13
+	call os_int13_protected
 	jmp .exit				; Pass along the carry flag
 
 ; --------------------------------------------------------------------------
@@ -126,12 +156,16 @@ os_disk_detect_drive:
 	je .skip_chs_check
 
 	mov ah, 16h				; Check if a disk change occured, if it did, do not re-load the params
-	call os_int13
+	call os_int13_protected
 	jnc .end
 
 .skip_chs_check:
+	push di
+	push es
 	mov ah, 8				; Get drive parameters
 	call os_int13_failsafe
+	pop es
+	pop di
 
 	jc .end
 
@@ -163,9 +197,7 @@ os_disk_detect_drive:
 
 	mov ah, 41h				; Detect LBA support
 	mov bx, 55AAh
-	pusha
 	call os_int13
-	popa
 
 	jc .get_chs				; Fall back to CHS if not supported
 
@@ -173,7 +205,7 @@ os_disk_detect_drive:
 	je .skip_lba_check
 
 	mov ah, 49h				; Check if a disk change occured, if it did, do not re-load the params
-	call os_int13
+	call os_int13_protected
 	jnc .end
 
 .skip_lba_check:
@@ -230,15 +262,15 @@ os_disk_detect_drive:
 os_disk_read_sector:
 	pushad
 	push ds
-	call os_disk_detect_drive	; Detect drive change
+	call os_disk_detect_drive			; Detect drive change
 	jc .err
 
-	call os_disk_init_int13		; Prepare the params
+	call os_disk_init_int13				; Prepare the params
 	jc .err
 
 ;	call os_dump_registers
 
-	call os_int13_failsafe		; Read the sector
+	call os_int13_failsafe_protected	; Read the sector
 	jc .err
 
 	clc
@@ -282,17 +314,17 @@ os_disk_read_multiple_sectors:
 os_disk_write_sector:
 	pushad
 	push ds
-	call os_disk_detect_drive	; Detect drive change
+	call os_disk_detect_drive			; Detect drive change
 	jc .err
 
-	call os_disk_init_int13		; Prepare the params
+	call os_disk_init_int13				; Prepare the params
 	jc .err
 
-	inc ah						; Select write operation (works for both CHS and LBA)
+	inc ah								; Select write operation (works for both CHS and LBA)
 
 ;	call os_dump_registers
 
-	call os_int13_failsafe		; Read the sector
+	call os_int13_failsafe_protected	; Read the sector
 	jc .err
 
 	clc
