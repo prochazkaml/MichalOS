@@ -472,7 +472,7 @@ load_fileman:
 
 systemfilemissing:
 	mov ax, noprogerror
-	jmp os_fatal_error
+	call os_fatal_error
 	
 	; And now data for the above code...
 
