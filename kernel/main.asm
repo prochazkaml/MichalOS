@@ -471,14 +471,21 @@ load_fileman:
 	jmp checkformenu
 
 systemfilemissing:
-	mov ax, noprogerror
+	push cs
+	pop es
+
+	mov bx, noprogerror
+	mov cx, 4000h
+	call os_string_join
+
+	mov ax, cx
 	call os_fatal_error
 	
 	; And now data for the above code...
 
 	driversgmt				dw 0000h
 	
-	noprogerror				db 'System file not found', 0
+	noprogerror				db ' - System file not found', 0
 	
 	app_ext					db 'APP', 0
 	bas_ext					db 'BAS', 0
