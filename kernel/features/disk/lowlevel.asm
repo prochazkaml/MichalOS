@@ -37,19 +37,25 @@ os_int13:
 ; IN/OUT: depends on function in AH (DL must be drive number), high 16 bits of all 32-bit registers preserved, carry set if error
 
 os_int13_failsafe:
+	pusha
 	call os_int13				; Attempt #1
 	jnc .ok
+	popa
 
 	call os_disk_reset_device	; Reset device and try again
 
+	pusha
 	call os_int13				; Attempt #2
 	jnc .ok
+	popa
 
 	call os_disk_reset_device	; Reset device and try again
 
+	pusha
 	call os_int13				; Third time's a charm!
 
 .ok:
+	add sp, 16					; Restore stack without popping regs
 	ret
 
 ; --------------------------------------------------------------------------
