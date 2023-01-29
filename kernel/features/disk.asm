@@ -321,9 +321,7 @@ os_load_file:
 	ret
 
 
-	.bootd					db 0 		; Boot device number
 	.cluster				dw 0 		; Cluster of the file we want to load
-	.pointer				dw 0 		; Pointer into DISK_BUFFER, for loading 'file2load'
 
 	.filename_loc			dw 0		; Temporary store of filename location
 	.load_position			dw 0		; Where we'll load the file
@@ -354,17 +352,6 @@ os_write_file:
 	call os_print_string
 
 .no_msg:
-	mov si, ax
-	call os_string_length
-	test ax, ax
-	jz .failure
-	mov ax, si
-
-	call os_string_uppercase
-
-	call int_filename_convert	; Make filename FAT12-style
-	jc .failure
-
 	mov word [.filesize], cx
 	mov word [.location], bx
 	mov word [.filename], ax
@@ -608,6 +595,7 @@ os_write_file:
 	call int_read_root_dir
 
 	mov word ax, [.filename]
+	call int_filename_convert
 	call int_get_root_entry
 
 	mov word ax, [.free_clusters]	; Get first free cluster
@@ -695,14 +683,15 @@ os_file_exists:
 os_create_file:
 	clc
 
-	call os_string_uppercase
-	call int_filename_convert	; Make FAT12-style filename
-	pusha
-
-	push ax				; Save filename for now
-
 	call os_file_exists		; Does the file already exist?
 	jnc .exists_error
+
+	pusha
+
+	call os_string_uppercase
+	call int_filename_convert	; Make FAT12-style filename
+	push ax				; Save filename for now
+
 
 
 	; Root dir already read into DISK_BUFFER by os_file_exists
@@ -723,8 +712,6 @@ os_create_file:
 	call os_fatal_error
 
 .exists_error:				; We also get here if above loop finds nothing
-	pop ax				; Get filename back
-
 	jmp .failure
 
 .found_free_entry:
@@ -1365,9 +1352,9 @@ int_get_root_entry:
 	ret
 
 .found_file:
-	mov word [.tmp], di		; Restore all registers except for DI
+	mov word [cs:.tmp], di	; Restore all registers except for DI
 	popa
-	mov word di, [.tmp]
+	mov word di, [cs:.tmp]
 	clc
 	ret
 
