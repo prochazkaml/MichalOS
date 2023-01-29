@@ -10,6 +10,8 @@ os_demotour:
 	mov cx, .test_data_end - .test_data_bgcolor
 	rep movsb
 
+	call os_init_text_mode
+
 	clr cx
 	call .draw_background
 

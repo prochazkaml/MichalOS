@@ -227,7 +227,11 @@ first_init_stack_done:
 	jc systemfilemissing
 	pop es
 	
-	mov byte [CONFIG_FONT], CFG_FONT_MICHALOS	; Our custom font has loaded, so use it
+	mov ax, system_cfg			; Try to load SYSTEM.CFG
+	mov cx, CONFIG_FILE
+	call os_load_file
+
+	pushf
 
 	cli
 
@@ -251,7 +255,6 @@ first_init_stack_done:
 
 	sti
 	
-	call os_init_text_mode
 	call os_return_app_timer	; Also sets up RTC handler
 	clr cx
 	call os_set_timer_speed
@@ -260,14 +263,11 @@ first_init_stack_done:
 	mov bx, 0104h
 	int 16h
 	
-	mov ax, system_cfg			; Try to load SYSTEM.CFG
-	mov cx, CONFIG_FILE
-	call os_load_file
-
 	mov al, [CONFIG_SOUND_ENABLED]				; Copy the default sound volume (on/off)
 	mov [0083h], al
 	
-	jnc no_load_demotour		; If failed, it doesn't exist, so the system is run for the first time
+	popf
+	jnc no_load_demotour		; If loading SYSTEM.CFG failed, it doesn't exist, so the system was started for the first time
 	
 	mov byte [0083h], 1
 	mov ax, demotour_name
@@ -275,6 +275,8 @@ first_init_stack_done:
 	call run_binary_program
 
 no_load_demotour:
+	call os_init_text_mode
+
 	int 12h						; Get RAM size
 	dec ax						; Some BIOSes round up, so we have to sacrifice 1 kB :(
 	shl ax, 6					; Convert kB to segments
