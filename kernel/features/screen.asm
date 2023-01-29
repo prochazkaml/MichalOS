@@ -408,28 +408,12 @@ os_file_selector_filtered:
 .get_filename:
 	call .get_ptr_from_index
 	clr cx
+
+	mov ax, si
+	call int_filename_deconvert
+	mov si, ax
 	mov di, .filename
-	
-.loopy:
-	lodsb
-	cmp al, ' '
-	je .ignore_space
-	stosb
-	
-.ignore_space:
-	inc cx
-	cmp cx, 8
-	jne .no_add_dot
-
-	mov al, '.'
-	stosb
-
-.no_add_dot:
-	cmp cx, 11
-	jne .loopy
-
-	mov al, 0
-	stosb
+	call os_string_copy
 	ret
 
 .callback:
