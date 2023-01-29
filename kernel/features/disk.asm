@@ -232,6 +232,8 @@ os_load_file:
 	popad
 	clr bx			; If file not found or major disk error,
 
+	call int_restore_footer
+
 	stc				; return with size = 0 and carry set
 	ret
 
