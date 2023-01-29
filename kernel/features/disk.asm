@@ -1085,83 +1085,157 @@ os_get_file_datetime:
 ; IN: DS:AX = filename string
 ; OUT: ES:AX = location of converted string (carry set if invalid)
 
-
 int_filename_convert:
 	pusha
 	movs es, cs
 
 	mov si, ax
-
-	call os_string_length
-	cmp ax, 12			; Filename too long?
-	jg .failure			; Fail if so
-
-	test ax, ax
-	jz .failure			; Similarly, fail if zero-char string
-
-	mov dx, ax			; Store string length for now
-
 	mov di, .dest_string
 
 	clr cx
+
 .copy_loop:
 	lodsb
+
 	cmp al, '.'
 	je .extension_found
+
+	cmp al, 0
+	je .finish
+
+	; Check against allowed special characters
+
+	call .check_valid_char
+	jc .copy_loop
+
 	stosb
-	inc cx
-	cmp cx, dx
-	jg .failure			; No extension found = wrong
+
+	inc cx				; Go to the next character
+	cmp cx, 8			; If the basename's full, go to the extension
+	jge .extension_found
+
 	jmp .copy_loop
 
 .extension_found:
-	test cx, cx
-	jz .failure			; Fail if extension dot is first char
+	cmp byte [si], 0	; Special case: filename is a single period
+	je .do_unnamed
 
-	cmp cx, 8
-	je .do_extension		; Skip spaces if first bit is 8 chars
+	cmp cx, 8			; If the basename was less than 8 chars, pad it out
+	jl .basename_pad
 
-	; Now it's time to pad out the rest of the first part of the filename
-	; with spaces, if necessary
+	cmp al, '.'			; If the basename is larger than 8 chars, skip forward
+	jne .basename_skip
 
+.extension_loop:
+	lodsb
+
+	cmp al, 0
+	je .finish
+
+	; Check against allowed special characters
+
+	call .check_valid_char
+	jc .extension_loop
+
+	stosb
+
+	inc cx				; Go to the next character
+	cmp cx, 11			; If the extension's full, finish
+	jge .finish
+
+	jmp .extension_loop
+
+.basename_pad:
 	mov al, ' '
 
-.add_spaces:
+.basename_pad_loop:
 	stosb
 	inc cx
 	cmp cx, 8
-	jl .add_spaces
+	jl .basename_pad_loop
 
-	; Finally, copy over the extension
-.do_extension:
-	lodsb				; 3 characters
-	test al, al
-	jz .failure
-	stosb
+	jmp .extension_loop
+
+.basename_skip:
 	lodsb
-	test al, al
-	jz .failure
-	stosb
-	lodsb
-	test al, al
-	jz .failure
-	stosb
 
-	clr al			; Zero-terminate filename
-	stosb
+	cmp al, '.'
+	je .extension_loop
 
+	cmp al, 0
+	jne .basename_skip
+
+;	jmp .finish			; Not necessary, can just fall through
+
+.finish:
+	test cx, cx			; Special case if the file name was empty or full of gibberish
+	jz .do_unnamed
+
+	cmp cx, 11
+	jl .extension_pad
+
+.exit:
 	popa
 	mov ax, .dest_string
-	clc				; Clear carry for success
 	ret
 
-.failure:	
-	popa
-	stc				; Set carry for failure
+.extension_pad:
+	mov al, ' '
+
+.extension_pad_loop:
+	stosb
+	inc cx
+	cmp cx, 11
+	jl .extension_pad_loop
+
+	jmp .exit
+
+.do_unnamed:
+	push ds
+	movs ds, cs
+	mov si, .unnamed
+	mov di, .dest_string
+	mov cx, 11
+	rep movsb
+	pop ds
+	jmp .exit
+
+.check_valid_char:
+	cmp al, '-'
+	je .check_valid_char_pass
+
+	cmp al, '_'
+	je .check_valid_char_pass
+
+	cmp al, '~'
+	je .check_valid_char_pass
+
+	; Range 0-9
+
+	cmp al, '0'
+	jb .check_valid_char_fail
+
+	cmp al, '9'
+	jbe .check_valid_char_pass
+
+	; Range A-Z
+
+	cmp al, 'A'
+	jb .check_valid_char_fail
+
+	cmp al, 'Z'
+	ja .check_valid_char_fail
+
+.check_valid_char_pass:
+	clc
+	ret
+
+.check_valid_char_fail:
+	stc
 	ret
 
 	.dest_string	times 12 db 0
-
+	.unnamed		db "UNNAMED    ", 0
 
 ; --------------------------------------------------------------------------
 ; int_get_root_entry -- Search RAM copy of root dir for file entry
