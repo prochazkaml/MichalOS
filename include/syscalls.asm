@@ -471,7 +471,7 @@ os_string_to_int equ 32942
 
 ; ------------------------------------------------------------------
 ; os_string_to_hex -- Convert hexadecimal string to integer value
-; IN: SI = string location (max 8 chars, up to 'FFFFFFFF')
+; IN: DS:SI = string location (max 8 chars, up to 'FFFFFFFF')
 ; OUT: EAX = number
 
 os_string_to_hex equ 32840
@@ -479,14 +479,14 @@ os_string_to_hex equ 32840
 ; ------------------------------------------------------------------
 ; os_int_to_string -- Convert unsigned integer to string
 ; IN: AX = unsigned int
-; OUT: AX = string location
+; OUT: DS:AX = string location
 
 os_int_to_string equ 32792
 
 ; ------------------------------------------------------------------
 ; os_sint_to_string -- Convert signed integer to string
 ; IN: AX = signed int
-; OUT: AX = string location
+; OUT: DS:AX = string location
 
 os_sint_to_string equ 32957
 

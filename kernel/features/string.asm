@@ -481,9 +481,11 @@ os_int_to_string:
 	pusha
 	movs ds, cs
 
+	mov di, .t			; Get our pointer ready
+
+.ptr_rdy:
 	clr cx
 	mov bx, 10			; Set BX 10, for division and mod
-	mov di, .t			; Get our pointer ready
 
 .push:
 	xor dx, dx
@@ -524,47 +526,16 @@ os_sint_to_string:
 	pusha
 	movs ds, cs
 
-	xor cx, cx
-	mov bx, 10			; Set BX 10, for division and mod
-	mov di, .t			; Get our pointer ready
+	mov di, os_int_to_string.t		; Get our pointer ready
 
-	test ax, ax			; Find out if X > 0 or not, force a sign
-	js .neg				; If negative...
-	jmp .push			; ...or if positive
+	test ax, ax						; Find out if X > 0 or not, force a sign
+	jns os_int_to_string.ptr_rdy	; If positive, there's no problem
 
-.neg:
-	neg ax				; Make AX positive
-	mov byte [.t], '-'		; Add a minus sign to our string
-	inc di				; Update the index
+	neg ax							; Make AX positive
+	mov byte [di], '-'				; Add a minus sign to our string
+	inc di							; Update the index
 
-.push:
-	xor dx, dx
-	div bx				; Remainder in DX, quotient in AX
-	inc cx				; Increase pop loop counter
-
-	push dx				; Push remainder, so as to reverse order when popping
-
-	test ax, ax			; Is quotient zero?
-	jnz .push			; If not, loop again
-
-.pop:
-	pop dx				; Pop off values in reverse order, and add 48 to make them digits
-
-	add dl, '0'			; And save them in the string, increasing the pointer each time
-	mov [di], dl
-
-	inc di
-	dec cx
-	jnz .pop
-
-	mov byte [di], 0		; Zero-terminate string
-
-	popa
-	mov ax, .t			; Return location of string
-	ret
-
-
-	.t times 7 db 0
+	jmp os_int_to_string.ptr_rdy	; Finish the conversion
 
 ; ------------------------------------------------------------------
 ; os_get_time_string -- Get current time in a string (eg '10:25')
