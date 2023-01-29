@@ -118,29 +118,14 @@ os_get_file_list:
 
 
 .gotfilename:				; Got a filename that passes testing
-	mov si, dx			; DX = where getting string
-	xor cx, cx
-	
-.loopy:
-	lodsb
-	cmp al, ' '
-	je .ignore_space
-	stosb
-	
-.ignore_space:
-	inc cx
-	cmp cx, 8
-	je .add_dot
-	cmp cx, 11
-	je .done_copy
-	jmp .loopy
+	mov ax, dx			; DX = where getting string
+	call int_filename_deconvert
 
-.add_dot:
-	mov byte [es:di], '.'
-	inc di
-	jmp .loopy
+	mov si, ax
+	call os_string_copy
+	call os_string_length
+	add di, ax
 
-.done_copy:
 	mov byte [es:di], ','		; Use comma to separate filenames
 	inc di
 	inc byte [.num_entries]
@@ -1101,28 +1086,28 @@ int_filename_deconvert:
 	jmp int_filename_convert.exit
 
 .basename_skip:
+	cmp cx, 8
+	jge .basename_finish
+
 	lodsb
 
 	cmp al, ' '
 	jne .error
 
 	inc cx
-	cmp cx, 8
-	jl .basename_skip
-
-	jmp .basename_finish
+	jmp .basename_skip
 
 .extension_skip:
+	cmp cx, 11
+	jge .extension_finish
+
 	lodsb
 
 	cmp al, ' '
 	jne .error
 
 	inc cx
-	cmp cx, 11
-	jl .extension_skip
-
-	jmp .extension_finish
+	jmp .extension_skip
 
 .error:
 	popa
