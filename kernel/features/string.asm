@@ -823,10 +823,11 @@ os_string_callback_tokenizer:
 ; ------------------------------------------------------------------
 ; os_32int_to_string -- Converts an unsigned 32-bit integer into a string
 ; IN: EAX = unsigned int
-; OUT: AX = string location
+; OUT: DS:AX = string location
 
 os_32int_to_string:
 	pushad
+	movs ds, cs
 
 	clr cx
 	mov ebx, 10					; Set BX 10, for division and mod
@@ -861,7 +862,7 @@ os_32int_to_string:
 
 ; ------------------------------------------------------------------
 ; os_string_to_32int -- Converts a string into a 32-bit integer
-; IN: SI = string location
+; IN: DS:SI = string location
 ; OUT: EAX = unsigned integer
 
 os_string_to_32int:
@@ -883,7 +884,7 @@ os_string_to_32int:
 	sub cl, '0'				; Convert the value to decimal
 	and ecx, 255			; Keep the low 8 bits only
 
-	mul dword [.divisor]	; Multiply EAX by 10
+	mul dword [cs:.divisor]	; Multiply EAX by 10
 	add eax, ecx			; Add the value to the integer
 	jmp .loop				; Loop again
 	

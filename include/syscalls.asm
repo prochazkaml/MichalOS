@@ -523,13 +523,13 @@ os_string_callback_tokenizer equ 33128
 ; ------------------------------------------------------------------
 ; os_32int_to_string -- Converts an unsigned 32-bit integer into a string
 ; IN: EAX = unsigned int
-; OUT: AX = string location
+; OUT: DS:AX = string location
 
 os_32int_to_string equ 33059
 
 ; ------------------------------------------------------------------
 ; os_string_to_32int -- Converts a string into a 32-bit integer
-; IN: SI = string location
+; IN: DS:SI = string location
 ; OUT: EAX = unsigned integer
 
 os_string_to_32int equ 33068
