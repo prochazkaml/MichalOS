@@ -86,13 +86,12 @@ start_dro:
 	
 .dro_decode:
 	mov byte [.play], 0
-	mov dword [.current_pos], 0
-	mov word [.timer], 0
+	mov dword [.target_pos], 0
 	
 	call .clear_adlib
 
 	mov eax, [gs:10h]	; Song length in miliseconds
-	shr eax, 10			; Waaay faster than dividing by 1000
+	shr eax, 10
 	mov [.song_length], ax
 	
 	mov al, [gs:17h]
@@ -121,8 +120,10 @@ start_dro:
 	
 	call os_stop_adlib
 
+	mov dword [.current_pos], 0
+
 	mov si, .int_handler
-	mov cx, 33
+	mov cx, 132
 	mov bl, 9
 	call os_start_adlib
 
@@ -149,13 +150,13 @@ start_dro:
 	pushad
 
 	mov eax, [.current_pos]
-	mov ebx, [gs:10h]
-	call draw_progress_bar
-
 	test ax, 1111111111b
 	jnz .no_update_timer
 
-	shr eax, 10			; Waaay faster than dividing by 1000
+	mov ebx, [gs:10h]
+	call draw_progress_bar
+
+	shr eax, 10			; Waaay faster than dividing by 250
 	
 	mov dx, 0C26h
 	call os_move_cursor
@@ -178,8 +179,9 @@ start_dro:
 	popad
 	
 	; DRO parsing
-	cmp word [.timer], 0
-	jne .loop
+	mov eax, [.target_pos]
+	cmp [.current_pos], eax
+	jl .loop
 
 	mov ax, [.position_segment]
 	cmp ax, [.length_segment]
@@ -234,16 +236,18 @@ start_dro:
 .do_short:
 	pusha
 	inc al
-	mov [.timer], al
+	clr ebx
+	mov bl, al
+	add [.target_pos], ebx
 	popa
 	jmp .loop
 	
 .do_long:
 	pusha
-	mov ah, al
-	inc ah
-	clr al
-	mov [.timer], ax
+	inc al
+	clr ebx
+	mov bh, al
+	add [.target_pos], ebx
 	popa
 	jmp .loop
 	
@@ -269,12 +273,7 @@ start_dro:
 	cmp byte [.play], 1
 	je .no_dec_timer
 	
-	cmp word [.timer], 0
-	je .no_dec_timer
-	
-	inc dword [.current_pos]
-
-	dec word [.timer]
+	add dword [.current_pos], 4
 
 .no_dec_timer:
 	ret
@@ -287,10 +286,10 @@ start_dro:
 	.length_segment		dw 0
 	
 	.current_pos		dd 0
+	.target_pos			dd 0
 	.song_length		dw 0
 	
 	.codemap			dw 0
-	.timer				dw 0
 	.play				db 0
 	
 	.millilength_msg	db 'Song length (in milliseconds): ', 0
