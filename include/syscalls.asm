@@ -598,6 +598,12 @@ os_speaker_note_length equ 32900
 os_speaker_off equ 32798
 
 ; ------------------------------------------------------------------
+; os_speaker_muted -- Check if the PC speaker is muted
+; OUT: ZF set if muted, clear if not
+
+os_speaker_muted equ 33125
+
+; ------------------------------------------------------------------
 ; os_start_adlib -- Starts the selected Adlib driver
 ; IN: SI = interrupt handler, CX = prescaler, BL = number of channels
 ; The interrupt will fire at 33144 Hz (the closest possible to 32768 Hz) divided by CX.

@@ -172,7 +172,7 @@ int_special_keys:
 	ret
 		
 .enable_sound:
-	mov byte [0083h], 1
+	mov byte [speaker_unmuted], 1
 
 	mov ax, [speaker_period]
 
@@ -185,7 +185,7 @@ int_special_keys:
 	jmp .display_speaker
 	
 .disable_sound:
-	mov byte [0083h], 0
+	mov byte [speaker_unmuted], 0
 	call os_speaker_off
 
 .display_speaker:
@@ -199,7 +199,7 @@ int_special_keys:
 	
 	mov ax, 0E17h
 	clr bh
-	cmp byte [0083h], 0
+	cmp byte [speaker_unmuted], 0
 	je .no_crossed_spkr
 	
 	dec al

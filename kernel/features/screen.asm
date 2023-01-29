@@ -2126,7 +2126,7 @@ os_print_clock:
 	call os_print_string
 	
 	mov al, 17h
-	sub al, [0083h]
+	sub al, [speaker_unmuted]
 	call os_putchar
 
 	pop dx

@@ -19,9 +19,6 @@
 ; Segment 0360h:
 ;   - 0000h - 00FFh = System variables
 ;      - 0000h = RET instruction
-;      - 0083h = Sound state (byte)
-;         - 0 if sound disabled
-;         - 1 if sound enabled
 ;      - 0088h = Maximum number of characters that os_input_string can input (byte)
 ;      - 00E0h - 00EFh - parameters for an app (eg. a file to open when an app launches)
 ;      - 00F0h - 00FFh - temporary buffer for storing apps' filenames
@@ -156,6 +153,7 @@ os_call_vectors:
 	jmp os_disk_write_multiple_sectors
 	jmp os_input_string_ex
 	jmp os_file_selector_filtered
+	jmp os_speaker_muted
 
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE
@@ -264,12 +262,12 @@ first_init_stack_done:
 	int 16h
 	
 	mov al, [CONFIG_SOUND_ENABLED]				; Copy the default sound volume (on/off)
-	mov [0083h], al
+	mov [speaker_unmuted], al
 	
 	popf
 	jnc no_load_demotour		; If loading SYSTEM.CFG failed, it doesn't exist, so the system was started for the first time
 	
-	mov byte [0083h], 1
+	mov byte [speaker_unmuted], 1
 	mov ax, demotour_name
 	call load_program_file
 	call run_binary_program

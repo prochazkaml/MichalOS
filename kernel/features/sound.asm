@@ -9,7 +9,7 @@
 
 os_speaker_tone:
 	pusha
-	cmp byte [0083h], 0
+	cmp byte [speaker_unmuted], 0
 	je .exit
 
 	test ax, ax
@@ -47,7 +47,7 @@ os_speaker_tone:
 
 os_speaker_raw_period:
 	pusha
-	cmp byte [0083h], 0
+	cmp byte [speaker_unmuted], 0
 	je .exit
 
 	mov [speaker_period], ax
@@ -95,7 +95,7 @@ os_speaker_off:
 	and al, 0FCh
 	out 61h, al
 
-	cmp byte [0083h], 0
+	cmp byte [speaker_unmuted], 0
 	je .exit
 
 	mov word [speaker_period], 1
@@ -103,6 +103,16 @@ os_speaker_off:
 .exit:
 	popa
 	ret
+
+; ------------------------------------------------------------------
+; os_speaker_muted -- Check if the PC speaker is muted
+; OUT: ZF set if muted, clear if not
+
+os_speaker_muted:
+	cmp byte [cs:speaker_unmuted], 0
+	ret
+
+	speaker_unmuted	db 0
 
 ; ------------------------------------------------------------------
 ; os_start_adlib -- Starts the selected Adlib driver
