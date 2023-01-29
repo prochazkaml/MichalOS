@@ -1082,12 +1082,13 @@ os_get_file_datetime:
 
 ; ------------------------------------------------------------------
 ; int_filename_convert -- Change 'TEST.BIN' into 'TEST    BIN' as per FAT12
-; IN: AX = filename string
-; OUT: AX = location of converted string (carry set if invalid)
+; IN: DS:AX = filename string
+; OUT: ES:AX = location of converted string (carry set if invalid)
 
 
 int_filename_convert:
 	pusha
+	movs es, cs
 
 	mov si, ax
 
@@ -1123,9 +1124,10 @@ int_filename_convert:
 	; Now it's time to pad out the rest of the first part of the filename
 	; with spaces, if necessary
 
+	mov al, ' '
+
 .add_spaces:
-	mov byte [di], ' '
-	inc di
+	stosb
 	inc cx
 	cmp cx, 8
 	jl .add_spaces
@@ -1145,7 +1147,8 @@ int_filename_convert:
 	jz .failure
 	stosb
 
-	mov byte [di], 0		; Zero-terminate filename
+	clr al			; Zero-terminate filename
+	stosb
 
 	popa
 	mov ax, .dest_string
@@ -1157,58 +1160,44 @@ int_filename_convert:
 	stc				; Set carry for failure
 	ret
 
-	.dest_string	times 13 db 0
+	.dest_string	times 12 db 0
 
 
 ; --------------------------------------------------------------------------
 ; int_get_root_entry -- Search RAM copy of root dir for file entry
-; IN: AX = filename; OUT: DI = location in DISK_BUFFER of root dir entry,
+; IN: DS:AX = filename; OUT: ES:DI = location in DISK_BUFFER of root dir entry,
 ; or carry set if file not found
 
 int_get_root_entry:
 	pusha
+	movs es, cs
 
-	mov word [.filename], ax
+	mov si, ax
 
 	mov cx, 224			; Search all (224) entries
-	clr ax				; Searching at offset 0
+	mov di, DISK_BUFFER	; Point to next root dir entry
 
 .to_next_root_entry:
-	xchg cx, dx			; We use CX in the inner loop...
-
-	mov word si, [.filename]	; Start searching for filename
+	pusha
 	mov cx, 11
 	rep cmpsb
+	popa
 	je .found_file			; Pointer DI will be at offset 11, if file found
 
-	add ax, 32			; Bump searched entries by 1 (32 bytes/entry)
-
-	mov di, DISK_BUFFER		; Point to next root dir entry
-	add di, ax
-
-	xchg dx, cx			; Get the original CX back
+	add di, 32			; Bump searched entries by 1 (32 bytes/entry)
 	loop .to_next_root_entry
 
 	popa
-
 	stc				; Set carry if entry not found
 	ret
 
-
 .found_file:
-	sub di, 11			; Move back to start of this root dir entry
-
 	mov word [.tmp], di		; Restore all registers except for DI
-
 	popa
-
 	mov word di, [.tmp]
-
 	clc
 	ret
 
-
-	.filename	dw 0
 	.tmp		dw 0
 
 
@@ -1225,7 +1214,7 @@ int_read_fat:
 	mov eax, 1
 	mov cx, 9
 	mov si, DISK_BUFFER
-	mov dl, [bootdev]
+	call os_get_boot_disk
 	call os_disk_read_multiple_sectors		; Read sectors, error status in CF
 
 	pop es
@@ -1245,7 +1234,7 @@ int_write_fat:
 	mov eax, 1
 	mov cx, 9
 	mov si, DISK_BUFFER
-	mov dl, [bootdev]
+	call os_get_boot_disk
 	call os_disk_write_multiple_sectors		; Write sectors, error status in CF
 
 	pop es
@@ -1266,7 +1255,7 @@ int_read_root_dir:
 	mov eax, 19
 	mov cx, 14
 	mov si, DISK_BUFFER
-	mov dl, [bootdev]
+	call os_get_boot_disk
 	call os_disk_read_multiple_sectors		; Read sectors, error status in CF
 
 	pop es
@@ -1286,7 +1275,7 @@ int_write_root_dir:
 	mov eax, 19
 	mov cx, 14
 	mov si, DISK_BUFFER
-	mov dl, [bootdev]
+	call os_get_boot_disk
 	call os_disk_write_multiple_sectors		; Write sectors, error status in CF
 
 	pop es
@@ -1300,7 +1289,7 @@ int_write_root_dir:
 ; OUT: DL = boot disk number for use in INT 13h calls
 
 os_get_boot_disk:
-	mov dl, [bootdev]
+	mov dl, [cs:bootdev]
 	ret
 	
 	bootdev db 0			; Boot device number

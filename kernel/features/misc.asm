@@ -61,9 +61,10 @@ os_illegal_call:
 ; ------------------------------------------------------------------
 ; os_get_os_name -- Get the OS name string
 ; IN: None
-; OUT: SI = OS name string, zero-terminated
+; OUT: DS:SI = OS name string, zero-terminated
 
 os_get_os_name:
+	movs ds, cs
 	mov si, osname
 	ret
 

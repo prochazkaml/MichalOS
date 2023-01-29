@@ -557,7 +557,7 @@ os_clear_registers equ 32975
 ; ------------------------------------------------------------------
 ; os_get_os_name -- Get the OS name string
 ; IN: None
-; OUT: SI = OS name string, zero-terminated
+; OUT: DS:SI = OS name string, zero-terminated
 
 os_get_os_name equ 33083
 

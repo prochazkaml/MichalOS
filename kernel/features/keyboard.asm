@@ -9,7 +9,9 @@
 ; OUT: AX = key pressed, other regs preserved
 
 os_wait_for_key:
+	push ds
 	pusha
+	movs ds, cs
 	
 .try_again:
 	clr bh
@@ -52,10 +54,9 @@ os_wait_for_key:
 	cmp byte [.scrn_active], 1
 	je .try_again
 	
-	mov [.tmp_buf], ax
-
 	popa
-	mov ax, [.tmp_buf]
+	mov ax, [os_check_for_key.tmp_buf]
+	pop ds
 	ret
 	
 .screensaver:
@@ -97,7 +98,6 @@ os_wait_for_key:
 	popa
 	ret
 	
-	.tmp_buf		dw 0
 	.gfx_state		db 0
 	.orig_crsr		dw 0
 	.scrn_active	db 0
@@ -110,7 +110,9 @@ os_wait_for_key:
 ; OUT: AX = 0 if no key pressed, otherwise scan code
 
 os_check_for_key:
+	push ds
 	pusha
+	movs ds, cs
 
 	mov ah, 11h			; BIOS call to check for key
 	
@@ -124,16 +126,16 @@ os_check_for_key:
 	call int_special_keys
 
 	mov [.tmp_buf], ax		; Store resulting keypress
-
 	popa				; But restore all other regs
 	mov ax, [.tmp_buf]
+	pop ds
 	ret
 
 .nokey:
 	popa
+	pop ds
 	clr ax			; Zero result if no key pressed
 	ret
-
 
 	.tmp_buf	dw 0
 
