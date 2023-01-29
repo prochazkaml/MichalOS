@@ -76,28 +76,28 @@ os_putchar equ 32981
 
 ; ------------------------------------------------------------------
 ; os_put_chars -- Puts up to a set amount of characters on the screen
-; IN: BL = terminator, SI = location, CX = character count
+; IN: BL = terminator, DS:SI = location, CX = character count
 ; OUT: None, registers preserved
 
 os_put_chars equ 32996
 
 ; ------------------------------------------------------------------
 ; os_print_string -- Displays text
-; IN: SI = message location (zero-terminated string)
+; IN: DS:SI = message location (zero-terminated string)
 ; OUT: None, registers preserved
 
 os_print_string equ 32771
 
 ; ------------------------------------------------------------------
 ; os_print_string_box -- Displays text inside a text-box.
-; IN: SI = message location (zero-terminated string), DL = left alignment
+; IN: DS:SI = message location (zero-terminated string), DL = left alignment
 ; OUT: None, registers preserved
 
 os_print_string_box equ 32993
 
 ; ------------------------------------------------------------------
 ; os_format_string -- Displays colored text
-; IN: BL/SI = text color/message location (zero-terminated string)
+; IN: DS:SI = message location (zero-terminated string), BL = text color
 ; OUT: None, registers preserved
 
 os_format_string equ 32978
@@ -208,7 +208,7 @@ os_select_list equ 33110
 ; ------------------------------------------------------------------
 ; os_draw_background -- Clear screen with white top and bottom bars
 ; containing text, and a coloured middle section.
-; IN: AX/BX = top/bottom string locations, CX = colour (256 if the app wants to display the default background)
+; IN: DS:AX/BX = top/bottom string locations, CX = colour (256 if the app wants to display the default background)
 ; OUT: None, registers preserved
 
 os_draw_background equ 32807
@@ -341,7 +341,7 @@ os_color_selector equ 33053
 
 ; ------------------------------------------------------------------
 ; os_temp_box -- Draws a dialog box with up to 5 lines of text.
-; IN: SI/AX/BX/CX/DX = string locations (or 0 for no display)
+; IN: DS:SI/AX/BX/CX/DX = string locations (or 0 for no display)
 ; OUT: None, registers preserved
 
 os_temp_box equ 33086
@@ -361,7 +361,7 @@ os_draw_logo equ 32852
 
 ; ------------------------------------------------------------------
 ; os_draw_icon -- Draws an icon (in the MichalOS format).
-; IN: SI = address of the icon
+; IN: DS:SI = address of the icon
 ; OUT: None, registers preserved
 
 os_draw_icon equ 33023

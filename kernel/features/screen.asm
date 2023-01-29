@@ -19,7 +19,7 @@ os_putchar:
 
 ; ------------------------------------------------------------------
 ; os_put_chars -- Puts up to a set amount of characters on the screen
-; IN: BL = terminator, SI = location, CX = character count
+; IN: BL = terminator, DS:SI = location, CX = character count
 ; OUT: None, registers preserved
 
 os_put_chars:
@@ -29,17 +29,19 @@ os_put_chars:
 .loop:
 	lodsb
 	cmp al, bl
-	je int_popa_ret
+	je .exit
 	
 	call os_putchar
 	
 	loop .loop
+
+.exit:
 	popa
 	ret
 
 ; ------------------------------------------------------------------
 ; os_print_string -- Displays text
-; IN: SI = message location (zero-terminated string)
+; IN: DS:SI = message location (zero-terminated string)
 ; OUT: None, registers preserved
 
 os_print_string:
@@ -52,7 +54,7 @@ os_print_string:
 
 ; ------------------------------------------------------------------
 ; os_print_string_box -- Displays text inside a text-box.
-; IN: SI = message location (zero-terminated string), DL = left alignment
+; IN: DS:SI = message location (zero-terminated string), DL = left alignment
 ; OUT: None, registers preserved
 
 os_print_string_box:
@@ -78,7 +80,7 @@ os_print_string_box:
 
 ; ------------------------------------------------------------------
 ; os_format_string -- Displays colored text
-; IN: BL/SI = text color/message location (zero-terminated string)
+; IN: DS:SI = message location (zero-terminated string), BL = text color
 ; OUT: None, registers preserved
 
 os_format_string:
@@ -132,8 +134,8 @@ os_clear_screen:
 	mov16 dx, 79, 24	; Bottom-right
 	int 10h
 
-	mov byte [system_ui_state], 1	; Assume that an application clearing 
-									; the screen doesn't want to refresh time		
+	mov byte [cs:system_ui_state], 1	; Assume that an application clearing 
+										; the screen doesn't want to refresh time		
 	popa
 	ret
 
@@ -1178,7 +1180,7 @@ os_select_list:
 ; ------------------------------------------------------------------
 ; os_draw_background -- Clear screen with white top and bottom bars
 ; containing text, and a coloured middle section.
-; IN: AX/BX = top/bottom string locations, CX = colour (256 if the app wants to display the default background)
+; IN: DS:AX/BX = top/bottom string locations, CX = colour (256 if the app wants to display the default background)
 ; OUT: None, registers preserved
 
 os_draw_background:
@@ -1220,14 +1222,14 @@ os_draw_background:
 
 	call os_print_clock
 
-	mov byte [system_ui_state], 0	; Assume that an application drawing 
-									; the background wants to refresh time		
+	mov byte [cs:system_ui_state], 0	; Assume that an application drawing 
+										; the background wants to refresh time		
 
 	mov16 dx, 0, 1		; Ready for app text
 	jmp os_move_cursor.no_pusha
 
 .draw_default_background:
-	mov bl, byte [CONFIG_DESKTOP_BG_COLOR] ; In case it is necessary
+	mov bl, byte [cs:CONFIG_DESKTOP_BG_COLOR] ; In case it is necessary
 
 	cmp byte [fs:DESKTOP_BACKGROUND], 0
 	je .fill_bg
@@ -1664,9 +1666,11 @@ os_print_8hex:
 
 os_print_int:
 	pusha
+	push ds
 	call os_int_to_string
 	mov si, ax
 	call os_print_string
+	pop ds
 	popa
 	ret
 
@@ -1677,9 +1681,11 @@ os_print_int:
 
 os_print_32int:
 	pushad
+	push ds
 	call os_32int_to_string
 	mov si, ax
 	call os_print_string
+	pop ds
 	popad
 	ret
 
@@ -1847,7 +1853,7 @@ os_color_selector:
 	
 ; ------------------------------------------------------------------
 ; os_temp_box -- Draws a dialog box with up to 5 lines of text.
-; IN: SI/AX/BX/CX/DX = string locations (or 0 for no display)
+; IN: DS:SI/AX/BX/CX/DX = string locations (or 0 for no display)
 ; OUT: None, registers preserved
 
 os_temp_box:
@@ -1861,7 +1867,7 @@ os_temp_box:
 	
 	call os_hide_cursor
 
-	mov bl, [CONFIG_WINDOW_BG_COLOR]		; Color from RAM
+	mov bl, [cs:CONFIG_WINDOW_BG_COLOR]		; Color from RAM
 	mov16 dx, 19, 9			; First, draw red background box
 	mov si, 42
 	mov di, 16
@@ -1893,12 +1899,15 @@ os_temp_box:
 
 int_save_footer:
 	pusha
-	cmp byte [system_ui_state], 1
+	cmp byte [cs:system_ui_state], 1
 	stc
 	je int_popa_ret
 
 	call os_get_cursor_pos
-	mov [int_footer_cursor], dx
+	mov [cs:int_footer_cursor], dx
+
+	push es
+	movs es, cs
 
 	mov di, int_footer_data
 	mov16 dx, 0, 24
@@ -1928,6 +1937,7 @@ int_save_footer:
 	call os_move_cursor
 
 	clc
+	pop es
 	popa
 	ret
 
@@ -1938,7 +1948,7 @@ int_save_footer:
 
 int_restore_footer:
 	pusha
-	cmp byte [system_ui_state], 1
+	cmp byte [cs:system_ui_state], 1
 	je int_popa_ret
 
 	mov16 dx, 0, 24
@@ -1949,10 +1959,13 @@ int_restore_footer:
 	mov cx, 80
 	int 10h
 	
+	push ds
+	movs ds, cs
 	mov si, int_footer_data
 	call os_print_string
 
 	mov dx, [int_footer_cursor]
+	pop ds
 	jmp os_move_cursor.no_pusha
 
 	int_footer_data		times 80 db 0	; 80 chars + zero term.
@@ -1965,7 +1978,7 @@ int_restore_footer:
 os_reset_font:
 	pusha
 	
-	cmp byte [CONFIG_FONT], CFG_FONT_BIOS
+	cmp byte [cs:CONFIG_FONT], CFG_FONT_BIOS
 	je .bios
 	
 	push es
@@ -1989,18 +2002,24 @@ os_reset_font:
 
 os_draw_logo:
 	pusha
-	
+	push ds
+	movs ds, cs
+
 	mov ax, 0920h
 	mov bx, 00000100b
 	mov cx, 560
 	int 10h
 
 	mov si, logo
-	jmp os_draw_icon.no_pusha
+	call os_draw_icon
+
+	pop ds
+	popa
+	ret
 
 ; ------------------------------------------------------------------
 ; os_draw_icon -- Draws an icon (in the MichalOS format).
-; IN: SI = address of the icon
+; IN: DS:SI = address of the icon
 ; OUT: None, registers preserved
 
 os_draw_icon:
@@ -2026,7 +2045,7 @@ os_draw_icon:
 	movzx bx, ah
 	and bl, 11000000b
 	shr bl, 6
-	mov al, [.chars + bx]
+	mov al, [cs:.chars + bx]
 	call os_putchar
 
 	shl ah, 2
@@ -2104,6 +2123,10 @@ os_option_menu:
 
 os_print_clock:
 	pusha
+	push ds
+	movs ds, cs
+	movs es, cs
+
 	call os_get_cursor_pos
 	push dx
 	
@@ -2127,6 +2150,8 @@ os_print_clock:
 	call os_putchar
 
 	pop dx
+
+	pop ds
 	jmp os_move_cursor.no_pusha
 		
 	.tmp_buffer		times 12 db 0
