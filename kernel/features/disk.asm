@@ -1080,9 +1080,6 @@ int_filename_deconvert:
 	jne .extension_loop
 
 .extension_finish:
-	mov al, 0				; Zero-terminate the string
-	stosb
-
 	jmp int_filename_convert.exit
 
 .basename_skip:
@@ -1148,14 +1145,9 @@ int_filename_convert:
 
 	inc cx				; Go to the next character
 	cmp cx, 8			; If the basename's full, go to the extension
-	jge .extension_found
-
-	jmp .copy_loop
+	jl .copy_loop
 
 .extension_found:
-	cmp byte [si], 0	; Special case: filename is a single period
-	je .do_unnamed
-
 	test cx, cx			; Special case: filename starts with period
 	jz .copy_loop
 
@@ -1180,9 +1172,22 @@ int_filename_convert:
 
 	inc cx				; Go to the next character
 	cmp cx, 11			; If the extension's full, finish
-	jge .finish
+	jl .extension_loop
 
-	jmp .extension_loop
+.finish:
+	test cx, cx			; Special case if the file name was empty or full of gibberish
+	jz .do_unnamed
+
+	cmp cx, 11
+	jl .extension_pad
+
+.exit:
+	mov al, 0				; Zero-terminate the string
+	stosb
+
+	popa
+	mov ax, int_filename
+	ret
 
 .basename_pad:
 	mov al, ' '
@@ -1204,19 +1209,7 @@ int_filename_convert:
 	cmp al, 0
 	jne .basename_skip
 
-;	jmp .finish			; Not necessary, can just fall through
-
-.finish:
-	test cx, cx			; Special case if the file name was empty or full of gibberish
-	jz .do_unnamed
-
-	cmp cx, 11
-	jl .extension_pad
-
-.exit:
-	popa
-	mov ax, int_filename
-	ret
+	jmp .finish
 
 .extension_pad:
 	mov al, ' '
