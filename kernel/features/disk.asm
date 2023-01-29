@@ -1083,14 +1083,14 @@ os_get_file_datetime:
 ; ------------------------------------------------------------------
 ; int_filename_convert -- Change 'TEST.BIN' into 'TEST    BIN' as per FAT12
 ; IN: DS:AX = filename string
-; OUT: ES:AX = location of converted string (carry set if invalid)
+; OUT: ES:AX = location of converted string
 
 int_filename_convert:
 	pusha
 	movs es, cs
 
 	mov si, ax
-	mov di, .dest_string
+	mov di, int_filename
 
 	clr cx
 
@@ -1119,6 +1119,9 @@ int_filename_convert:
 .extension_found:
 	cmp byte [si], 0	; Special case: filename is a single period
 	je .do_unnamed
+
+	test cx, cx			; Special case: filename starts with period
+	jz .copy_loop
 
 	cmp cx, 8			; If the basename was less than 8 chars, pad it out
 	jl .basename_pad
@@ -1176,7 +1179,7 @@ int_filename_convert:
 
 .exit:
 	popa
-	mov ax, .dest_string
+	mov ax, int_filename
 	ret
 
 .extension_pad:
@@ -1194,48 +1197,56 @@ int_filename_convert:
 	push ds
 	movs ds, cs
 	mov si, .unnamed
-	mov di, .dest_string
+	mov di, int_filename
 	mov cx, 11
 	rep movsb
 	pop ds
 	jmp .exit
 
 .check_valid_char:
-	cmp al, '-'
-	je .check_valid_char_pass
+	; Is the character within ASCII range?
 
-	cmp al, '_'
-	je .check_valid_char_pass
-
-	cmp al, '~'
-	je .check_valid_char_pass
-
-	; Range 0-9
-
-	cmp al, '0'
+	cmp al, 0x21
 	jb .check_valid_char_fail
 
-	cmp al, '9'
-	jbe .check_valid_char_pass
+	cmp al, 0x7E
+	ja .check_valid_char_pass
 
-	; Range A-Z
+	; There are certain blocked characters, so mask those off as well
+	; (https://www.win.tue.nl/~aeb/linux/fs/fat/fat-1.html)
 
-	cmp al, 'A'
-	jb .check_valid_char_fail
+	pusha
+	push ds
+	movs ds, cs
+	mov bl, al
+	mov si, .banlist
 
-	cmp al, 'Z'
-	ja .check_valid_char_fail
+.check_valid_char_loop:
+	lodsb
+	cmp al, bl
+	je .check_valid_char_fail_pop
 
+	cmp al, 0
+	jne .check_valid_char_loop
+	pop ds
+	popa
+	
 .check_valid_char_pass:
 	clc
 	ret
+
+.check_valid_char_fail_pop:
+	pop ds
+	popa
 
 .check_valid_char_fail:
 	stc
 	ret
 
-	.dest_string	times 12 db 0
+	.banlist		db 0x22, "*+,./:;<=>?[\]|", 0
 	.unnamed		db "UNNAMED    ", 0
+
+	int_filename	times 13 db 0
 
 ; --------------------------------------------------------------------------
 ; int_get_root_entry -- Search RAM copy of root dir for file entry
