@@ -1081,6 +1081,99 @@ os_get_file_datetime:
 ; INTERNAL OS ROUTINES -- Not accessible to user programs
 
 ; ------------------------------------------------------------------
+; int_filename_deconvert -- Change 'TEST    BIN' into 'TEST.BIN' as per FAT12
+; IN: DS:AX = filename string
+; OUT: ES:AX = location of converted string
+
+int_filename_deconvert:
+	pusha
+	movs es, cs
+
+	mov si, ax
+	mov di, int_filename
+
+	cmp byte [si], ' '		; Special case - filename starts with a space
+	je .error
+
+	mov cx, 0
+
+.basename_loop:
+	lodsb
+
+	inc cx
+
+	cmp al, ' '				; If there's a space, skip forward
+	je .basename_skip
+
+	call int_filename_convert.check_valid_char
+	jc .error
+
+	stosb
+
+	cmp cx, 8
+	jne .basename_loop
+
+.basename_finish:
+	cmp byte [si], ' '		; Check if the extension is empty
+	je .extension_skip
+
+	mov al, '.'				; Otherwise add the period and parse the extension
+	stosb
+
+.extension_loop:
+	lodsb
+
+	inc cx
+
+	cmp al, ' '
+	je .extension_skip
+
+	call int_filename_convert.check_valid_char
+	jc .error
+
+	stosb
+
+	cmp cx, 11
+	jne .extension_loop
+
+.extension_finish:
+	mov al, 0				; Zero-terminate the string
+	stosb
+
+	jmp int_filename_convert.exit
+
+.basename_skip:
+	lodsb
+
+	cmp al, ' '
+	jne .error
+
+	inc cx
+	cmp cx, 8
+	jl .basename_skip
+
+	jmp .basename_finish
+
+.extension_skip:
+	lodsb
+
+	cmp al, ' '
+	jne .error
+
+	inc cx
+	cmp cx, 11
+	jl .extension_skip
+
+	jmp .extension_finish
+
+.error:
+	popa
+	mov ax, .invalid
+	ret
+
+	.invalid		db "[NAME ERROR]", 0
+
+; ------------------------------------------------------------------
 ; int_filename_convert -- Change 'TEST.BIN' into 'TEST    BIN' as per FAT12
 ; IN: DS:AX = filename string
 ; OUT: ES:AX = location of converted string
@@ -1194,14 +1287,9 @@ int_filename_convert:
 	jmp .exit
 
 .do_unnamed:
-	push ds
-	movs ds, cs
-	mov si, .unnamed
-	mov di, int_filename
-	mov cx, 11
-	rep movsb
-	pop ds
-	jmp .exit
+	popa
+	mov ax, .unnamed
+	ret
 
 .check_valid_char:
 	; Is the character within ASCII range?
