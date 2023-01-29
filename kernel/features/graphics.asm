@@ -80,8 +80,7 @@ os_draw_line:
 	pusha				; Save parameters
 	push ds
 	
-	push cs
-	pop ds
+	movs ds, cs
 	
 	mov [.x1], cx			; Save points
 	mov [.x], cx
@@ -269,8 +268,7 @@ os_draw_rectangle:
 	pusha
 	push ds
 
-	push cs
-	pop ds
+	movs ds, cs
 
 	mov word [.x1], cx
 	mov word [.y1], dx
@@ -357,8 +355,7 @@ os_draw_polygon:
 	pusha
 	push ds
 
-	push cs
-	pop ds
+	movs ds, cs
 
 	dec bh
 	mov byte [.points], bh
@@ -439,8 +436,7 @@ os_draw_circle:
 	pusha
 	push ds
 
-	push cs
-	pop ds
+	movs ds, cs
 
 	mov [.colour], al
 	mov [.radius], bx

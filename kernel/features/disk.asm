@@ -184,8 +184,7 @@ os_load_file:
 	push es
 	mov [.old_segment], es
 
-	push cs
-	pop es
+	movs es, cs
 	
 	call os_string_uppercase
 
@@ -275,8 +274,7 @@ os_load_file:
 
 	call os_disk_read_sector
 
-	push cs
-	pop es
+	movs es, cs
 	
 	jc .root_problem
 
@@ -345,8 +343,7 @@ os_write_file:
 	
 	mov [.old_segment], es
 	
-	push cs
-	pop es
+	movs es, cs
 		
 	call int_save_footer			; Message display routine
 	jc .no_msg
@@ -593,8 +590,7 @@ os_write_file:
 	
 	call os_disk_write_sector
 
-	push cs
-	pop es
+	movs es, cs
 		
 	popad
 
@@ -1225,8 +1221,7 @@ int_read_fat:
 	pushad
 	push es
 	
-	push cs
-	pop es
+	movs es, cs
 	mov eax, 1
 	mov cx, 9
 	mov si, DISK_BUFFER
@@ -1246,8 +1241,7 @@ int_write_fat:
 	pushad
 	push es
 	
-	push cs
-	pop es
+	movs es, cs
 	mov eax, 1
 	mov cx, 9
 	mov si, DISK_BUFFER
@@ -1268,8 +1262,7 @@ int_read_root_dir:
 	pushad
 	push es
 	
-	push cs
-	pop es
+	movs es, cs
 	mov eax, 19
 	mov cx, 14
 	mov si, DISK_BUFFER
@@ -1289,8 +1282,7 @@ int_write_root_dir:
 	pushad
 	push es
 	
-	push cs
-	pop es
+	movs es, cs
 	mov eax, 19
 	mov cx, 14
 	mov si, DISK_BUFFER

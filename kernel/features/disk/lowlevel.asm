@@ -93,7 +93,7 @@ os_int13_failsafe_protected:
 ; IN: DL = drive number, OUT: DS:DI = pointer to param table
 
 os_disk_get_param_table:
-	mov ds, [cs:driversgmt]		; Segment 0
+	movs ds, fs					; Segment 0
 
 	movzx di, dl				; Each entry is 8 bytes wide
 	shl di, 3
@@ -214,8 +214,7 @@ os_disk_detect_drive:
 
 	push es
 
-	push ds					; DS = BIOS drive param table, ES = our struct
-	pop es
+	movs es, ds				; DS = BIOS drive param table, ES = our struct
 
 	mov al, 7Fh				; Allocate a buffer in the disk cache
 	call os_disk_cache_alloc_sector
@@ -427,9 +426,7 @@ os_disk_init_int13:
 
 	push si
 	mov si, .packet					; Initialize driver packet pointer
-
-	push cs
-	pop ds
+	movs ds, cs
 
 	mov [si + 8], eax				; LBA address
 	pop ax

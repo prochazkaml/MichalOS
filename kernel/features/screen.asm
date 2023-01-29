@@ -1235,8 +1235,7 @@ os_draw_background:
 	push ds
 	push es
 	
-	push fs	; Set up source pointer
-	pop ds
+	movs ds, fs				; Set up source pointer
 
 	mov si, DESKTOP_BACKGROUND
 
@@ -1311,9 +1310,7 @@ os_dump_registers:
 
 	; Dump the 16 bit registers
 
-	push cs
-	pop ds
-
+	movs ds, cs
 	mov si, .ip_string
 
 	mov bx, sp
@@ -1976,7 +1973,7 @@ os_reset_font:
 	mov bx, 1000h
 	mov cx, 0100h
 	clr dx
-	mov es, [driversgmt]
+	movs es, fs
 	mov bp, SYSTEM_FONT
 	int 10h
 	pop es

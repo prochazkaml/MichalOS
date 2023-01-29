@@ -11,8 +11,7 @@ os_run_zx7_module:
 	pusha
 	push es
 
-	push cs
-	pop es
+	movs es, cs
 	mov di, 100h
 	call os_decompress_zx7
 	
@@ -76,8 +75,7 @@ os_get_os_name:
 ; OUT: None, as it does not return
 
 os_fatal_error:
-	push cs
-	pop ds
+	movs ds, cs
 	mov si, .sub_fatalerr_data
 	jmp os_run_zx7_module
 
@@ -114,8 +112,7 @@ os_int_1Ah:
 	push ds
 	pusha
 
-	push cs
-	pop ds
+	movs ds, cs
 
 	cmp ah, 2		; Read system time
 	je .read_time

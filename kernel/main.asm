@@ -170,9 +170,10 @@ os_main:
 
 first_init_stack_done:
 	mov ax, cs					; Set all segments to match where kernel is loaded
-	mov ds, ax			
+	mov ds, ax
 	mov es, ax
-	mov fs, [driversgmt]
+	push word 0
+	pop fs
 	add ax, 1000h
 	mov gs, ax
 	
@@ -190,7 +191,7 @@ first_init_stack_done:
 	; Clear the disk params table
 
 	push es
-	mov es, [driversgmt]
+	movs es, fs
 	mov di, DISK_PARAMS
 	mov al, 0FFh
 	mov cx, 8 * 256
@@ -202,7 +203,7 @@ first_init_stack_done:
 	mov byte [CONFIG_FONT], CFG_FONT_BIOS		; If a fatal error occurs, use the default BIOS font
 
 	push es
-	mov es, [driversgmt]
+	movs es, fs
 	
 	mov ax, fileman_name
 	mov cx, FILE_MANAGER
@@ -459,7 +460,7 @@ checkformenu:
 
 load_fileman:
 	push ds
-	mov ds, [driversgmt]
+	movs ds, fs
 	mov si, FILE_MANAGER
 	mov di, 0100h
 	mov cx, 1000h
@@ -469,9 +470,7 @@ load_fileman:
 	jmp checkformenu
 
 systemfilemissing:
-	push cs
-	pop es
-
+	movs es, cs
 	mov bx, noprogerror
 	mov cx, 4000h
 	call os_string_join
@@ -481,8 +480,6 @@ systemfilemissing:
 	
 	; And now data for the above code...
 
-	driversgmt				dw 0000h
-	
 	noprogerror				db ' - System file not found', 0
 	
 	app_ext					db 'APP', 0

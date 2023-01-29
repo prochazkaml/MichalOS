@@ -35,6 +35,11 @@
 	mov %1, (%2 + %3 * 256)
 %endmacro
 
+%macro movs 2
+	push %2
+	pop %1
+%endmacro
+
 ; ------------------------------------------------------------------
 ; MEMORY LOCATIONS
 
