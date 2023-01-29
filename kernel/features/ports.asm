@@ -10,6 +10,8 @@
 os_serial_port_enable:
 	pusha
 
+	; TODO: Access raw ports!
+
 	clr dx			; Configure serial port 1
 	cmp ax, 1
 	je .slow_mode
@@ -35,16 +37,18 @@ os_serial_port_enable:
 os_send_via_serial:
 	pusha
 
+	; TODO: Access raw ports!
+
 	mov ah, 01h
 	clr dx			; COM1
 
 	int 14h
 
-	mov [.tmp], ah
+	mov [cs:.tmp], ah
 
 	popa
 
-	mov ah, [.tmp]
+	mov ah, [cs:.tmp]
 
 	ret
 
@@ -59,16 +63,18 @@ os_send_via_serial:
 os_get_via_serial:
 	pusha
 
+	; TODO: Access raw ports!
+
 	mov ah, 02h
 	clr dx			; COM1
 
 	int 14h
 
-	mov [.tmp], ax
+	mov [cs:.tmp], ax
 
 	popa
 
-	mov ax, [.tmp]
+	mov ax, [cs:.tmp]
 
 	ret
 

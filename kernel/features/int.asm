@@ -46,10 +46,10 @@ os_get_int_handler:
 ; OUT: None, registers preserved
 
 os_pause:
-	mov [pause_timer], ax
+	mov [cs:pause_timer], ax
 
 .wait_loop:
-	cmp word [pause_timer], 0
+	cmp word [cs:pause_timer], 0
 	jne .wait_loop
 	ret
 
@@ -61,8 +61,8 @@ os_pause:
 
 os_attach_app_timer:
 	pusha
-	mov [timer_application_offset], si
-	mov byte [timer_application_attached], 1
+	mov [cs:timer_application_offset], si
+	mov byte [cs:timer_application_attached], 1
 	
 	jmp os_set_timer_speed.no_pusha
 	
@@ -72,7 +72,7 @@ os_attach_app_timer:
 
 os_return_app_timer:
 	pusha
-	mov byte [timer_application_attached], 0
+	mov byte [cs:timer_application_attached], 0
 	
 	clr cx
 	call os_set_timer_speed
@@ -92,7 +92,7 @@ os_set_timer_speed:
 	pusha
 	
 .no_pusha:
-	mov [current_timer_speed], cx
+	mov [cs:current_timer_speed], cx
 	
 	mov al, 00110110b	; Timer 0, square wave
 	out 43h, al
@@ -111,7 +111,7 @@ os_set_timer_speed:
 
 	div ecx
 
-	mov [current_timer_freq], eax
+	mov [cs:current_timer_freq], eax
 	popad
 
 	popa

@@ -93,14 +93,14 @@ os_get_memory:
 	pusha
 	xor cx, cx
 	int 12h					; Get the conventional memory size...
-	mov [.conv_mem], ax		; ...and store it
+	mov [cs:.conv_mem], ax	; ...and store it
 	
 	mov ah, 88h				; Also get the high memory (>1MB)...
 	int 15h
-	mov [.high_mem], ax		; ...and store it too
+	mov [cs:.high_mem], ax	; ...and store it too
 	popa
-	mov ax, [.conv_mem]
-	mov bx, [.high_mem]
+	mov ax, [cs:.conv_mem]
+	mov bx, [cs:.high_mem]
 	ret
 
 	.conv_mem	dw 0
@@ -111,7 +111,11 @@ os_get_memory:
 ; IN/OUT: same as int 1Ah
 
 os_int_1Ah:
+	push ds
 	pusha
+
+	push cs
+	pop ds
 
 	cmp ah, 2		; Read system time
 	je .read_time
@@ -120,14 +124,17 @@ os_int_1Ah:
 	je .read_date
 	
 	popa
+	pop ds
 	int 1Ah
 	ret
 	
 .read_date:
 	call .update_time
+
 	popa
 	mov dx, [.days]
 	mov cx, [.years]
+	pop ds
 	ret
 	
 .read_time:
@@ -136,7 +143,7 @@ os_int_1Ah:
 	popa
 	mov dh, [.seconds]
 	mov cx, [.minutes]
-	
+	pop ds
 	ret
 
 .update_time:

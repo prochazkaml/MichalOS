@@ -9,7 +9,7 @@
 
 os_init_graphics_mode:
 	pusha
-	mov byte [system_ui_state], 1
+	mov byte [cs:system_ui_state], 1
 
 	mov ax, 13h
 	int 10h
@@ -78,15 +78,11 @@ os_set_pixel:
 
 os_draw_line:
 	pusha				; Save parameters
+	push ds
 	
-	xor ax, ax			; Clear variables
-	mov di, .x1
-	mov cx, 11
-	rep stosw
+	push cs
+	pop ds
 	
-	popa				; Restore and save parameters
-	pusha
-
 	mov [.x1], cx			; Save points
 	mov [.x], cx
 	mov [.y1], dx
@@ -244,6 +240,7 @@ os_draw_line:
 	mov bl, [.colour]
 	call os_set_pixel
 	
+	pop ds
 	popa
 	ret
 	
@@ -270,17 +267,16 @@ os_draw_line:
 
 os_draw_rectangle:
 	pusha
-	pushf
-	
+	push ds
+
+	push cs
+	pop ds
+
 	mov word [.x1], cx
 	mov word [.y1], dx
 	mov word [.x2], si
 	mov word [.y2], di
-	
-	popf
-	jnc .draw_line
-
-	jmp .fill_shape
+	jc .fill_shape
 	
 .draw_line:
 	; top line
@@ -342,6 +338,7 @@ os_draw_rectangle:
 	jl .x_loop
 
 .finished_fill:
+	pop ds
 	popa
 	ret
 	
@@ -358,7 +355,11 @@ os_draw_rectangle:
 
 os_draw_polygon:
 	pusha
-	
+	push ds
+
+	push cs
+	pop ds
+
 	dec bh
 	mov byte [.points], bh
 	
@@ -403,6 +404,7 @@ os_draw_polygon:
 	mov di, [.yi]
 	call os_draw_line
 	
+	pop ds
 	popa
 	ret
 	
@@ -435,6 +437,11 @@ os_clear_graphics:
 
 os_draw_circle:
 	pusha
+	push ds
+
+	push cs
+	pop ds
+
 	mov [.colour], al
 	mov [.radius], bx
 	mov [.x0], cx
@@ -538,6 +545,7 @@ os_draw_circle:
 	ret
 	
 .finish:
+	pop ds
 	popa
 	ret
 	

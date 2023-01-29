@@ -379,63 +379,63 @@ os_option_menu equ 32876
 
 ; ------------------------------------------------------------------
 ; os_string_encrypt -- Encrypts a string using a totally military-grade encryption algorithm
-; IN: SI = Input string/Output string
+; IN: DS:SI = Input string/Output string
 ; OUT: None, registers preserved
 
 os_string_encrypt equ 33014
 
 ; ------------------------------------------------------------------
 ; os_string_add -- Add a string on top of another string
-; IN: AX/BX = Main string/Added string
+; IN: DS:AX = Main string, DS:BX = Added string
 ; OUT: None, registers preserved
 
 os_string_add equ 32897
 
 ; ------------------------------------------------------------------
 ; os_string_length -- Return length of a string
-; IN: AX = string location
+; IN: DS:AX = string location
 ; OUT AX = length (other regs preserved)
 
 os_string_length equ 32810
 
 ; ------------------------------------------------------------------
 ; os_string_reverse -- Reverse the characters in a string
-; IN: SI = string location
+; IN: DS:SI = string location
 ; OUT: None, registers preserved
 
 os_string_reverse equ 32939
 
 ; ------------------------------------------------------------------
 ; os_find_char_in_string -- Find location of character in a string
-; IN: SI = string location, AL = character to find
+; IN: DS:SI = string location, AL = character to find
 ; OUT: AX = location in string, or 0 if char not present
 
 os_find_char_in_string equ 32867
 
 ; ------------------------------------------------------------------
 ; os_string_uppercase -- Convert zero-terminated string to upper case
-; IN: AX = string location
+; IN: DS:AX = string location
 ; OUT: None, registers preserved
 
 os_string_uppercase equ 32813
 
 ; ------------------------------------------------------------------
 ; os_string_lowercase -- Convert zero-terminated string to lower case
-; IN: AX = string location
+; IN: DS:AX = string location
 ; OUT: None, registers preserved
 
 os_string_lowercase equ 32816
 
 ; ------------------------------------------------------------------
 ; os_string_copy -- Copy one string into another
-; IN: SI = source, DI = destination (programmer ensure sufficient room)
+; IN: DS:SI = source, ES:DI = destination (programmer ensure sufficient room)
 ; OUT: None, registers preserved
 
 os_string_copy equ 32822
 
 ; ------------------------------------------------------------------
 ; os_string_join -- Join two strings into a third string
-; IN: AX = string one, BX = string two, CX = destination string
+; IN: DS:AX = string one, DS:BX = string two, ES:CX = destination string
 ; OUT: None, registers preserved
 
 os_string_join equ 32828

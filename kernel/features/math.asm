@@ -25,14 +25,13 @@ os_get_random:
 	add cx, ax			; Add the low offset back
 	ret
 
-
 .generate_random:
 	push dx
 
-	mov ax, [os_random_seed]
+	mov ax, [cs:os_random_seed]
 	mov dx, 0x7383			; The magic number (random.org)
 	mul dx				; DX:AX = AX * DX
-	mov [os_random_seed], ax
+	mov [cs:os_random_seed], ax
 
  	pop dx
 	ret
@@ -45,7 +44,8 @@ os_get_random:
 ; OUT: AX = integer value
 
 os_bcd_to_int:
-	pusha
+	push cx
+	push bx
 
 	mov bl, al			; Store entire number for now
 
@@ -57,23 +57,21 @@ os_bcd_to_int:
 	mul bl				; AX = 10 * BL
 
 	add ax, cx			; Add lower BCD to 10*higher
-	mov [.tmp], ax
 
-	popa
-	mov ax, [.tmp]			; And return it in AX!
+	pop bx
+	pop cx
 	ret
 
 
-	.tmp	dw 0
-
-	
 ; ------------------------------------------------------------------
 ; os_int_to_bcd -- Converts an integer to a binary coded decimal number
 ; IN: AL = integer value
 ; OUT: AL = BCD number
 
 os_int_to_bcd:
-	pusha
+	push bx
+	push dx
+
 	movzx ax, al
 	xor dx, dx
 	
@@ -81,14 +79,12 @@ os_int_to_bcd:
 	div bx
 	
 	shl al, 4
-	add dl, al
+	add al, dl
 	
-	mov [.tmp], dl
-	popa
-	mov al, [.tmp]
+	pop dx
+	pop bx
 	ret
 
-	.tmp	db 0
 
 ; ------------------------------------------------------------------
 ; os_math_power -- Calculates EAX^EBX.
@@ -99,21 +95,27 @@ os_math_power:
 	pushad
 	cmp ebx, 1
 	je .power_end
+
 	test ebx, ebx
 	jz .zero
+
 	mov ecx, ebx				; Prepare the data
 	mov ebx, eax
+
 .power_loop:
 	mul ebx
 	dec ecx
+
 	cmp ecx, 1
 	jnle .power_loop
+
 .power_end:
 	mov [.tmp_dword], eax
 	popad
 	mov eax, [.tmp_dword]
 	xor edx, edx
 	ret
+
 .zero:
 	popad
 	mov eax, 1
@@ -121,7 +123,6 @@ os_math_power:
 	ret
 	
 	.tmp_dword		dd 0
-	.tmp_dword2		dd 0
 	
 ; ------------------------------------------------------------------
 ; os_math_root -- Approximates the EBXth root of EAX.
@@ -132,30 +133,33 @@ os_math_root:
 	pushad
 	mov ecx, eax				; Prepare the data
 	mov esi, 2
+
 .root_loop:
 	mov eax, esi
 	call os_math_power
+
 	cmp eax, ecx
 	je .root_exact
 	jg .root_range
+	
 	inc esi
 	jmp .root_loop
+
 .root_exact:
 	mov [.tmp_dword], esi
 	popad
 	mov eax, [.tmp_dword]
 	xor edx, edx
 	ret
+
 .root_range:
-	mov [.tmp_dword2], esi
-	dec esi
 	mov [.tmp_dword], esi
 	popad
-	mov eax, [.tmp_dword]
-	mov edx, [.tmp_dword2]
+	mov edx, [.tmp_dword]
+	mov eax, edx
+	dec eax
 	ret
 	
 	.tmp_dword		dd 0
-	.tmp_dword2		dd 0
 
 ; ==================================================================

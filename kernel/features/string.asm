@@ -4,11 +4,16 @@
 
 ; ------------------------------------------------------------------
 ; os_string_encrypt -- Encrypts a string using a totally military-grade encryption algorithm
-; IN: SI = Input string/Output string
+; IN: DS:SI = Input string/Output string
 ; OUT: None, registers preserved
 
 os_string_encrypt:
 	pusha
+	push es
+
+	push ds
+	pop es
+
 	mov di, si
 
 	mov ax, si
@@ -33,59 +38,63 @@ os_string_encrypt:
 	jmp .loop
 	
 .exit:
+	pop es
 	popa
 	ret
 
 ; ------------------------------------------------------------------
 ; os_string_add -- Add a string on top of another string
-; IN: AX/BX = Main string/Added string
+; IN: DS:AX = Main string, DS:BX = Added string
 ; OUT: None, registers preserved
 
 os_string_add:
 	pusha
+	push es
+
+	push ds
+	pop es
+
 	push ax
 	call os_string_length		; Get the length of the main string
 	pop di
 	add di, ax					; Add it to the pointer
 	mov si, bx
  	call os_string_copy			; Copy the string
+
+	pop es
  	popa
  	ret
 	
 ; ------------------------------------------------------------------
 ; os_string_length -- Return length of a string
-; IN: AX = string location
+; IN: DS:AX = string location
 ; OUT AX = length (other regs preserved)
 
 os_string_length:
-	pusha
+	push si
+	push cx
 
-	mov bx, ax			; Move location of string to BX
-
-	xor cx, cx			; Counter
+	mov si, ax			; Move location of string to SI
+	mov cx, -1			; Counter
 
 .more:
-	cmp byte [bx], 0		; Zero (end of string) yet?
-	je .done
-	inc bx				; If not, keep adding
-	inc cx
-	jmp .more
+	inc cx				; If not, keep adding
 
+	lodsb
+	test al, al			; Zero (end of string) yet?
+	jnz .more
 
 .done:
-	mov word [.tmp_counter], cx	; Store count before restoring other registers
-	popa
+	mov ax, cx
 
-	mov ax, [.tmp_counter]		; Put count back into AX before returning
+	pop cx
+	pop si
 	ret
-
-
-	.tmp_counter	dw 0
 
 
 ; ------------------------------------------------------------------
 ; os_string_reverse -- Reverse the characters in a string
-; IN: SI = string location
+; IN: DS:SI = string location
 ; OUT: None, registers preserved
 
 os_string_reverse:
@@ -121,15 +130,16 @@ os_string_reverse:
 
 ; ------------------------------------------------------------------
 ; os_find_char_in_string -- Find location of character in a string
-; IN: SI = string location, AL = character to find
+; IN: DS:SI = string location, AL = character to find
 ; OUT: AX = location in string, or 0 if char not present
 
 os_find_char_in_string:
-	pusha
+	push cx
+	push si
 
 	mov cx, 1			; Counter -- start at first char (we count
-					; from 1 in chars here, so that we can
-					; return 0 if the source char isn't found)
+						; from 1 in chars here, so that we can
+						; return 0 if the source char isn't found)
 
 .more:
 	cmp byte [si], al
@@ -140,24 +150,19 @@ os_find_char_in_string:
 	inc cx
 	jmp .more
 
-.done:
-	mov [.tmp], cx
-	popa
-	mov ax, [.tmp]
-	ret
-
 .notfound:
-	popa
-	xor ax, ax
+	clr cx
+
+.done:
+	mov ax, cx
+	pop si
+	pop cx
 	ret
-
-
-	.tmp	dw 0
 
 
 ; ------------------------------------------------------------------
 ; os_string_uppercase -- Convert zero-terminated string to upper case
-; IN: AX = string location
+; IN: DS:AX = string location
 ; OUT: None, registers preserved
 
 os_string_uppercase:
@@ -190,7 +195,7 @@ os_string_uppercase:
 
 ; ------------------------------------------------------------------
 ; os_string_lowercase -- Convert zero-terminated string to lower case
-; IN: AX = string location
+; IN: DS:AX = string location
 ; OUT: None, registers preserved
 
 os_string_lowercase:
@@ -223,7 +228,7 @@ os_string_lowercase:
 
 ; ------------------------------------------------------------------
 ; os_string_copy -- Copy one string into another
-; IN: SI = source, DI = destination (programmer ensure sufficient room)
+; IN: DS:SI = source, ES:DI = destination (programmer ensure sufficient room)
 ; OUT: None, registers preserved
 
 os_string_copy:
@@ -240,7 +245,7 @@ os_string_copy:
 
 ; ------------------------------------------------------------------
 ; os_string_join -- Join two strings into a third string
-; IN: AX = string one, BX = string two, CX = destination string
+; IN: DS:AX = string one, DS:BX = string two, ES:CX = destination string
 ; OUT: None, registers preserved
 
 os_string_join:
