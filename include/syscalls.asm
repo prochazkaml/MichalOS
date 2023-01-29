@@ -442,14 +442,14 @@ os_string_join equ 32828
 
 ; ------------------------------------------------------------------
 ; os_string_chomp -- Strip leading and trailing spaces from a string
-; IN: AX = string location
+; IN: DS:AX = string location
 ; OUT: None, registers preserved
 
 os_string_chomp equ 32837
 
 ; ------------------------------------------------------------------
 ; os_string_compare -- See if two strings match
-; IN: SI = string one, DI = string two
+; IN: DS:SI = string one, DS:DI = string two
 ; OUT: carry set if same, clear if different
 
 os_string_compare equ 32834
@@ -457,7 +457,7 @@ os_string_compare equ 32834
 ; ------------------------------------------------------------------
 ; os_string_parse -- Take string (eg "run foo bar baz") and return
 ; pointers to zero-terminated strings (eg AX = "run", BX = "foo" etc.)
-; IN: SI = string
+; IN: DS:SI = string
 ; OUT: AX, BX, CX, DX = individual strings
 
 os_string_parse equ 32960

@@ -269,7 +269,7 @@ os_string_join:
 
 ; ------------------------------------------------------------------
 ; os_string_chomp -- Strip leading and trailing spaces from a string
-; IN: AX = string location
+; IN: DS:AX = string location
 ; OUT: None, registers preserved
 
 os_string_chomp:
@@ -327,7 +327,7 @@ os_string_chomp:
 
 ; ------------------------------------------------------------------
 ; os_string_compare -- See if two strings match
-; IN: SI = string one, DI = string two
+; IN: DS:SI = string one, DS:DI = string two
 ; OUT: carry set if same, clear if different
 
 os_string_compare:
@@ -363,7 +363,7 @@ os_string_compare:
 ; ------------------------------------------------------------------
 ; os_string_parse -- Take string (eg "run foo bar baz") and return
 ; pointers to zero-terminated strings (eg AX = "run", BX = "foo" etc.)
-; IN: SI = string
+; IN: DS:SI = string
 ; OUT: AX, BX, CX, DX = individual strings
 
 os_string_parse:
@@ -426,16 +426,18 @@ os_string_parse:
 ; OUT: AX = number
 
 os_string_to_int:
-	call os_string_to_32int		; This function only exists for compatibility reasons
-	ret
+	jmp os_string_to_32int		; This function only exists for compatibility reasons
 
 ; ------------------------------------------------------------------
 ; os_string_to_hex -- Convert hexadecimal string to integer value
-; IN: SI = string location (max 8 chars, up to 'FFFFFFFF')
+; IN: DS:SI = string location (max 8 chars, up to 'FFFFFFFF')
 ; OUT: EAX = number
 
 os_string_to_hex:
-	pushad
+	push si
+	push cx
+	push ebx
+	push edx
 	
 	mov ax, si			; First, uppercase the string
 	call os_string_uppercase
@@ -464,22 +466,22 @@ os_string_to_hex:
 	jmp .loop				; Loop again
 	
 .exit:
-	mov [.tmp_dword], eax
-	popad
-	mov eax, [.tmp_dword]
+	pop edx
+	pop ebx
+	pop cx
+	pop si
 	ret
 	
-	.tmp_dword	dd 0
-
 ; ------------------------------------------------------------------
 ; os_int_to_string -- Convert unsigned integer to string
 ; IN: AX = unsigned int
-; OUT: AX = string location
+; OUT: DS:AX = string location
 
 os_int_to_string:
 	pusha
+	movs ds, cs
 
-	xor cx, cx
+	clr cx
 	mov bx, 10			; Set BX 10, for division and mod
 	mov di, .t			; Get our pointer ready
 
@@ -487,18 +489,23 @@ os_int_to_string:
 	xor dx, dx
 	div bx				; Remainder in DX, quotient in AX
 	inc cx				; Increase pop loop counter
+
 	push dx				; Push remainder, so as to reverse order when popping
+
 	test ax, ax			; Is quotient zero?
 	jnz .push			; If not, loop again
+
 .pop:
 	pop dx				; Pop off values in reverse order, and add 48 to make them digits
+
 	add dl, '0'			; And save them in the string, increasing the pointer each time
-	mov [cs:di], dl
+	mov [di], dl
+	
 	inc di
 	dec cx
 	jnz .pop
 
-	mov byte [cs:di], 0		; Zero-terminate string
+	mov byte [di], 0	; Zero-terminate string
 
 	popa
 	mov ax, .t			; Return location of string
@@ -511,10 +518,11 @@ os_int_to_string:
 ; ------------------------------------------------------------------
 ; os_sint_to_string -- Convert signed integer to string
 ; IN: AX = signed int
-; OUT: AX = string location
+; OUT: DS:AX = string location
 
 os_sint_to_string:
 	pusha
+	movs ds, cs
 
 	xor cx, cx
 	mov bx, 10			; Set BX 10, for division and mod
@@ -523,21 +531,28 @@ os_sint_to_string:
 	test ax, ax			; Find out if X > 0 or not, force a sign
 	js .neg				; If negative...
 	jmp .push			; ...or if positive
+
 .neg:
 	neg ax				; Make AX positive
 	mov byte [.t], '-'		; Add a minus sign to our string
 	inc di				; Update the index
+
 .push:
 	xor dx, dx
 	div bx				; Remainder in DX, quotient in AX
 	inc cx				; Increase pop loop counter
+
 	push dx				; Push remainder, so as to reverse order when popping
+
 	test ax, ax			; Is quotient zero?
 	jnz .push			; If not, loop again
+
 .pop:
 	pop dx				; Pop off values in reverse order, and add 48 to make them digits
+
 	add dl, '0'			; And save them in the string, increasing the pointer each time
 	mov [di], dl
+
 	inc di
 	dec cx
 	jnz .pop
