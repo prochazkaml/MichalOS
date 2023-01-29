@@ -356,10 +356,6 @@ os_write_file:
 	mov word [.location], bx
 	mov word [.filename], ax
 
-	call os_file_exists		; Don't overwrite a file if it exists!
-	jnc .failure
-
-
 	; First, zero out the .free_clusters list from any previous execution
 	pusha
 
@@ -650,28 +646,10 @@ os_file_exists:
 	call os_string_uppercase
 
 	push ax
-	call os_string_length
-	test ax, ax
-	jz .failure
-	pop ax
-
-	push ax
 	call int_read_root_dir
-
-	mov di, DISK_BUFFER
-
 	call int_filename_convert	; Make FAT12-style filename
-	jc .failure
-
 	call int_get_root_entry	; Set or clear carry flag
 	pop ax
-
-	ret
-
-.failure:
-	pop ax
-
-	stc
 	ret
 
 
@@ -712,7 +690,8 @@ os_create_file:
 	call os_fatal_error
 
 .exists_error:				; We also get here if above loop finds nothing
-	jmp .failure
+	stc
+	ret
 
 .found_free_entry:
 	pop si				; Get filename back
@@ -821,8 +800,6 @@ os_remove_file:
 
 	call int_read_root_dir		; Get root dir into DISK_BUFFER
 
-	mov di, DISK_BUFFER		; Point DI to root dir
-
 	pop ax				; Get chosen filename back
 
 	call int_get_root_entry	; Entry will be returned in DI
@@ -927,8 +904,6 @@ os_rename_file:
 
 	call int_read_root_dir		; Get root dir into DISK_BUFFER
 
-	mov di, DISK_BUFFER		; Point DI to root dir
-
 	pop ax				; Get chosen filename back
 
 	call os_string_uppercase
@@ -990,8 +965,6 @@ os_get_file_size:
 
 	pop ax
 
-	mov di, DISK_BUFFER
-
 	call int_get_root_entry
 	jc .failure
 
@@ -1034,8 +1007,6 @@ os_get_file_datetime:
 	jc .failure
 
 	pop ax
-
-	mov di, DISK_BUFFER
 
 	call int_get_root_entry
 	jc .failure
