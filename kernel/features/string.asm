@@ -513,8 +513,7 @@ os_int_to_string:
 	mov ax, .t			; Return location of string
 	ret
 
-
-	.t times 7 db 0
+	.t times 12 db 0
 
 
 ; ------------------------------------------------------------------
@@ -539,7 +538,7 @@ os_sint_to_string:
 
 ; ------------------------------------------------------------------
 ; os_get_time_string -- Get current time in a string (eg '10:25')
-; IN: BX = string location
+; IN: ES:BX = string location
 ; OUT: None, registers preserved
 
 os_get_time_string:
@@ -607,7 +606,7 @@ os_get_time_string:
 
 ; ------------------------------------------------------------------
 ; os_get_date_string -- Get current date in a string (eg '12/31/2007')
-; IN: BX = string location
+; IN: ES:BX = string location
 ; OUT: None, registers preserved
 
 os_get_date_string:
@@ -670,7 +669,7 @@ os_get_date_string:
 ; ------------------------------------------------------------------
 ; os_string_tokenize -- Reads tokens separated by specified char from
 ; a string. Returns pointer to next token, or 0 if none left
-; IN: AL = separator char, SI = beginning
+; IN: AL = separator char, DS:SI = beginning
 ; OUT: DI = next token or 0 if none
 
 os_string_tokenize:
@@ -698,12 +697,17 @@ os_string_tokenize:
 
 ; ------------------------------------------------------------------
 ; os_string_callback_tokenizer -- Prints a token from string, requests are done by callback
-; IN: AX = comma-separated string
+; IN: DS:AX = comma-separated string
 ; OUT: AL = AH = max length of any token, CX = number of entries in the list,
 ;      SI = callback location (if C clear, accepts CX as entry ID, prints out result)
 
 os_string_callback_tokenizer:
 	push bx
+	push ds
+
+	mov [cs:.strbasesgmt], ds
+	
+	movs ds, cs
 	mov [.strbaseptr], ax
 	mov [.strcurptr], ax
 	mov word [.curentryid], 0
@@ -739,6 +743,7 @@ os_string_callback_tokenizer:
 	jmp .entry_loop
 
 .no_entries:
+	pop ds
 	pop bx
 	dec ah				; Terminator character was counted as well, so get rid of it
 	mov al, ah
@@ -746,23 +751,31 @@ os_string_callback_tokenizer:
 	ret
 
 .callback:
+	push ds
+	push bx
+
 	jc .cb_exit
+
+	movs ds, cs
 
 	dec cx
 	
 	mov si, [.strcurptr]
+	mov bx, [.curentryid]
 
 	; Check if we're able to simply advance forward or if we have to rewind to the start
 	
-	cmp cx, [.curentryid]
+	cmp cx, bx
 	jge .advance
 
-	mov word [.curentryid], 0
+	clr bx
 	mov si, [.strbaseptr]
 
 .advance:
-	sub cx, [.curentryid]	; Subtract the IDs that we've already processed
-	
+	sub cx, bx				; Subtract the IDs that we've already processed
+
+	mov ds, [.strbasesgmt]
+
 	test cx, cx				; Do we already have the thing we want?
 	jz .print_loop
 
@@ -777,7 +790,7 @@ os_string_callback_tokenizer:
 	cmp al, ','
 	jne .search_loop
 
-	inc word [.curentryid]
+	inc bx
 	loop .search_loop
 
 .print_loop:
@@ -793,82 +806,93 @@ os_string_callback_tokenizer:
 	jmp .print_loop
 
 .cb_save_exit:
-	inc word [.curentryid]
-	mov [.strcurptr], si	
+	inc bx
+	mov [cs:.curentryid], bx
+	mov [cs:.strcurptr], si	
 
 .cb_exit:
+	pop bx
+	pop ds
 	ret
 
+.strbasesgmt	dw 0
 .strbaseptr		dw 0
 .strcurptr		dw 0
 .curentryid		dw 0
 
 ; ------------------------------------------------------------------
-; os_32int_to_string -- Converts an unsigned 32-bit integer into a string.
+; os_32int_to_string -- Converts an unsigned 32-bit integer into a string
 ; IN: EAX = unsigned int
 ; OUT: AX = string location
 
 os_32int_to_string:
 	pushad
 
-	xor cx, cx
-	mov ebx, 10			; Set BX 10, for division and mod
-	mov di, .t			; Get our pointer ready
+	clr cx
+	mov ebx, 10					; Set BX 10, for division and mod
+	mov di, os_int_to_string.t	; Get our pointer ready
 
 .push:
-	xor edx, edx
-	div ebx				; Remainder in DX, quotient in AX
-	inc cx				; Increase pop loop counter
-	push edx			; Push remainder, so as to reverse order when popping
-	test eax, eax		; Is quotient zero?
-	jnz .push			; If not, loop again
+	clr edx
+	div ebx						; Remainder in DX, quotient in AX
+
+	inc cx						; Increase pop loop counter
+
+	push edx					; Push remainder, so as to reverse order when popping
+	test eax, eax				; Is quotient zero?
+	jnz .push					; If not, loop again
 
 .pop:
-	pop edx				; Pop off values in reverse order, and add 48 to make them digits
-	add dl, '0'			; And save them in the string, increasing the pointer each time
+	pop edx						; Pop off values in reverse order, and add 48 to make them digits
+
+	add dl, '0'					; And save them in the string, increasing the pointer each time
 	mov [di], dl
+
 	inc di
 	dec cx
 	jnz .pop
 
-	mov byte [di], 0		; Zero-terminate string
+	mov byte [di], 0			; Zero-terminate string
 
 	popad
-	mov ax, .t			; Return location of string
+	mov ax, os_int_to_string.t	; Return location of string
 	ret
 
 
-	.t times 11 db 0
-
 ; ------------------------------------------------------------------
-; os_string_to_32int -- Converts a string into a 32-bit integer.
+; os_string_to_32int -- Converts a string into a 32-bit integer
 ; IN: SI = string location
 ; OUT: EAX = unsigned integer
 
 os_string_to_32int:
-	pushad
-	xor eax, eax				; Temporary 32-bit integer
+	push si
+	push ecx
+	push edx
+
+	clr eax					; Temporary 32-bit integer
 	
 .loop:
 	push eax
 	lodsb					; Load a byte from SI
 	mov cl, al
 	pop eax
+
 	test cl, cl				; Have we reached the end?
-	jz .exit			; If we have, exit
+	jz .exit				; If we have, exit
+
 	sub cl, '0'				; Convert the value to decimal
 	and ecx, 255			; Keep the low 8 bits only
+
 	mul dword [.divisor]	; Multiply EAX by 10
 	add eax, ecx			; Add the value to the integer
 	jmp .loop				; Loop again
 	
 .exit:
-	mov [.tmp_dword], eax
-	popad
-	mov eax, [.tmp_dword]
+	pop edx
+	pop ecx
+	pop si
 	ret
 	
-	.tmp_dword	dd 0
 	.divisor	dd 10
 	
 ; ==================================================================

@@ -492,14 +492,14 @@ os_sint_to_string equ 32957
 
 ; ------------------------------------------------------------------
 ; os_get_time_string -- Get current time in a string (eg '10:25')
-; IN: BX = string location
+; IN: ES:BX = string location
 ; OUT: None, registers preserved
 
 os_get_time_string equ 32849
 
 ; ------------------------------------------------------------------
 ; os_get_date_string -- Get current date in a string (eg '12/31/2007')
-; IN: BX = string location
+; IN: ES:BX = string location
 ; OUT: None, registers preserved
 
 os_get_date_string equ 32858
@@ -507,20 +507,20 @@ os_get_date_string equ 32858
 ; ------------------------------------------------------------------
 ; os_string_tokenize -- Reads tokens separated by specified char from
 ; a string. Returns pointer to next token, or 0 if none left
-; IN: AL = separator char, SI = beginning
+; IN: AL = separator char, DS:SI = beginning
 ; OUT: DI = next token or 0 if none
 
 os_string_tokenize equ 32972
 
 ; ------------------------------------------------------------------
-; os_32int_to_string -- Converts an unsigned 32-bit integer into a string.
+; os_32int_to_string -- Converts an unsigned 32-bit integer into a string
 ; IN: EAX = unsigned int
 ; OUT: AX = string location
 
 os_32int_to_string equ 33059
 
 ; ------------------------------------------------------------------
-; os_string_to_32int -- Converts a string into a 32-bit integer.
+; os_string_to_32int -- Converts a string into a 32-bit integer
 ; IN: SI = string location
 ; OUT: EAX = unsigned integer
 
