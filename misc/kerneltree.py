@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import re
-from xml.etree.ElementInclude import include
 
 table = open("build/kernel.lst")
 rows = table.read().replace("\t", " ").splitlines()
