@@ -9,7 +9,7 @@
 
 os_speaker_tone:
 	pusha
-	cmp byte [speaker_unmuted], 0
+	cmp byte [cs:speaker_unmuted], 0
 	je .exit
 
 	test ax, ax
@@ -24,7 +24,7 @@ os_speaker_tone:
 	mov ax, 34DCh
 	div cx
 
-	mov [speaker_period], ax
+	mov [cs:speaker_period], ax
 
 	out 42h, al
 	mov al, ah
@@ -39,6 +39,7 @@ os_speaker_tone:
 	ret
 
 	speaker_period	dw 1
+	speaker_unmuted	db 0
 
 ; ------------------------------------------------------------------
 ; os_speaker_raw_period -- Generate PC speaker tone (call os_speaker_off to turn off)
@@ -47,10 +48,10 @@ os_speaker_tone:
 
 os_speaker_raw_period:
 	pusha
-	cmp byte [speaker_unmuted], 0
+	cmp byte [cs:speaker_unmuted], 0
 	je .exit
 
-	mov [speaker_period], ax
+	mov [cs:speaker_period], ax
 
 	push ax
 	mov al, 10110110b
@@ -95,10 +96,10 @@ os_speaker_off:
 	and al, 0FCh
 	out 61h, al
 
-	cmp byte [speaker_unmuted], 0
+	cmp byte [cs:speaker_unmuted], 0
 	je .exit
 
-	mov word [speaker_period], 1
+	mov word [cs:speaker_period], 1
 
 .exit:
 	popa
@@ -111,8 +112,6 @@ os_speaker_off:
 os_speaker_muted:
 	cmp byte [cs:speaker_unmuted], 0
 	ret
-
-	speaker_unmuted	db 0
 
 ; ------------------------------------------------------------------
 ; os_start_adlib -- Starts the selected Adlib driver
