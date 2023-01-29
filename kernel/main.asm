@@ -37,127 +37,125 @@
 ; OS CALL VECTORS
 
 os_call_vectors:
-	jmp os_main					; 8000h -- Called from bootloader
-	jmp os_print_string			; 8003h
-	jmp os_move_cursor			; 8006h
-	jmp os_clear_screen			; 8009h
-	jmp os_exit					; 800Ch
-	jmp os_print_newline		; 800Fh
-	jmp os_wait_for_key			; 8012h
-	jmp os_check_for_key		; 8015h
-	jmp os_int_to_string		; 8018h
-	jmp os_speaker_tone			; 801Bh
-	jmp os_speaker_off			; 801Eh
-	jmp os_load_file			; 8021h
-	jmp os_pause				; 8024h
-	jmp os_illegal_call			; 8027h ; FREE!!!!!!!!!!!!
-	jmp os_draw_background		; 802Ah
-	jmp os_string_length		; 802Dh
-	jmp os_string_uppercase		; 8030h
-	jmp os_string_lowercase		; 8033h
-	jmp os_input_string			; 8036h
-	jmp os_string_copy			; 8039h
-	jmp os_dialog_box			; 803Ch
-	jmp os_string_join			; 803Fh
-	jmp os_get_file_list		; 8042h
-	jmp os_string_compare		; 8045h
-	jmp os_string_chomp			; 8048h
-	jmp os_string_to_hex		; 804Bh
-	jmp os_adlib_regwrite		; 804Eh
-	jmp os_bcd_to_int			; 8051h
-	jmp os_get_time_string		; 8054h
-	jmp os_draw_logo			; 8057h
-	jmp os_file_selector		; 805Ah
-	jmp os_get_date_string		; 805Dh
-	jmp os_send_via_serial		; 8060h
-	jmp os_get_via_serial		; 8063h
-	jmp os_find_char_in_string	; 8066h
-	jmp os_get_cursor_pos		; 8069h
-	jmp os_print_space			; 806Ch
-	jmp os_option_menu			; 806Fh
-	jmp os_print_digit			; 8072h
-	jmp os_print_1hex			; 8075h
-	jmp os_print_2hex			; 8078h
-	jmp os_print_4hex			; 807Bh
-	jmp os_set_timer_speed		; 807Eh
-	jmp os_report_free_space	; 8081h
-	jmp os_string_add			; 8084h
-	jmp os_speaker_note_length	; 8087h
-	jmp os_show_cursor			; 808Ah
-	jmp os_hide_cursor			; 808Dh
-	jmp os_dump_registers		; 8090h
-	jmp os_list_dialog_tooltip	; 8093h
-	jmp os_write_file			; 8096h
-	jmp os_file_exists			; 8099h
-	jmp os_create_file			; 809Ch
-	jmp os_remove_file			; 809Fh
-	jmp os_rename_file			; 80A2h
-	jmp os_get_file_size		; 80A5h
-	jmp os_input_dialog			; 80A8h
-	jmp os_list_dialog			; 80ABh
-	jmp os_string_reverse		; 80AEh
-	jmp os_string_to_int		; 80B1h
-	jmp os_draw_block			; 80B4h
-	jmp os_get_random			; 80B7h
-	jmp os_print_32int			; 80BAh
-	jmp os_serial_port_enable	; 80BDh
-	jmp os_sint_to_string		; 80C0h
-	jmp os_string_parse			; 80C3h
-	jmp os_run_basic			; 80C6h
-	jmp os_adlib_calcfreq		; 80C9h
-	jmp os_attach_app_timer		; 80CCh
-	jmp os_string_tokenize		; 80CFh
-	jmp os_clear_registers		; 80D2h
-	jmp os_format_string		; 80D5h
-	jmp os_putchar				; 80D8h
-	jmp os_start_adlib			; 80DBh
-	jmp os_return_app_timer		; 80DEh
-	jmp os_reset_font			; 80E1h
-	jmp os_print_string_box		; 80E4h
-	jmp os_put_chars			; 80E7h
-	jmp os_illegal_call			; 80EAh ; FREE!!!!!!!!!!!
-	jmp os_draw_line			; 80EDh
-	jmp os_draw_polygon			; 80F0h
-	jmp os_draw_circle			; 80F3h
-	jmp os_clear_graphics		; 80F6h
-	jmp os_get_file_datetime	; 80F9h
-	jmp os_string_encrypt		; 80FCh
-	jmp os_set_pixel			; 80FFh
-	jmp os_init_graphics_mode	; 8102h
-	jmp os_draw_icon			; 8105h
-	jmp os_stop_adlib			; 8108h
-	jmp os_adlib_noteoff		; 810Bh
-	jmp os_int_1Ah				; 810Eh
-	jmp os_int_to_bcd			; 8111h
-	jmp os_decompress_zx7		; 8114h
-	jmp os_password_dialog		; 8117h
-	jmp os_adlib_mute			; 811Ah
-	jmp os_draw_rectangle		; 811Dh
-	jmp os_get_memory			; 8120h
-	jmp os_color_selector		; 8123h
-	jmp os_modify_int_handler	; 8126h
-	jmp os_32int_to_string		; 8129h
-	jmp os_get_boot_disk		; 812Ch
-	jmp os_print_8hex			; 812Fh
-	jmp os_string_to_32int		; 8132h
-	jmp os_math_power			; 8135h
-	jmp os_math_root			; 8138h
-	jmp os_input_password		; 813Bh
-	jmp os_get_int_handler		; 813Eh
-	jmp os_get_os_name			; 8141h
-	jmp os_temp_box				; 8144h
-	jmp os_adlib_unmute			; 8147h
-	jmp os_disk_read_sector		; 814Ah
-	jmp os_init_text_mode		; 814Dh
-	jmp os_disk_write_sector	; 8150h
-	jmp os_print_int			; 8153h
-	jmp os_disk_read_multiple_sectors	; 8156h
-	jmp os_speaker_raw_period	; 8159h
-	jmp os_select_list			; 815Ch
-	jmp os_list_dialog_ex		; 815Fh
-	jmp os_disk_write_multiple_sectors	; 8162h
-	jmp os_input_string_ex		; 8165h
-	jmp os_file_selector_filtered	; 8168h
+	jmp os_main
+	jmp os_print_string
+	jmp os_move_cursor
+	jmp os_clear_screen
+	jmp os_exit
+	jmp os_print_newline
+	jmp os_wait_for_key
+	jmp os_check_for_key
+	jmp os_int_to_string
+	jmp os_speaker_tone
+	jmp os_speaker_off
+	jmp os_load_file
+	jmp os_pause
+	jmp os_draw_background
+	jmp os_string_length
+	jmp os_string_uppercase
+	jmp os_string_lowercase
+	jmp os_input_string
+	jmp os_string_copy
+	jmp os_dialog_box
+	jmp os_string_join
+	jmp os_get_file_list
+	jmp os_string_compare
+	jmp os_string_chomp
+	jmp os_string_to_hex
+	jmp os_adlib_regwrite
+	jmp os_bcd_to_int
+	jmp os_get_time_string
+	jmp os_draw_logo
+	jmp os_file_selector
+	jmp os_get_date_string
+	jmp os_send_via_serial
+	jmp os_get_via_serial
+	jmp os_find_char_in_string
+	jmp os_get_cursor_pos
+	jmp os_print_space
+	jmp os_option_menu
+	jmp os_print_digit
+	jmp os_print_1hex
+	jmp os_print_2hex
+	jmp os_print_4hex
+	jmp os_set_timer_speed
+	jmp os_report_free_space
+	jmp os_string_add
+	jmp os_speaker_note_length
+	jmp os_show_cursor
+	jmp os_hide_cursor
+	jmp os_dump_registers
+	jmp os_list_dialog_tooltip
+	jmp os_write_file
+	jmp os_file_exists
+	jmp os_create_file
+	jmp os_remove_file
+	jmp os_rename_file
+	jmp os_get_file_size
+	jmp os_input_dialog
+	jmp os_list_dialog
+	jmp os_string_reverse
+	jmp os_string_to_int
+	jmp os_draw_block
+	jmp os_get_random
+	jmp os_print_32int
+	jmp os_serial_port_enable
+	jmp os_sint_to_string
+	jmp os_string_parse
+	jmp os_run_basic
+	jmp os_adlib_calcfreq
+	jmp os_attach_app_timer
+	jmp os_string_tokenize
+	jmp os_clear_registers
+	jmp os_format_string
+	jmp os_putchar
+	jmp os_start_adlib
+	jmp os_return_app_timer
+	jmp os_reset_font
+	jmp os_print_string_box
+	jmp os_put_chars
+	jmp os_draw_line
+	jmp os_draw_polygon
+	jmp os_draw_circle
+	jmp os_clear_graphics
+	jmp os_get_file_datetime
+	jmp os_string_encrypt
+	jmp os_set_pixel
+	jmp os_init_graphics_mode
+	jmp os_draw_icon
+	jmp os_stop_adlib
+	jmp os_adlib_noteoff
+	jmp os_int_1Ah
+	jmp os_int_to_bcd
+	jmp os_decompress_zx7
+	jmp os_password_dialog
+	jmp os_adlib_mute
+	jmp os_draw_rectangle
+	jmp os_get_memory
+	jmp os_color_selector
+	jmp os_modify_int_handler
+	jmp os_32int_to_string
+	jmp os_get_boot_disk
+	jmp os_print_8hex
+	jmp os_string_to_32int
+	jmp os_math_power
+	jmp os_math_root
+	jmp os_input_password
+	jmp os_get_int_handler
+	jmp os_get_os_name
+	jmp os_temp_box
+	jmp os_adlib_unmute
+	jmp os_disk_read_sector
+	jmp os_init_text_mode
+	jmp os_disk_write_sector
+	jmp os_print_int
+	jmp os_disk_read_multiple_sectors
+	jmp os_speaker_raw_period
+	jmp os_select_list
+	jmp os_list_dialog_ex
+	jmp os_disk_write_multiple_sectors
+	jmp os_input_string_ex
+	jmp os_file_selector_filtered
 
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE

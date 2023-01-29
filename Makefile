@@ -62,6 +62,10 @@ bigdebug: build/images/michalos288.flp
 
 bignoboot: build/images/michalos288.flp
 
+# Include header file
+include/syscalls.asm: misc/geninclude.py kernel/main.asm kernel/features/*.asm kernel/features/*/*.asm
+	python3 misc/geninclude.py
+
 # Bootloader target
 build/boot.bin: boot/boot.asm .git/refs/heads/master | build
 	nasm -O2 -w+all -f bin -o $@ -l build/boot.lst boot/boot.asm \
@@ -74,7 +78,7 @@ build/%.zx7: kernel/compressed/%.asm include/*.* .git/refs/heads/master misc/zx7
 	misc/zx7/raw_zx7 $@.raw $@
 
 # Kernel target
-build/kernel.sys: kernel/main.asm kernel/features/*.asm kernel/features/*/*.asm include/*.* .git/refs/heads/master $(CKA) | build
+build/kernel.sys: kernel/main.asm include/*.* .git/refs/heads/master $(CKA) | build
 	nasm -O2 -w+all -f bin -I . -I kernel/ -I build/ -o $@ -l build/kernel.lst kernel/main.asm \
 	-dVERMIN="'`expr $$(git rev-list --all --count) - $(VERCOMMIT)`'" \
 	-dVERMAJ="'$(VER)'"
@@ -110,7 +114,7 @@ build/%.drz: files/src/%.dro misc/zx7/segmented_zx7 | build
 	misc/zx7/segmented_zx7 $< $@
 
 # Builds the image.
-build/images/michalos.flp: build/boot.bin build/kernel.sys \
+build/images/michalos.flp: include/syscalls.asm build/boot.bin build/kernel.sys \
 					$(FILES) | build/images
 	dd if=/dev/zero of=build/images/michalos.flp bs=512 count=2880
 	dd conv=notrunc if=build/boot.bin of=build/images/michalos.flp

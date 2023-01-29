@@ -38,10 +38,10 @@ More screenshots are available in the [gallery](https://github.com/prochazkaml/M
 
 ## Building instructions
 
-For building the OS, a Unix-based system is required (Linux, BSD, WSL, macOS) with **NASM**, **mtools** and **make** installed. **DOSBox** is required for testing MichalOS builds (QEMU, [VirtualBox](https://github.com/prochazkaml/MichalOS/blob/master/misc/VirtualBox.md), VMware etc. could also be used, but you will be met with limited functionality). **mkisofs** is needed only if you want to generate an ISO image for CDs by running ```make iso```.
+For building the OS, a Unix-based system is required (Linux, BSD, WSL, macOS) with **NASM**, **mtools**, **Python 3** and **make** installed. **DOSBox** is required for testing MichalOS builds (QEMU, [VirtualBox](https://github.com/prochazkaml/MichalOS/blob/master/misc/VirtualBox.md), VMware etc. could also be used, but you will be met with limited functionality). **mkisofs** is needed only if you want to generate an ISO image for CDs by running ```make iso```.
 
-On Debian GNU/Linux (and its derivates, such as Linux Mint or Ubuntu), these requirements can be met by running ```sudo apt-get install nasm mtools make dosbox```.
+On Debian GNU/Linux (and its derivates, such as Linux Mint or Ubuntu), these requirements can be met by running ```sudo apt-get install nasm mtools make dosbox python3```.
 
-On macOS, first install [Homebrew](https://brew.sh/) and then run ```brew install nasm mtools dosbox``` from the Terminal.
+On macOS, first install [Homebrew](https://brew.sh/) and then run ```brew install nasm mtools dosbox python``` from the Terminal.
 
 Then, you can simply build the image by running ```make```.
