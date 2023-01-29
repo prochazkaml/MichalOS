@@ -513,6 +513,14 @@ os_get_date_string equ 32858
 os_string_tokenize equ 32972
 
 ; ------------------------------------------------------------------
+; os_string_callback_tokenizer -- Prints a token from string, requests are done by callback
+; IN: DS:AX = comma-separated string
+; OUT: AL = AH = max length of any token, CX = number of entries in the list,
+;      SI = callback location (if C clear, accepts CX as entry ID, prints out result)
+
+os_string_callback_tokenizer equ 33128
+
+; ------------------------------------------------------------------
 ; os_32int_to_string -- Converts an unsigned 32-bit integer into a string
 ; IN: EAX = unsigned int
 ; OUT: AX = string location

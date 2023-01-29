@@ -154,6 +154,7 @@ os_call_vectors:
 	jmp os_input_string_ex
 	jmp os_file_selector_filtered
 	jmp os_speaker_muted
+	jmp os_string_callback_tokenizer
 
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE
