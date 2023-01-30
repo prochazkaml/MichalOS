@@ -1495,6 +1495,9 @@ os_dialog_box:
 	popa
 
 	pusha
+	push ds
+	movs ds, cs
+
 	cmp dx, 1
 	jge .two_button
 
@@ -1511,6 +1514,7 @@ os_dialog_box:
 	cmp al, 13			; Wait for enter key (13) to be pressed
 	jne .one_button_wait
 
+	pop ds
 	jmp os_show_cursor.no_pusha
 
 .two_button:
@@ -1534,7 +1538,8 @@ os_dialog_box:
 .exit:	
 	call os_show_cursor
 
-	mov [cs:.tmp], cl			; Keep result after restoring all regs
+	mov [.tmp], cl			; Keep result after restoring all regs
+	pop ds
 	popa
 	movzx ax, byte [cs:.tmp]
 
@@ -1547,13 +1552,13 @@ os_dialog_box:
 .draw_left:
 	clr cl
 	mov bl, 11110000b
-	mov bh, [cs:CONFIG_WINDOW_BG_COLOR]
+	mov bh, [CONFIG_WINDOW_BG_COLOR]
 
 	jmp .draw_buttons
 
 .draw_right:
 	mov cl, 1
-	mov bl, [cs:CONFIG_WINDOW_BG_COLOR]
+	mov bl, [CONFIG_WINDOW_BG_COLOR]
 	mov bh, 11110000b
 
 	jmp .draw_buttons
