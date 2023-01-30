@@ -309,14 +309,14 @@ os_print_32int equ 32951
 
 ; ------------------------------------------------------------------
 ; os_input_string -- Take string from keyboard entry
-; IN: AX = location of string
+; IN: ES:AX = location of string
 ; OUT: None, registers preserved
 
 os_input_string equ 32819
 
 ; ------------------------------------------------------------------
 ; os_input_password -- Take password from keyboard entry
-; IN: AX = location of string
+; IN: ES:AX = location of string
 ; OUT: None, registers preserved
 
 os_input_password equ 33077
@@ -330,7 +330,7 @@ os_set_max_input_length equ 33131
 
 ; ------------------------------------------------------------------
 ; os_input_string_ex -- Take string from keyboard entry
-; IN: AX = location of string, CH = 0 if normal input, 1 if password input,
+; IN: ES:AX = location of string, CH = 0 if normal input, 1 if password input,
 ;     SI = callback on keys where AL = 0 (input: AX = keypress)
 ; OUT: None, registers preserved
 
