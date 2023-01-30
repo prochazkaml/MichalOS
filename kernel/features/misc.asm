@@ -111,9 +111,11 @@ os_get_memory:
 
 os_int_1Ah:
 	push ds
+	push es
 	pusha
 
 	movs ds, cs
+	movs es, cs
 
 	cmp ah, 2		; Read system time
 	je .read_time
@@ -122,6 +124,7 @@ os_int_1Ah:
 	je .read_date
 	
 	popa
+	pop es
 	pop ds
 	int 1Ah
 	ret
@@ -132,6 +135,7 @@ os_int_1Ah:
 	popa
 	mov dx, [.days]
 	mov cx, [.years]
+	pop es
 	pop ds
 	ret
 	
@@ -141,6 +145,7 @@ os_int_1Ah:
 	popa
 	mov dh, [.seconds]
 	mov cx, [.minutes]
+	pop es
 	pop ds
 	ret
 
