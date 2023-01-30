@@ -252,6 +252,10 @@ first_init_stack_done:
 	mov si, os_compat_int07
 	call os_modify_int_handler
 
+	mov cl, 40h					; Far API call handler
+	mov si, os_farcall_handler
+	call os_modify_int_handler
+
 	sti
 	
 	call os_return_app_timer	; Also sets up RTC handler
@@ -485,7 +489,7 @@ systemfilemissing:
 	app_ext					db 'APP', 0
 	bas_ext					db 'BAS', 0
 
-	fileman_name			db 'FILEMAN.APP', 0
+	fileman_name			db 'APITEST.APP', 0
 	demotour_name			db 'DEMOTOUR.APP', 0
 	system_cfg				db 'SYSTEM.CFG', 0
 	font_name				db 'FONT.SYS', 0

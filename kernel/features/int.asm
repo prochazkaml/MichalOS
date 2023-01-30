@@ -201,6 +201,20 @@ os_compat_int1C:
 	popad
 	iret
 
+; Far API call handler
+os_farcall_handler:
+	call bp
+	pushf
+	pop bp
+
+	push bx
+	mov bx, sp
+	mov [ss:bx + 6], bp
+	pop bx
+
+	clr bp
+	iret
+
 	timer_application_attached	db 0
 	timer_application_offset	dw 0
 	
