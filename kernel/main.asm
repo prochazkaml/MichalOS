@@ -489,7 +489,7 @@ systemfilemissing:
 	app_ext					db 'APP', 0
 	bas_ext					db 'BAS', 0
 
-	fileman_name			db 'APITEST.APP', 0
+	fileman_name			db 'FILEMAN.APP', 0
 	demotour_name			db 'DEMOTOUR.APP', 0
 	system_cfg				db 'SYSTEM.CFG', 0
 	font_name				db 'FONT.SYS', 0
