@@ -10,9 +10,7 @@
 os_string_encrypt:
 	pusha
 	push es
-
-	push ds
-	pop es
+	movs es, ds
 
 	mov di, si
 
