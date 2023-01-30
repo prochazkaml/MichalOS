@@ -1511,9 +1511,13 @@ os_dialog_box:
 
 .one_button_wait:
 	call os_wait_for_key
+	cmp al, 27
+	je .one_button_exit
+
 	cmp al, 13			; Wait for enter key (13) to be pressed
 	jne .one_button_wait
 
+.one_button_exit:
 	pop ds
 	jmp os_show_cursor.no_pusha
 
