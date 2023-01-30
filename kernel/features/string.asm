@@ -422,7 +422,7 @@ os_string_parse:
 
 ; ------------------------------------------------------------------
 ; os_string_to_int -- Convert decimal string to integer value
-; IN: SI = string location (max 5 chars, up to '65535')
+; IN: DS:SI = string location (max 5 chars, up to '65535')
 ; OUT: AX = number
 
 os_string_to_int:
@@ -436,8 +436,6 @@ os_string_to_int:
 os_string_to_hex:
 	push si
 	push cx
-	push ebx
-	push edx
 	
 	mov ax, si			; First, uppercase the string
 	call os_string_uppercase
@@ -449,25 +447,28 @@ os_string_to_hex:
 	lodsb					; Load a byte from SI
 	mov cl, al
 	pop eax
-	test cl, cl				; Have we reached the end?
-	jz .exit			; If we have, exit
-	
+
+	cmp cl, '0'				; Verify allowed range
+	jb .exit
+
+	cmp cl, 'F'
+	ja .exit
+
 	cmp cl, '9'
-	jle .no_change
-	
+	jbe .no_change
+
+	cmp cl, 'A'
+	jb .exit
+
 	sub cl, 7
 	
 .no_change:
 	sub cl, '0'				; Convert the value to decimal
-	and ecx, 255			; Keep the low 8 bits only
-	mov ebx, 16 
-	mul ebx					; Multiply EAX by 16
-	add eax, ecx			; Add the value to the integer
+	shl eax, 4				; Multiply EAX by 16
+	add al, cl				; Add the value to the integer
 	jmp .loop				; Loop again
 	
 .exit:
-	pop edx
-	pop ebx
 	pop cx
 	pop si
 	ret

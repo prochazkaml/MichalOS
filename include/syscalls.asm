@@ -469,7 +469,7 @@ os_string_parse equ 32960
 
 ; ------------------------------------------------------------------
 ; os_string_to_int -- Convert decimal string to integer value
-; IN: SI = string location (max 5 chars, up to '65535')
+; IN: DS:SI = string location (max 5 chars, up to '65535')
 ; OUT: AX = number
 
 os_string_to_int equ 32942
