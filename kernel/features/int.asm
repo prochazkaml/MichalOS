@@ -203,6 +203,8 @@ os_compat_int1C:
 
 ; Far API call handler
 os_farcall_handler:
+	sti
+	
 	call bp
 	pushf
 	pop bp
