@@ -544,7 +544,9 @@ os_sint_to_string:
 
 os_get_time_string:
 	pusha
-	
+	push ds
+	movs ds, cs
+
 	mov di, bx			; Location to place the string
 
 	mov ah, 02h			; Get the current time
@@ -602,6 +604,7 @@ os_get_time_string:
 	jnz .minute_loop
 
 .exit:
+	pop ds
 	popa
 	ret
 
@@ -612,6 +615,8 @@ os_get_time_string:
 
 os_get_date_string:
 	pusha
+	push ds
+	movs ds, cs
 
 	mov di, bx
 	
@@ -649,6 +654,7 @@ os_get_date_string:
 	clr al				; Terminate date string
 	stosb
 
+	pop ds
 	popa
 	ret
 
