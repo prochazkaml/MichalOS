@@ -878,8 +878,11 @@ os_string_to_32int:
 	mov cl, al
 	pop eax
 
-	test cl, cl				; Have we reached the end?
-	jz .exit				; If we have, exit
+	cmp cl, '0'
+	jl .exit
+
+	cmp cl, '9'
+	jg .exit
 
 	sub cl, '0'				; Convert the value to decimal
 	and ecx, 255			; Keep the low 8 bits only
