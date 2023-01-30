@@ -155,6 +155,11 @@ os_call_vectors:
 	jmp os_speaker_muted
 	jmp os_string_callback_tokenizer
 	jmp os_set_max_input_length
+	jmp os_read_config_byte
+	jmp os_read_config_word
+	jmp os_write_config_byte
+	jmp os_write_config_word
+	jmp os_save_config
 
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE

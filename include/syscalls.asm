@@ -544,6 +544,44 @@ os_string_to_32int equ 33068
 ; ==================================================================
 
 ; ------------------------------------------------------------------
+; os_read_config_byte -- Reads a byte from the config
+; IN: BX = offset
+; OUT: AL = value
+
+os_read_config_byte equ 33134
+
+; ------------------------------------------------------------------
+; os_read_config_word -- Reads a word from the config
+; IN: BX = offset
+; OUT: AX = value
+
+os_read_config_word equ 33137
+
+; ------------------------------------------------------------------
+; os_write_config_byte -- Writes a byte to the config
+; NOTE: This will only affect the config in memory,
+; run os_save_config to save the changes to disk!
+; IN: BX = offset, AL = value
+; OUT: None, registers preserved
+
+os_write_config_byte equ 33140
+
+; ------------------------------------------------------------------
+; os_write_config_word -- Writes a byte to the config
+; NOTE: This will only affect the config in memory,
+; run os_save_config to save the changes to disk!
+; IN: BX = offset, AX = value
+; OUT: None, registers preserved
+
+os_write_config_word equ 33143
+
+; ------------------------------------------------------------------
+; os_save_config -- Saves the current config to disk
+; OUT: Carry set if error
+
+os_save_config equ 33146
+
+; ------------------------------------------------------------------
 ; os_exit -- Exits the application, launches another one (if possible)
 ; IN: AX = if not 0, then ptr to filename of application to be launched,
 ;     BX = 1 if the application calling os_exit should be re-launched after

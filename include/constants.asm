@@ -51,6 +51,7 @@
 
 %define DISK_BUFFER 0E000h
 %define CONFIG_FILE 57000
+%define CONFIG_FILE_SIZE 83
 
 ; ------------------------------------------------------------------
 ; CONFIG FILE LOCATIONS
