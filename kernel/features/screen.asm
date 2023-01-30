@@ -1450,7 +1450,7 @@ int_input_dialog:
 
 ; ------------------------------------------------------------------
 ; os_dialog_box -- Print dialog box in middle of screen, with button(s)
-; IN: AX, BX, CX = string locations (set registers to 0 for no display),
+; IN: DS:AX, DS:BX, DS:CX = string locations (set registers to 0 for no display),
 ; IN: DX = 0 for single 'OK' dialog,
 ;          1 for two-button 'OK' and 'Cancel' ('OK' selected by default),
 ;          2 for two-button 'OK' and 'Cancel' ('Cancel' selected by default)
@@ -1507,9 +1507,9 @@ os_dialog_box:
 .exit:	
 	call os_show_cursor
 
-	mov [.tmp], cl			; Keep result after restoring all regs
+	mov [cs:.tmp], cl			; Keep result after restoring all regs
 	popa
-	movzx ax, byte [.tmp]
+	movzx ax, byte [cs:.tmp]
 
 	ret
 
@@ -1520,13 +1520,13 @@ os_dialog_box:
 .draw_left:
 	clr cl
 	mov bl, 11110000b
-	mov bh, [CONFIG_WINDOW_BG_COLOR]
+	mov bh, [cs:CONFIG_WINDOW_BG_COLOR]
 
 	jmp .draw_buttons
 
 .draw_right:
 	mov cl, 1
-	mov bl, [CONFIG_WINDOW_BG_COLOR]
+	mov bl, [cs:CONFIG_WINDOW_BG_COLOR]
 	mov bh, 11110000b
 
 	jmp .draw_buttons
