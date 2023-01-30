@@ -19,7 +19,6 @@
 ; Segment 0360h:
 ;   - 0000h - 00FFh = System variables
 ;      - 0000h = RET instruction
-;      - 0088h = Maximum number of characters that os_input_string can input (byte)
 ;      - 00E0h - 00EFh - parameters for an app (eg. a file to open when an app launches)
 ;      - 00F0h - 00FFh - temporary buffer for storing apps' filenames
 ;   - 0100h - 7FFFh = Application
@@ -155,6 +154,7 @@ os_call_vectors:
 	jmp os_file_selector_filtered
 	jmp os_speaker_muted
 	jmp os_string_callback_tokenizer
+	jmp os_set_max_input_length
 
 ; ------------------------------------------------------------------
 ; START OF MAIN KERNEL CODE
@@ -186,7 +186,6 @@ first_init_stack_done:
 	rep stosb
 
 	mov byte [0000h], 0xC3
-	mov byte [0088h], 255
 ;	mov byte [00E0h], 0
 
 	; Clear the disk params table

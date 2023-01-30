@@ -1396,8 +1396,7 @@ os_password_dialog:
 int_input_dialog:
 	pusha
 
-	mov dl, [0088h]
-	mov [.og_value], dl
+	mov dl, [os_max_input_length]
 
 	cmp dl, 50			; If there is no limit set, set it now
 	jb .no_adjust
@@ -1405,7 +1404,7 @@ int_input_dialog:
 	mov dl, 50
 
 .no_adjust:
-	mov [0088h], dl
+	mov [os_max_input_length], dl
 
 	push bx				; Save message to show
 
@@ -1441,12 +1440,8 @@ int_input_dialog:
 	jmp os_input_string_ex.no_pusha
 
 .retptr:
-	mov dl, [.og_value]
-	mov [0088h], dl
 	popa
 	ret
-
-	.og_value		db 0
 
 ; ------------------------------------------------------------------
 ; os_dialog_box -- Print dialog box in middle of screen, with button(s)
@@ -1676,7 +1671,6 @@ os_print_32int:
 ; ------------------------------------------------------------------
 ; os_input_string -- Take string from keyboard entry
 ; IN: AX = location of string
-; (Location will contain up to [0088h] characters, zero-terminated)
 ; OUT: None, registers preserved
 
 os_input_string:
@@ -1690,7 +1684,6 @@ os_input_string:
 ; ------------------------------------------------------------------
 ; os_input_password -- Take password from keyboard entry
 ; IN: AX = location of string
-; (Location will contain up to [0088h] characters, zero-terminated)
 ; OUT: None, registers preserved
 
 os_input_password:
@@ -1702,10 +1695,18 @@ os_input_password:
 	jmp os_input_string_ex.no_pusha
 
 ; ------------------------------------------------------------------
+; os_set_max_input_length -- Set the maximum length for the next string input
+; IN: AL = maximum number of characters
+; OUT: None, registers preserved
+
+os_set_max_input_length:
+	mov [cs:os_max_input_length], al
+	ret
+
+; ------------------------------------------------------------------
 ; os_input_string_ex -- Take string from keyboard entry
 ; IN: AX = location of string, CH = 0 if normal input, 1 if password input,
 ;     SI = callback on keys where AL = 0 (input: AX = keypress)
-; (Location will contain up to [0088h] characters, zero-terminated)
 ; OUT: None, registers preserved
 
 os_input_string_ex:
@@ -1729,7 +1730,7 @@ os_input_string_ex:
 	cmp al, ' '			; If an incompatible key pressed, call the callback
 	jl .callback
 
-	cmp cl, [0088h]		; Make sure we don't exhaust buffer
+	cmp cl, [cs:os_max_input_length]	; Make sure we don't exhaust buffer
 	je .more
 
 	stosb				; Store character in designated buffer
@@ -1796,9 +1797,13 @@ os_input_string_ex:
 	clr al
 	stosb
 
+	mov byte [cs:os_max_input_length], 255	; Restore the max length to max
+
 	popa
 	ret
 	
+	os_max_input_length		db 255
+
 ; ------------------------------------------------------------------
 ; os_color_selector - Pops up a color selector.
 ; IN: None

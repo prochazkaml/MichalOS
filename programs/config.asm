@@ -402,11 +402,13 @@ start:
 	call .draw_background
 	
 	call .reset_name
+
+	mov al, CFG_USERNAME_MAX_INPUT_LENGTH
+	call os_set_max_input_length
+
 	mov ax, CONFIG_USERNAME
 	mov bx, .name_msg
-	mov byte [0088h], CFG_USERNAME_MAX_INPUT_LENGTH
 	call os_input_dialog
-	mov byte [0088h], 255
 
 	call .update_config
 	jmp .password
@@ -424,11 +426,12 @@ start:
 	mov byte [CONFIG_PASSWORD_ENABLED], 1
 	call .reset_password
 
+	mov al, CFG_PASSWORD_MAX_INPUT_LENGTH
+	call os_set_max_input_length
+
 	mov ax, CONFIG_PASSWORD
 	mov bx, .password_msg
-	mov byte [0088h], CFG_PASSWORD_MAX_INPUT_LENGTH
 	call os_password_dialog
-	mov byte [0088h], 255
 	
 	mov si, CONFIG_PASSWORD
 	call os_string_encrypt

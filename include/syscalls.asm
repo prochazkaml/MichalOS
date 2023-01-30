@@ -242,7 +242,7 @@ os_password_dialog equ 33041
 
 ; ------------------------------------------------------------------
 ; os_dialog_box -- Print dialog box in middle of screen, with button(s)
-; IN: AX, BX, CX = string locations (set registers to 0 for no display),
+; IN: DS:AX, DS:BX, DS:CX = string locations (set registers to 0 for no display),
 ; IN: DX = 0 for single 'OK' dialog,
 ;          1 for two-button 'OK' and 'Cancel' ('OK' selected by default),
 ;          2 for two-button 'OK' and 'Cancel' ('Cancel' selected by default)
@@ -310,7 +310,6 @@ os_print_32int equ 32951
 ; ------------------------------------------------------------------
 ; os_input_string -- Take string from keyboard entry
 ; IN: AX = location of string
-; (Location will contain up to [0088h] characters, zero-terminated)
 ; OUT: None, registers preserved
 
 os_input_string equ 32819
@@ -318,16 +317,21 @@ os_input_string equ 32819
 ; ------------------------------------------------------------------
 ; os_input_password -- Take password from keyboard entry
 ; IN: AX = location of string
-; (Location will contain up to [0088h] characters, zero-terminated)
 ; OUT: None, registers preserved
 
 os_input_password equ 33077
 
 ; ------------------------------------------------------------------
+; os_set_max_input_length -- Set the maximum length for the next string input
+; IN: AL = maximum number of characters
+; OUT: None, registers preserved
+
+os_set_max_input_length equ 33131
+
+; ------------------------------------------------------------------
 ; os_input_string_ex -- Take string from keyboard entry
 ; IN: AX = location of string, CH = 0 if normal input, 1 if password input,
 ;     SI = callback on keys where AL = 0 (input: AX = keypress)
-; (Location will contain up to [0088h] characters, zero-terminated)
 ; OUT: None, registers preserved
 
 os_input_string_ex equ 33119

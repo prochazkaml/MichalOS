@@ -9,8 +9,6 @@ start:
 
 	call .draw_background
 	
-	mov byte [0088h], 30
-
 	mov16 dx, 11, 4
 	call os_move_cursor
 	
@@ -247,6 +245,9 @@ start:
 	
 	; Display the prompt
 
+	mov al, 30
+	call os_set_max_input_length
+
 	mov16 dx, 2, 2
 	call os_move_cursor
 	call os_show_cursor		; Get a command from the user
@@ -427,7 +428,6 @@ start:
 	ret
 
 .exit:
-	mov byte [0088h], 255
 	call os_clear_screen
 	ret
 

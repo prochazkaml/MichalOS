@@ -224,11 +224,12 @@ os_demotour:
 
 .change_name:
 	call .reset_name
+	mov al, CFG_USERNAME_MAX_INPUT_LENGTH
+	call os_set_max_input_length
+
 	mov ax, CONFIG_USERNAME
 	mov bx, .name_msg
-	mov byte [0088h], 32
 	call os_input_dialog
-	mov byte [0088h], 255
 	ret
 	
 .disable_password:
@@ -240,11 +241,13 @@ os_demotour:
 	mov al, 1
 	mov [CONFIG_PASSWORD_ENABLED], al
 	call .reset_password
+
+	mov al, CFG_PASSWORD_MAX_INPUT_LENGTH
+	call os_set_max_input_length
+
 	mov ax, CONFIG_PASSWORD
 	mov bx, .password_msg
-	mov byte [0088h], 32
 	call os_password_dialog
-	mov byte [0088h], 255
 	
 	mov si, CONFIG_PASSWORD
 	call os_string_encrypt

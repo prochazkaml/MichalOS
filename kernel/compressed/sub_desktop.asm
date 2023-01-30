@@ -73,11 +73,12 @@ enterpressed:
 	mov si, passentermsg
 	call os_print_string
 	
+	mov al, 32
+	call os_set_max_input_length
+
 	mov ax, buffer
 	mov bl, 7
-	mov byte [0088h], 32
 	call os_input_password
-	mov byte [0088h], 255
 
 	mov si, buffer
 	call os_string_encrypt
