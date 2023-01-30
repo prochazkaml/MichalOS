@@ -626,8 +626,8 @@ os_file_selector_filtered:
 ; os_list_dialog_tooltip -- Show a dialog with a list of options and a tooltip.
 ; That means, when the user changes the selection, the application will be called back
 ; to change the tooltip's contents.
-; IN: AX = comma-separated list of strings to show (zero-terminated),
-;     BX = first help string, CX = second help string
+; IN: DS:AX = comma-separated list of strings to show (zero-terminated),
+;     DS:BX = first help string, DS:CX = second help string
 ;     SI = key/display callback (see os_list_dialog_ex)
 ;     if AX = 0: DI = entry display callback, DX = number of entries
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
@@ -635,27 +635,34 @@ os_file_selector_filtered:
 os_list_dialog_tooltip:
 	pusha
 
-	mov [.callbackaddr], si
+	mov [cs:.callbackaddr], si
 
 	call int_init_list_struct
 
 	test ax, ax
 	jnz .no_entry_callback
 
-	mov [list_dialog_sample_struct + 000h], di
-	mov [list_dialog_sample_struct + 006h], dx
+	mov [cs:list_dialog_sample_struct + 000h], di
+	mov [cs:list_dialog_sample_struct + 006h], dx
 
 .no_entry_callback:
-	mov word [list_dialog_sample_struct + 004h], .callback
-	mov byte [list_dialog_sample_struct + 010h], 37
-	
+	mov word [cs:list_dialog_sample_struct + 004h], .callback
+	mov byte [cs:list_dialog_sample_struct + 010h], 37
+	popa
+
+	push bx
 	mov bx, list_dialog_sample_struct
-	jmp os_list_dialog_ex.no_pusha
-	
+	push ds
+	movs ds, cs
+	call os_list_dialog_ex
+	pop ds
+	pop bx
+	ret
+
 .callback:
 	pusha
 	; Draw the box on the right
-	mov bl, [CONFIG_WINDOW_BG_COLOR]		; Color from RAM
+	mov bl, [cs:CONFIG_WINDOW_BG_COLOR]		; Color from RAM
 	mov16 dx, 41, 2		; Start X/Y position
 	mov si, 37			; Width
 	mov di, 23			; Finish Y position
@@ -665,14 +672,14 @@ os_list_dialog_tooltip:
 	call os_move_cursor
 	popa
 
-	jmp [.callbackaddr]
+	jmp [cs:.callbackaddr]
 	
 	.callbackaddr	dw 0
 	
 ; ------------------------------------------------------------------
 ; os_list_dialog -- Show a dialog with a list of options
-; IN: AX = comma-separated list of strings to show (zero-terminated),
-;     BX = first help string, CX = second help string
+; IN: ES:AX = comma-separated list of strings to show (zero-terminated),
+;     ES:BX = first help string, ES:CX = second help string
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_list_dialog:
@@ -680,18 +687,26 @@ os_list_dialog:
 
 	call int_init_list_struct
 
-	mov byte [list_dialog_sample_struct + 010h], 76
-	mov [list_dialog_sample_struct + 004h], bx
+	mov byte [cs:list_dialog_sample_struct + 010h], 76
+	mov [cs:list_dialog_sample_struct + 004h], bx
+	popa
 
+	push bx
 	mov bx, list_dialog_sample_struct
-	jmp os_list_dialog_ex.no_pusha
+	push ds
+	movs ds, cs
+	call os_list_dialog_ex
+	pop ds
+	pop bx
+	ret
 
 int_init_list_struct:
-	mov [list_dialog_sample_struct + 002h], ax
-	mov [list_dialog_sample_struct + 008h], bx
-	mov [list_dialog_sample_struct + 00Ah], cx
+	mov [cs:list_dialog_sample_struct + 012h], ds
+	mov [cs:list_dialog_sample_struct + 002h], ax
+	mov [cs:list_dialog_sample_struct + 008h], bx
+	mov [cs:list_dialog_sample_struct + 00Ah], cx
 	clr bx
-	mov [list_dialog_sample_struct + 006h], bx
+	mov [cs:list_dialog_sample_struct + 006h], bx
 	ret
 
 list_dialog_sample_struct:
@@ -706,10 +721,11 @@ list_dialog_sample_struct:
 	db 2	; Y position
 	db 76	; Width
 	db 21	; Height
+	dw 0	; Segment
 	
 ; ------------------------------------------------------------------
 ; os_list_dialog_ex -- Show a dialog with a list of options
-; IN: BX = pointer to setup struct
+; IN: DS:BX = pointer to setup struct
 ;       Addr Size Description
 ;       000h word Pointer to entry display callback (accepts CX as entry ID, prints out result) - valid only if ptr to list is zero
 ;       002h word Pointer to comma-separated list of strings to show (zero-terminated)
@@ -717,11 +733,12 @@ list_dialog_sample_struct:
 ;       006h word Number of entries (if 0, then it is automatically calculated from 002h)
 ;       008h word Pointer to first help string (if 0, then the list will fill the whole dialog)
 ;       00Ah word Pointer to second help string
-;       00Ch word Pointer to history data (points to a 5 byte array)
+;       00Ch word (ES) Pointer to history data (points to a 5 byte array)
 ;       00Eh byte Screen X position
 ;       00Fh byte Screen Y position
 ;       010h byte Dialog width
 ;       011h byte Dialog height
+;       012h word Source segment (used for comma-separated list & help strings)
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_list_dialog_ex:
@@ -739,22 +756,25 @@ os_list_dialog_ex:
 	test ax, ax							; Check if callback is used instead
 	jz .no_setup_tokenizer_callback
 
+	push ds
+	mov ds, [bx + 012h]
 	call os_string_callback_tokenizer	; Create a tokenizer callback from the list
+	pop ds
 
 	mov ax, [bx + 006h]					; Check if the number of entries is expected to be calculated
 	test ax, ax
 	jnz .no_tokenizer_length_detect
 
-	mov [.num_of_entries], cx			; If so, store it for later
+	mov [cs:.num_of_entries], cx			; If so, store it for later
 
 .no_tokenizer_length_detect:
 	mov dx, si
 
 .no_setup_tokenizer_callback:
-	mov [.parsercb], dx					; Store the entry display callback (whatever it ends up being)
+	mov [cs:.parsercb], dx					; Store the entry display callback (whatever it ends up being)
 
 	mov ax, [bx + 004h]					; Key/Entry change callback
-	mov [.displaycb], ax
+	mov [cs:.displaycb], ax
 
 	; Draw the window
 
@@ -764,7 +784,7 @@ os_list_dialog_ex:
 	movzx ax, byte [bx + 00Fh]
 	add di, ax
 	movzx si, byte [bx + 010h]	; Width
-	mov bl, [CONFIG_WINDOW_BG_COLOR]				; Color from RAM
+	mov bl, [cs:CONFIG_WINDOW_BG_COLOR]				; Color from RAM
 	call os_draw_block			; Draw option selector window
 	pop bx
 
@@ -772,19 +792,25 @@ os_list_dialog_ex:
 	call os_move_cursor
 
 	mov si, [bx + 008h]
+	push ds
+	mov ds, [bx + 012h]
 	call os_print_string
+	pop ds
 
 	inc dh
 	call os_move_cursor
 
 	mov si, [bx + 00Ah]			; ...and the second
+	push ds
+	mov ds, [bx + 012h]
 	call os_print_string
+	pop ds
 
 	mov ax, [bx + 010h]			; Width/height
 	sub ax, 606h
 	mov dx, [bx + 00Eh]			; X/Y
 	add dx, 301h
-	mov cx, [.num_of_entries]	; Number of entries
+	mov cx, [cs:.num_of_entries]	; Number of entries
 	mov si, .callbackroutine	; Callback routine
 	mov di, [bx + 00Ch]			; Ptr to history data
 	mov bl, 11110000b			; Black on white for option list box
@@ -793,9 +819,12 @@ os_list_dialog_ex:
 .callbackroutine:
 	jc .cbdisplay
 
-	jmp word [.parsercb]
+	jmp word [cs:.parsercb]
 
 .cbdisplay:
+	push ds
+	movs ds, cs
+
 	pusha
 	xchg ax, cx
 	call word [.displaycb]
@@ -823,6 +852,7 @@ os_list_dialog_ex:
 	call os_print_string
 	
 .cbexit:
+	pop ds
 	ret
 
 	.num_of_entries	dw 0
@@ -835,13 +865,16 @@ os_list_dialog_ex:
 ; IN: AX = width/height, BL = color, CX = number of entries, DX = X/Y pos,
 ;     SI = callback (if C clear = accepts an entry ID in CX, prints an appropriate string,
 ;     if C set = accepts key input in AX, entry ID in CX; not required to preserve regs),
-;     DI = pointer to a history struct (word .num_of_entries, word .skip_num, byte .cursor) or 0 if none
+;     ES:DI = pointer to a history struct (word .num_of_entries, word .skip_num, byte .cursor) or 0 if none
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_select_list:
 	pusha
 
 .no_pusha:
+	push ds
+	movs ds, cs
+
 	call os_hide_cursor
 
 	; Initialize vars
@@ -864,13 +897,13 @@ os_select_list:
 	test di, di
 	jz .no_history
 
-	cmp [di], cx
+	cmp [es:di], cx
 	jne .no_history
 
-	mov ax, [di + 2]
+	mov ax, [es:di + 2]
 	mov [.skip_num], ax
 
-	mov dh, [di + 4]
+	mov dh, [es:di + 4]
 
 .no_history:
 	mov [.num_of_entries], cx
@@ -1117,6 +1150,8 @@ os_select_list:
 	shr dx, 8
 	add dx, [.skip_num]	; Add any lines skipped from scrolling
 
+	pop ds
+
 	mov bx, sp
 	mov [ss:bx + 14], dx
 
@@ -1126,6 +1161,7 @@ os_select_list:
 
 .esc_pressed:
 	call .dialog_end
+	pop ds
 	popa
 	stc					; Set carry for Esc
 	ret
@@ -1806,7 +1842,10 @@ os_input_string_ex:
 ; OUT: color number (0-15)
 
 os_color_selector:
+	push ds
 	pusha
+	movs ds, cs
+
 	mov ax, .colorlist			; Call os_list_dialog with colors
 	mov bx, .colormsg0
 	mov cx, .colormsg1
@@ -1820,6 +1859,7 @@ os_color_selector:
 	mov [ss:bx + 16], al
 	popf
 	popa
+	pop ds
 	ret
 
 .callback:
@@ -2064,7 +2104,7 @@ os_draw_icon:
 
 os_option_menu:
 	pusha
-	cmp byte [CONFIG_MENU_DIMMING], 0	; "Blur" the background if requested
+	cmp byte [cs:CONFIG_MENU_DIMMING], 0	; "Blur" the background if requested
 	je .skip
 	
 	mov16 dx, 0, 1
@@ -2097,7 +2137,7 @@ os_option_menu:
 
 .good:
 	mov16 dx, 1, 1
-	mov bl, [CONFIG_MENU_BG_COLOR]
+	mov bl, [cs:CONFIG_MENU_BG_COLOR]
 	clr di
 	jmp os_select_list.no_pusha
 

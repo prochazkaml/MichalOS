@@ -160,8 +160,8 @@ os_file_selector_filtered equ 33122
 ; os_list_dialog_tooltip -- Show a dialog with a list of options and a tooltip.
 ; That means, when the user changes the selection, the application will be called back
 ; to change the tooltip's contents.
-; IN: AX = comma-separated list of strings to show (zero-terminated),
-;     BX = first help string, CX = second help string
+; IN: DS:AX = comma-separated list of strings to show (zero-terminated),
+;     DS:BX = first help string, DS:CX = second help string
 ;     SI = key/display callback (see os_list_dialog_ex)
 ;     if AX = 0: DI = entry display callback, DX = number of entries
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
@@ -170,15 +170,15 @@ os_list_dialog_tooltip equ 32912
 
 ; ------------------------------------------------------------------
 ; os_list_dialog -- Show a dialog with a list of options
-; IN: AX = comma-separated list of strings to show (zero-terminated),
-;     BX = first help string, CX = second help string
+; IN: ES:AX = comma-separated list of strings to show (zero-terminated),
+;     ES:BX = first help string, ES:CX = second help string
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_list_dialog equ 32936
 
 ; ------------------------------------------------------------------
 ; os_list_dialog_ex -- Show a dialog with a list of options
-; IN: BX = pointer to setup struct
+; IN: DS:BX = pointer to setup struct
 ;       Addr Size Description
 ;       000h word Pointer to entry display callback (accepts CX as entry ID, prints out result) - valid only if ptr to list is zero
 ;       002h word Pointer to comma-separated list of strings to show (zero-terminated)
@@ -186,11 +186,12 @@ os_list_dialog equ 32936
 ;       006h word Number of entries (if 0, then it is automatically calculated from 002h)
 ;       008h word Pointer to first help string (if 0, then the list will fill the whole dialog)
 ;       00Ah word Pointer to second help string
-;       00Ch word Pointer to history data (points to a 5 byte array)
+;       00Ch word (ES) Pointer to history data (points to a 5 byte array)
 ;       00Eh byte Screen X position
 ;       00Fh byte Screen Y position
 ;       010h byte Dialog width
 ;       011h byte Dialog height
+;       012h word Source segment (used for comma-separated list & help strings)
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_list_dialog_ex equ 33113
@@ -200,7 +201,7 @@ os_list_dialog_ex equ 33113
 ; IN: AX = width/height, BL = color, CX = number of entries, DX = X/Y pos,
 ;     SI = callback (if C clear = accepts an entry ID in CX, prints an appropriate string,
 ;     if C set = accepts key input in AX, entry ID in CX; not required to preserve regs),
-;     DI = pointer to a history struct (word .num_of_entries, word .skip_num, byte .cursor) or 0 if none
+;     ES:DI = pointer to a history struct (word .num_of_entries, word .skip_num, byte .cursor) or 0 if none
 ; OUT: AX = number (starts from 1) of entry selected; carry set if Esc pressed
 
 os_select_list equ 33110

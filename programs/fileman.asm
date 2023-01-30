@@ -6,6 +6,7 @@
 
 start:
 	mov [.load_segment], gs
+	mov [.params_struct + 012h], ds
 
 	call .draw_background
 
@@ -240,6 +241,7 @@ start:
 		db 2				; Y position
 		db 37				; Width
 		db 21				; Height
+		dw 0				; Segment
 
 	.command_list			db 'Run application,Create file,Delete file,Rename,Copy file', 0
 
