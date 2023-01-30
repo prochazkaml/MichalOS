@@ -1396,20 +1396,16 @@ os_password_dialog:
 int_input_dialog:
 	pusha
 
-	mov dl, [os_max_input_length]
-
-	cmp dl, 50			; If there is no limit set, set it now
+	cmp byte [cs:os_max_input_length], 50			; If there is no limit set, set it now
 	jb .no_adjust
 
-	mov dl, 50
+	mov byte [cs:os_max_input_length], 50
 
 .no_adjust:
-	mov [os_max_input_length], dl
-
 	push bx				; Save message to show
 
-	mov bl, [CONFIG_WINDOW_BG_COLOR]		; Color from RAM
-	mov16 dx, 12, 10			; First, draw red background box
+	mov bl, [cs:CONFIG_WINDOW_BG_COLOR]		; Color from RAM
+	mov16 dx, 12, 10			; First, draw background box
 	mov si, 55
 	mov di, 16
 	call os_draw_block
@@ -1670,7 +1666,7 @@ os_print_32int:
 
 ; ------------------------------------------------------------------
 ; os_input_string -- Take string from keyboard entry
-; IN: AX = location of string
+; IN: ES:AX = location of string
 ; OUT: None, registers preserved
 
 os_input_string:
@@ -1683,7 +1679,7 @@ os_input_string:
 
 ; ------------------------------------------------------------------
 ; os_input_password -- Take password from keyboard entry
-; IN: AX = location of string
+; IN: ES:AX = location of string
 ; OUT: None, registers preserved
 
 os_input_password:
@@ -1705,7 +1701,7 @@ os_set_max_input_length:
 
 ; ------------------------------------------------------------------
 ; os_input_string_ex -- Take string from keyboard entry
-; IN: AX = location of string, CH = 0 if normal input, 1 if password input,
+; IN: ES:AX = location of string, CH = 0 if normal input, 1 if password input,
 ;     SI = callback on keys where AL = 0 (input: AX = keypress)
 ; OUT: None, registers preserved
 

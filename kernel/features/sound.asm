@@ -125,9 +125,9 @@ os_speaker_muted:
 
 os_start_adlib:
 	pusha
-	mov byte [adlib_running], 1
+	mov byte [cs:adlib_running], 1
 
-	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	clr ax
@@ -150,11 +150,11 @@ os_start_adlib:
 	mov ax, 36
 	div bl
 	
-	mov [pwm_channel_amplitude], al
+	mov [cs:pwm_channel_amplitude], al
 
-	mov [pwm_callback], si
-	mov [pwm_callback_ctr], cx
-	mov [pwm_callback_ctr_def], cx
+	mov [cs:pwm_callback], si
+	mov [cs:pwm_callback_ctr], cx
+	mov [cs:pwm_callback_ctr_def], cx
 
 	; Set up the PC speaker
 	in al, 0x61
@@ -181,7 +181,7 @@ os_stop_adlib:
 	pusha
 	call os_return_app_timer
 
-	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	clr ah
@@ -189,14 +189,14 @@ os_stop_adlib:
 .loop:
 	movzx bx, ah
 	shr bx, 5
-	mov al, [adlib_clear_regs + bx]
+	mov al, [cs:adlib_clear_regs + bx]
 
 	call int_adlib_regwrite
 	
 	inc ah
 	jnz .loop
 	
-	mov byte [adlib_running], 0
+	mov byte [cs:adlib_running], 0
 	popa
 	ret
 	
@@ -255,10 +255,10 @@ os_adlib_regread:
 int_adlib_regwrite:
 	pusha
 
-	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 
-	cmp byte [adlib_running], 0
+	cmp byte [cs:adlib_running], 0
 	je .no_write
 
 	mov dx, 388h
@@ -314,9 +314,8 @@ int_adlib_regwrite:
 	; WARNING! Due to the 16-bit integer limit (for speed), the maximum is block = 7, FNum = 511.
 	; Quick and dirty formula: freq = (fnum << block) / 21
 
-	mov [.shift + 2], dl
-	
-	.shift: db 0C1h, 0E0h, 0	; Shift AX left by the block number
+	mov cl, dl
+	shl ax, cl
 
 	push bx
 	
@@ -328,23 +327,23 @@ int_adlib_regwrite:
 
 	push bx						; Apply the frequency multiplier
 	clr bh
-	mov bl, [adlib_fmul_registers + bx]
+	mov bl, [cs:adlib_fmul_registers + bx]
 	mov bl, [fs:ADLIB_BUFFER + bx]
 	and bl, 0Fh
-	mov bl, [adlib_fmul_values + bx]
+	mov bl, [cs:adlib_fmul_values + bx]
 	
 	mul bx
 	pop bx
 	
 	shl bx, 1		; Words
-	mov word [pwm_freq + bx], ax
+	mov word [cs:pwm_freq + bx], ax
 
 	popa
 	ret
 	
 .pcspk_clear:
 	shl bx, 1		; Words
-	mov word [pwm_freq + bx], 0
+	mov word [cs:pwm_freq + bx], 0
 	
 	popa
 	ret
@@ -359,7 +358,7 @@ int_adlib_regwrite:
 os_adlib_mute:
 	pusha
 	
-	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	mov si, adlib_volume_registers
@@ -378,7 +377,7 @@ os_adlib_mute:
 	ret
 
 .pcspk:
-	mov byte [pwm_muted], 1
+	mov byte [cs:pwm_muted], 1
 	popa
 	ret
 	
@@ -389,7 +388,7 @@ os_adlib_mute:
 os_adlib_unmute:
 	pusha
 
-	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	mov si, adlib_volume_registers
@@ -407,7 +406,7 @@ os_adlib_unmute:
 	ret
 	
 .pcspk:
-	mov byte [pwm_muted], 0
+	mov byte [cs:pwm_muted], 0
 	popa
 	ret
 
@@ -526,10 +525,10 @@ pwm_handler:
 os_adlib_calcfreq:
 	pushad
 
-	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 
-	mov [.channel], cl
+	mov [cs:.channel], cl
 	
 	movzx eax, ax
 	clr cl			; Block number
@@ -543,8 +542,10 @@ os_adlib_calcfreq:
 	mov bl, 20
 	sub bl, cl
 	
-	mov [.shift + 3], bl
-.shift: db 0x66, 0xc1, 0xe0, 0		; shl eax, XX
+	push cx
+	mov cl, bl
+	shl eax, cl
+	pop cx
 
 	clr edx
 	mov ebx, 49716	; Divide by the sample rate
@@ -564,13 +565,13 @@ os_adlib_calcfreq:
 	
 	push ax
 	mov ah, 0A0h
-	add ah, [.channel]
+	add ah, [cs:.channel]
 	call os_adlib_regwrite
 	pop ax
 	
 	mov al, ah
 	mov ah, 0B0h
-	add ah, [.channel]
+	add ah, [cs:.channel]
 	call os_adlib_regwrite
 	
 	pop eax
@@ -581,7 +582,7 @@ os_adlib_calcfreq:
 	movzx bx, cl
 	shl bx, 1
 	shl ax, 1
-	mov [pwm_freq + bx], ax
+	mov [cs:pwm_freq + bx], ax
 	popad
 	ret
 	
@@ -593,7 +594,7 @@ os_adlib_calcfreq:
 ; OUT: None, registers preserved
 
 os_adlib_noteoff:
-	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	pusha
@@ -612,7 +613,7 @@ os_adlib_noteoff:
 	pusha
 	movzx bx, cl
 	shl bx, 1
-	mov word [pwm_freq + bx], 0
+	mov word [cs:pwm_freq + bx], 0
 	popa
 	ret	
 	
