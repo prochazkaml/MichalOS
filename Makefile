@@ -119,7 +119,7 @@ build/images/michalos.flp: include/syscalls.asm build/boot.bin build/kernel.sys 
 	dd if=/dev/zero of=build/images/michalos.flp bs=512 count=2880
 	dd conv=notrunc if=build/boot.bin of=build/images/michalos.flp
 	
-	mcopy -i $@ build/kernel.sys $(FILES) ::
+	mcopy -o -i $@ build/kernel.sys $(FILES) ::
 
 build/images/michalos288.flp: build/images/michalos.flp files/gitignore/288data
 	cp files/gitignore/288data build/288data
