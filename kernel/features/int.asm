@@ -202,7 +202,7 @@ os_compat_int1C:
 .app_routine:
 	mov ds, [timer_application_segment]
 	movs es, ds
-	call far [timer_application_offset]
+	call far [cs:timer_application_offset]
 	
 	pop es
 	pop ds	
