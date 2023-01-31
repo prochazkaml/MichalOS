@@ -704,37 +704,36 @@ os_string_tokenize:
 ; os_string_callback_tokenizer -- Prints a token from string, requests are done by callback
 ; IN: DS:AX = comma-separated string
 ; OUT: AL = AH = max length of any token, CX = number of entries in the list,
-;      SI = callback location (if C clear, accepts CX as entry ID, prints out result)
+;      DX:SI = callback location (if C clear, accepts CX as entry ID, prints out result)
 
 os_string_callback_tokenizer:
-	push bx
-	push ds
+	; Believe it or not, we do not need to preserve any regs here
 
 	mov [cs:.strbasesgmt], ds
 	
-	movs ds, cs
-	mov [.strbaseptr], ax
-	mov [.strcurptr], ax
-	mov word [.curentryid], 0
+	mov [cs:.strbaseptr], ax
+	mov [cs:.strcurptr], ax
+	mov word [cs:.curentryid], 0
 
 	mov si, ax
 	clr cx
+	mov ah, 1			; In case the list is empty
 
 	cmp byte [si], 0	; Check if the list contains any entries
 	je .no_entries
 
 	inc cx				; Automatically assume there is at least 1 entry in the list
 	clr ah				; For storing the max length
-	clr bl				; For storing the current length
+	clr dl				; For storing the current length
 
 .entry_loop:
 	lodsb
 
-	inc bl				; Increment the current width
-	cmp bl, ah			; Save it if it is the largest so far
+	inc dl				; Increment the current width
+	cmp dl, ah			; Save it if it is the largest so far
 	jle .no_expand
 
-	mov ah, bl
+	mov ah, dl
 
 .no_expand:
 	test al, al			; End of string?
@@ -743,16 +742,15 @@ os_string_callback_tokenizer:
 	cmp al, ','			; End of entry?
 	jne .entry_loop
 
-	clr bl				; Reset the width counter
+	clr dl				; Reset the width counter
 	inc cx				; Increment the entry counter
 	jmp .entry_loop
 
 .no_entries:
-	pop ds
-	pop bx
 	dec ah				; Terminator character was counted as well, so get rid of it
 	mov al, ah
 	mov si, .callback
+	mov dx, cs
 	ret
 
 .callback:
