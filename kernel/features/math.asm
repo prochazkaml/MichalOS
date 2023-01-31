@@ -110,9 +110,9 @@ os_math_power:
 	jnle .power_loop
 
 .power_end:
-	mov [.tmp_dword], eax
+	mov [cs:.tmp_dword], eax
 	popad
-	mov eax, [.tmp_dword]
+	mov eax, [cs:.tmp_dword]
 	xor edx, edx
 	ret
 
@@ -146,16 +146,16 @@ os_math_root:
 	jmp .root_loop
 
 .root_exact:
-	mov [.tmp_dword], esi
+	mov [cs:.tmp_dword], esi
 	popad
-	mov eax, [.tmp_dword]
+	mov eax, [cs:.tmp_dword]
 	xor edx, edx
 	ret
 
 .root_range:
-	mov [.tmp_dword], esi
+	mov [cs:.tmp_dword], esi
 	popad
-	mov edx, [.tmp_dword]
+	mov edx, [cs:.tmp_dword]
 	mov eax, edx
 	dec eax
 	ret
