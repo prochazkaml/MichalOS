@@ -90,11 +90,11 @@ os_save_config:
 os_exit:
 	; Mark special exit
 
-	mov byte [app_exit_special], 1
+	mov byte [cs:app_exit_special], 1
 
 	; Exit the application
 
-	mov sp, [origstack]
+	mov sp, [cs:origstack]
 	jmp finish
 
 	app_exit_special	db 0
