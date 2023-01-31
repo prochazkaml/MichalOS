@@ -1747,13 +1747,16 @@ os_set_max_input_length:
 ; ------------------------------------------------------------------
 ; os_input_string_ex -- Take string from keyboard entry
 ; IN: ES:AX = location of string, CH = 0 if normal input, 1 if password input,
-;     SI = callback on keys where AL = 0 (input: AX = keypress)
+;     DS:SI = callback on keys where AL = 0 (input: AX = keypress)
 ; OUT: None, registers preserved
 
 os_input_string_ex:
 	pusha
 
 .no_pusha:
+	mov [cs:.callback_offset], si
+	mov [cs:.callback_segment], ds
+
 	call os_show_cursor
 	
 	mov di, ax			; DI is where we'll store input (buffer)
@@ -1793,7 +1796,14 @@ os_input_string_ex:
 	jz .more
 
 	pusha
-	call si
+	push ds
+	push es
+	mov ds, [cs:.callback_segment]
+	movs es, ds
+
+	call far [cs:.callback_offset]
+	pop es
+	pop ds
 	popa
 	jmp .more
 
@@ -1842,7 +1852,10 @@ os_input_string_ex:
 
 	popa
 	ret
-	
+
+	.callback_offset		dw 0
+	.callback_segment		dw 0
+
 	os_max_input_length		db 255
 
 ; ------------------------------------------------------------------

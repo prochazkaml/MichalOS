@@ -300,7 +300,7 @@ start:
 	call os_move_cursor
 
 .cbexit:
-	ret
+	retf
 
 .cbup:
 	mov bx, -16

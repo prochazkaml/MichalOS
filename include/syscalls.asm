@@ -332,7 +332,7 @@ os_set_max_input_length equ 33131
 ; ------------------------------------------------------------------
 ; os_input_string_ex -- Take string from keyboard entry
 ; IN: ES:AX = location of string, CH = 0 if normal input, 1 if password input,
-;     SI = callback on keys where AL = 0 (input: AX = keypress)
+;     DS:SI = callback on keys where AL = 0 (input: AX = keypress)
 ; OUT: None, registers preserved
 
 os_input_string_ex equ 33119
