@@ -2158,6 +2158,7 @@ os_option_menu:
 os_print_clock:
 	pusha
 	push ds
+	push es
 	movs ds, cs
 	movs es, cs
 
@@ -2185,6 +2186,7 @@ os_print_clock:
 
 	pop dx
 
+	pop es
 	pop ds
 	jmp os_move_cursor.no_pusha
 		
