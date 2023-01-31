@@ -151,8 +151,8 @@ os_file_selector equ 32855
 ; ------------------------------------------------------------------
 ; os_file_selector_filtered -- Show a file selection dialog only 
 ; with files mathing the filter
-; IN: BX = location of file extension list (0 if none)
-; OUT: AX = location of filename string (or carry set if Esc pressed)
+; IN: ES:BX = location of file extension list (0 if none)
+; OUT: DS:AX = location of filename string (or carry set if Esc pressed)
 
 os_file_selector_filtered equ 33122
 

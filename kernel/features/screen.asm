@@ -245,13 +245,23 @@ os_file_selector:
 ; ------------------------------------------------------------------
 ; os_file_selector_filtered -- Show a file selection dialog only 
 ; with files mathing the filter
-; IN: BX = location of file extension list (0 if none)
-; OUT: AX = location of filename string (or carry set if Esc pressed)
+; IN: ES:BX = location of file extension list (0 if none)
+; OUT: DS:AX = location of filename string (or carry set if Esc pressed)
 
 os_file_selector_filtered:
 	pusha
 
 .no_pusha:
+	mov [cs:.extension_list_sgmt], es
+
+	push es
+	movs es, cs
+	movs ds, cs
+
+	; Remember the filter list for later
+
+	mov [.extension_list], bx
+
 	; Get volume name
 
 	pushad
@@ -273,10 +283,6 @@ os_file_selector_filtered:
 	shr ax, 1					; Sectors -> kB
 	mov [.freespace], ax
 	
-	; Remember the filter list for later
-
-	mov [.extension_list], bx
-
 	; Create the filename index list
 
 	call int_read_root_dir		; Get the files into the buffer
@@ -305,12 +311,14 @@ os_file_selector_filtered:
 
 	pusha
 
+	push es
+	mov es, [.extension_list_sgmt]
 	mov bx, [.extension_list]
 
 	test bx, bx			; Check if we are supposed to filter the filenames
 	jz .no_extension_check
 
-	movzx cx, byte [bx]	; Cycle through all filters
+	movzx cx, byte [es:bx]	; Cycle through all filters
 
 	mov di, bx
 	sub di, 3			; 1 - 4 = -3 (skip header, prepare for addition)
@@ -328,15 +336,17 @@ os_file_selector_filtered:
 	
 	loop .extension_loop
 	
+	pop es
 	popa
 	jmp .skip
 
 .no_extension_check:
+	pop es
 	popa
 
 	inc cx				; Increment the number of discovered files
 	mov ax, si			; Store the filename pointer into the buffer
-	stosw
+	ds stosw
 
 .skip:
 	add si, 32		; Skip to the next file
@@ -364,6 +374,7 @@ os_file_selector_filtered:
 
 	call .get_filename
 	
+	pop es
 	popa
 	mov ax, .filename
 	clc
@@ -376,6 +387,7 @@ os_file_selector_filtered:
 	clr dx
 	call os_dialog_box
 
+	pop es
 	popa
 	stc
 	ret
@@ -383,6 +395,7 @@ os_file_selector_filtered:
 	.nofilesmsg		db "There are no files available.", 0
 
 .esc_pressed:				; Set carry flag if Escape was pressed
+	pop es
 	popa
 	stc
 	ret
@@ -432,6 +445,9 @@ os_file_selector_filtered:
 	mov si, .filter_msg
 	call os_print_string
 
+	push ds
+	mov ds, [.extension_list_sgmt]
+
 	mov si, bx
 	movzx cx, byte [si]
 	inc si
@@ -449,6 +465,8 @@ os_file_selector_filtered:
 
 	loop .filter_loop
 	
+	pop ds
+
 .no_filter:
 	popa
 
@@ -619,6 +637,7 @@ os_file_selector_filtered:
 	.volname		times 12 db 0
 	.freespace		dw 0
 	.extension_list	dw 0
+	.extension_list_sgmt	dw 0
 
 	.history		times 5 db 0
 
