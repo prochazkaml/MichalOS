@@ -162,12 +162,8 @@ int_special_keys:
 	cmp byte [app_running], 0
 	je .no_exit
 	
-	popa
-	
 	mov sp, [origstack]
-	sub sp, 2
-	
-	ret
+	jmp finish
 	
 .no_exit:
 	popa
