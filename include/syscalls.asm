@@ -229,14 +229,14 @@ os_dump_registers equ 32909
 
 ; ------------------------------------------------------------------
 ; os_input_dialog -- Get text string from user via a dialog box
-; IN: AX = string location, BX = message to show
+; IN: ES:AX = string location, DS:BX = message to show
 ; OUT: None, registers preserved
 
 os_input_dialog equ 32933
 
 ; ------------------------------------------------------------------
 ; os_password_dialog -- Get a password from user via a dialog box
-; IN: AX = string location, BX = message to show
+; IN: ES:AX = string location, DS:BX = message to show
 ; OUT: None, registers preserved
 
 os_password_dialog equ 33041

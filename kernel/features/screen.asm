@@ -1406,7 +1406,7 @@ os_dump_registers:
 
 ; ------------------------------------------------------------------
 ; os_input_dialog -- Get text string from user via a dialog box
-; IN: AX = string location, BX = message to show
+; IN: ES:AX = string location, DS:BX = message to show
 ; OUT: None, registers preserved
 
 os_input_dialog:
@@ -1416,7 +1416,7 @@ os_input_dialog:
 
 ; ------------------------------------------------------------------
 ; os_password_dialog -- Get a password from user via a dialog box
-; IN: AX = string location, BX = message to show
+; IN: ES:AX = string location, DS:BX = message to show
 ; OUT: None, registers preserved
 
 os_password_dialog:
@@ -1425,7 +1425,7 @@ os_password_dialog:
 
 ; ------------------------------------------------------------------
 ; int_input_dialog -- Get text string from user via a dialog box
-; IN: AX = string location, BX = message to show,
+; IN: ES:AX = string location, DS:BX = message to show,
 ;     CH = CH = 0 if normal input, 1 if password input
 ; OUT: None, registers preserved
 
