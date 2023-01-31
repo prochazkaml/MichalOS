@@ -63,7 +63,7 @@ start:
 	mov [.new_edx], edx
 	
 	inc word [.timer]
-	ret
+	retf
 	
 	.timer		dw 0
 	.old_eax	dd 0

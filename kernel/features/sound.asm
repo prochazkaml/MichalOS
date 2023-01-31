@@ -153,6 +153,7 @@ os_start_adlib:
 	mov [cs:pwm_channel_amplitude], al
 
 	mov [cs:pwm_callback], si
+	mov [cs:pwm_callback_seg], ds
 	mov [cs:pwm_callback_ctr], cx
 	mov [cs:pwm_callback_ctr_def], cx
 
@@ -500,7 +501,7 @@ pwm_handler:
 	mov [pwm_callback_ctr], ax
 	
 	; Call the callback
-	call [pwm_callback]
+	call far [pwm_callback]
 	
 .exit:
 	pop ds
@@ -511,6 +512,7 @@ pwm_handler:
 	pwm_cntr				times 9 dw 0
 	pwm_muted				db 0
 	pwm_callback			dw 0
+	pwm_callback_seg		dw 0
 	pwm_callback_ctr		dw 0
 	pwm_callback_ctr_def	dw 0
 	pwm_val					db 0

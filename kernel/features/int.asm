@@ -56,12 +56,18 @@ os_pause:
 ; -----------------------------------------------------------------
 ; os_attach_app_timer -- Attach a timer interrupt to an application and sets the timer speed
 ; Formula: speed = (105000000 / 88) / frequency
-; IN: SI = handler location, CX = speed
+; IN: DS:SI = handler location, CX = speed
 ; OUT: None, registers preserved
 
 os_attach_app_timer:
 	pusha
+	mov byte [cs:timer_application_attached], 0
+
+	test si, si
+	jz os_set_timer_speed.no_pusha
+
 	mov [cs:timer_application_offset], si
+	mov [cs:timer_application_segment], ds
 	mov byte [cs:timer_application_attached], 1
 	
 	jmp os_set_timer_speed.no_pusha
@@ -182,7 +188,7 @@ os_compat_int1C:
 	call os_print_clock
 
 .no_update:
-	cmp byte [cs:timer_application_attached], 1
+	cmp byte [timer_application_attached], 1
 	je .app_routine
 
 	pop es
@@ -194,7 +200,9 @@ os_compat_int1C:
 	.tmp_time	dw 0
 
 .app_routine:
-	call [cs:timer_application_offset]
+	mov ds, [timer_application_segment]
+	movs es, ds
+	call far [timer_application_offset]
 	
 	pop es
 	pop ds	
@@ -219,6 +227,7 @@ os_farcall_handler:
 
 	timer_application_attached	db 0
 	timer_application_offset	dw 0
+	timer_application_segment	dw 0
 	
 	current_timer_speed			dw 0
 	current_timer_freq			dd 0	; in Hz/64

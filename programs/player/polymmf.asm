@@ -170,7 +170,7 @@ start_poly_mmf:
 	
 .int_handler:
 	mov byte [.playreq], 1
-	ret
+	retf
 	
 	.pointer	dw .track0
 	.sdelay		db 0

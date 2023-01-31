@@ -840,7 +840,7 @@ os_pause equ 32804
 ; -----------------------------------------------------------------
 ; os_attach_app_timer -- Attach a timer interrupt to an application and sets the timer speed
 ; Formula: speed = (105000000 / 88) / frequency
-; IN: SI = handler location, CX = speed
+; IN: DS:SI = handler location, CX = speed
 ; OUT: None, registers preserved
 
 os_attach_app_timer equ 32969

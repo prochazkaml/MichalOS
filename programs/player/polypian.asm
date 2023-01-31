@@ -18,7 +18,7 @@ polypiano:
 	mov byte [.currentchannel], 0
 	mov [.numofchannels], al
 
-	mov si, .dummyinterrupt
+	clr si
 	mov cx, 1820
 	mov bl, al
 	call os_start_adlib
@@ -150,9 +150,6 @@ polypiano:
 	call os_stop_adlib
 	jmp start
 
-.dummyinterrupt:
-	ret
-	
 .error:
 	mov ax, .channelerr
 	mov bx, .channelerr2

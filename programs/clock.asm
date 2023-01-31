@@ -442,13 +442,13 @@ start:
 	jnc .no_timer
 	
 .no_timer:
-	ret
+	retf
 	
 .set_off:
 	mov ax, 523
 	call os_speaker_tone
 	mov byte [.timer_running], 0
-	ret
+	retf
 	
 .increment_number:
 	inc al

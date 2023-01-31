@@ -272,8 +272,7 @@ tick:
 	mov     [done], ax
 
 .intend:
-
-	ret
+	retf
 
 	done   dw      0
 	offset dw      8192

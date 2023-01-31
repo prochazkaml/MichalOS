@@ -276,7 +276,7 @@ start_dro:
 	add dword [.current_pos], 4
 
 .no_dec_timer:
-	ret
+	retf
 
 	.short_delay		db 0
 	.long_delay			db 0

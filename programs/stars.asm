@@ -240,7 +240,7 @@ start:
 
 .int_handler:
 	mov byte [.drawframe], 1
-	ret
+	retf
 
 	.drawframe	db 1
 

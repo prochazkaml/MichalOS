@@ -238,7 +238,7 @@ irq_handler:
 	mov byte [playrequest], 1
 
 .no_play:
-	ret
+	retf
 
 	toggleplaypause		db 0
 	playmsg2			db 'Order:   /   Line:', 0
