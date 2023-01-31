@@ -358,8 +358,10 @@ int_adlib_regwrite:
 
 os_adlib_mute:
 	pusha
-	
-	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	push ds
+	movs ds, cs
+
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	mov si, adlib_volume_registers
@@ -374,11 +376,14 @@ os_adlib_mute:
 	call int_adlib_regwrite
 	
 	loop .loop
+	
+	pop ds
 	popa
 	ret
 
 .pcspk:
-	mov byte [cs:pwm_muted], 1
+	mov byte [pwm_muted], 1
+	pop ds
 	popa
 	ret
 	
@@ -388,8 +393,10 @@ os_adlib_mute:
 
 os_adlib_unmute:
 	pusha
+	push ds
+	movs ds, cs
 
-	cmp byte [cs:CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
+	cmp byte [CONFIG_ADLIB_DRIVER], CFG_ADLIB_PWM_DRIVER
 	jge .pcspk
 	
 	mov si, adlib_volume_registers
@@ -403,11 +410,14 @@ os_adlib_unmute:
 	call int_adlib_regwrite
 	
 	loop .loop
+
+	pop ds
 	popa
 	ret
 	
 .pcspk:
-	mov byte [cs:pwm_muted], 0
+	mov byte [pwm_muted], 0
+	pop ds
 	popa
 	ret
 
