@@ -377,8 +377,9 @@ os_demotour:
 						db 10
 						db ' If an application uses any other keys, they will be shown in the bottom panel.', 0
 	
-	.tsl0				db ' Throughout the entire OS, you may also use the following shortcuts, which can', 13, 10
-						db ' be used by holding down the Alt key and then pressing a function key:', 13, 10
+	.tsl0				db ' Throughout the entire OS, you may also use the following shortcuts,', 13, 10
+						db ' which can be used by holding down the Alt key and then pressing', 13, 10
+						db ' a function key:', 13, 10
 						db 10
 						db '  ', 1Ah, ' Alt + F2: Mute the PC speaker', 13, 10
 						db '  ', 1Ah, ' Alt + F3: Unmute the PC speaker', 13, 10
