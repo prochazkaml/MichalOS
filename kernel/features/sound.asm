@@ -510,7 +510,10 @@ pwm_handler:
 	mov ax, [pwm_callback_ctr_def]
 	mov [pwm_callback_ctr], ax
 	
-	; Call the callback
+	; Call the callback if it is set
+	cmp word [pwm_callback], 0
+	je .exit
+
 	call far [pwm_callback]
 	
 .exit:
