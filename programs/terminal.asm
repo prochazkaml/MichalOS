@@ -261,8 +261,9 @@ print_date:
 ; ------------------------------------------------------------------
 
 print_ver:
-	mov si, version_msg
+	call os_get_os_name
 	call os_print_string
+	call os_print_newline
 	jmp get_cmd
 
 
