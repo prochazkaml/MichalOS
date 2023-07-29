@@ -245,10 +245,6 @@ first_init_stack_done:
 	mov si, os_compat_int00
 	call os_modify_int_handler
 
-	mov cl, 05h					; Debugger
-	mov si, os_compat_int05
-	call os_modify_int_handler
-	
 	mov cl, 06h					; Bad instruction error handler
 	mov si, os_compat_int06
 	call os_modify_int_handler

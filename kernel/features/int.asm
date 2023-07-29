@@ -133,12 +133,6 @@ os_compat_int00:
 
 	.msg db 'CPU: Division by zero error', 0
 
-os_compat_int05:
-	mov ax, .msg
-	jmp os_fatal_error
-
-	.msg db 'User triggered crash', 0
-
 ; Invalid opcode handler
 os_compat_int06:
 	mov ax, .msg
