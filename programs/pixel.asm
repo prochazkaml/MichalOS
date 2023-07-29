@@ -431,10 +431,10 @@ start:
 	.save_error_msg		db 'Error saving the file!', 0
 	.save_msg			db 'Enter a filename (PICTURE.PIX):', 0
 	.title_msg			db 'MichalOS Pixel Art Editor - ', 0
-	.footer_msg			db '[F1] - File, [P] - Toggle the fill mode', 0
-	.mode_msg			db 'Fill mode: ', 0
-	.yes_msg			db 'yes', 0
-	.no_msg				db 'no ', 0
+	.footer_msg			db '[F1] - File, [P] - Toggle erase mode', 0
+	.mode_msg			db 'Erase mode: ', 0
+	.yes_msg			db 'on ', 0
+	.no_msg				db 'off ', 0
 	.save_ok_msg		db 'File saved.', 0
 	.help0				db 'Controls:', 0
 	.help1				db 'Q,W,E,R,T,Y,U,I - Colors 0-7', 0
