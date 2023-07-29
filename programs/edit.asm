@@ -208,9 +208,6 @@ get_input:
 	cmp ah, 79
 	je go_end
 	
-	cmp al, KEY_ESC				; Quit if Esc pressed
-	je close
-
 	jmp text_entry				; Otherwise it was probably a text entry char
 
 
@@ -464,7 +461,7 @@ go_up:
 
 
 ; ------------------------------------------------------------------
-; When an key (other than cursor keys or Esc) is pressed...
+; When an key (other than cursor keys) is pressed...
 
 text_entry:
 	pusha
@@ -501,7 +498,10 @@ text_entry:
 	
 	cmp al, 17				; Ctrl+Q
 	je close_file
-	
+
+	cmp al, 27				; Esc
+	je close_file
+
 	cmp al, 20h
 	jl .nothing_to_do
 	
@@ -962,10 +962,16 @@ new_file:
 ; Quit
 
 close_file:
+	mov ax, confirm_msg
+	mov bx, confirm_msg1
+	clr cx
+	mov dx, 1
+	call os_dialog_box
+
+	cmp ax, 1
+	je new_file.do_nothing
 	popa
 
-close:
-	mov word [gs:4094], 0
 	call os_clear_screen
 	ret
 
