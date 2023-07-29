@@ -169,10 +169,9 @@ os_disk_detect_drive:
 
 	jc .end
 
-	mov byte [di + 1], 0	; Mark as CHS drive
-
 	mov ax, cx				; Number of sectors per track
 	and ax, 3Fh
+	jz .err
 	mov [di + 2], ax
 
 	and cl, 11000000b		; Number of tracks
@@ -185,12 +184,18 @@ os_disk_detect_drive:
 	inc dl					; Head numbers start at 0 - add 1 for total
 	mov [di + 6], dl
 
+	mov byte [di + 1], 0	; Mark as CHS drive
+
 	clc
 
 .end:
 	pop ds
 	popa
 	ret
+
+.err:
+	stc
+	jmp short .end
 
 .fixed_disk:
 	; Fixed disk (drive number 80-FF)
