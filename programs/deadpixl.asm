@@ -14,6 +14,7 @@ start:
 	call os_init_graphics_mode
 	
 	clr bx
+	movs es, 0A000h
 
 .loop:
 	call os_clear_graphics
