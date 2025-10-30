@@ -574,10 +574,10 @@ sub_draw_screen:
 	
 sub_get_mem_ptr:
 	pusha
-	movzx ax, [cursor_y]
+	movzx ax, byte [cursor_y]
 	mov bx, 80
 	mul bx
-	movzx bx, [cursor_x]
+	movzx bx, byte [cursor_x]
 	add ax, bx
 	shl ax, 1
 	add ax, buffer

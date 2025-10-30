@@ -958,7 +958,7 @@ os_select_list:
 	pusha
 	mov dh, [.ypos]
 	inc dl
-	movzx cx, [.height]
+	movzx cx, byte [.height]
 	mov ax, [.skip_num]
 
 .entry_draw_loop:
