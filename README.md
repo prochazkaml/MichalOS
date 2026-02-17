@@ -1,3 +1,7 @@
+# Moved over to [Codeberg](https://codeberg.org/prochazkaml/MichalOS).
+
+---
+
 # MichalOS
 
 A 16-bit keyboard controlled operating system based on MikeOS 4.5, aimed to be more advanced and lightweight on the inside, but simple and easy to use on the outside.
